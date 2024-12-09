@@ -45,7 +45,7 @@ namespace MiniBase
         private static MoonletData moonlet = new MoonletData();
 
         // Rewrite of WorldGen.RenderOffline
-        public static bool CreateWorld(WorldGen gen, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits)
+        public static bool CreateWorld(WorldGen gen, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits)
         {
             Log("Creating world");
 
@@ -270,7 +270,7 @@ namespace MiniBase
             // Settle simulation
             // This writes the cells to the world, then performs a couple of game frames of simulation, then saves the game
             Log("Settling sim");
-            running.SetValue(WorldGenSimUtil.DoSettleSim(gen.Settings, ref cells, ref bgTemp, ref dc, updateProgressFn, data, templateSpawnTargets, errorCallback, baseId));
+            running.SetValue(WorldGenSimUtil.DoSettleSim(gen.Settings, writer, ref cells, ref bgTemp, ref dc, updateProgressFn, data, templateSpawnTargets, errorCallback, baseId));
 
             // Place templates, pretty much just the printing pod
             Log("Placing templates");
@@ -289,7 +289,7 @@ namespace MiniBase
 
             // Finish and save
             Log("Saving world");
-            gen.SaveWorldGen();
+            //gen.SaveWorldGen();
             updateProgressFn(UI.WORLDGEN.COMPLETE.key, 1f, WorldGenProgressStages.Stages.Complete);
             running.SetValue(false);
             return true;
