@@ -401,19 +401,19 @@ namespace MiniBase
                 if (instance.Settings.world.filePath == "worlds/BabyNiobiumMoonlet") return true;
                 return false;
             }
-            public static bool Prefix(WorldGen __instance, ref bool __result, bool doSettle, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
+            public static bool Prefix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
             {
                 Log("WorldGen_RenderOffline_Patch Prefix");
                 // Skip the original method if on minibase world
                 return !IsMiniBaseWorld(__instance);
             }
 
-            public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
+            public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
             {
                 Log("WorldGen_RenderOffline_Patch Postfix");
 
                 if (IsMiniBaseWorld(__instance))
-                    __result = MiniBaseWorldGen.CreateWorld(__instance, ref cells, ref dc, baseId, ref placedStoryTraits);
+                    __result = MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId, ref placedStoryTraits);
 
                 if (IsMiniBaseCluster())
                 {
