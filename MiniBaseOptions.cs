@@ -15,12 +15,7 @@ namespace MiniBase
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class MiniBaseOptions
     {
-        public static MiniBaseOptions Instance { get; private set; }
-
-        private const string WorldGenCategory = "These options are only applied when the map is generated";
-        private const string SizeCategory = "These options change the size of the liveable area\nTo define a custom size, set Map Size to 'Custom'";
-        private const string AnytimeCategory = "These options may be changed at any time";
-
+        #region Properties
         [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureWest { get; set; }
@@ -129,7 +124,7 @@ namespace MiniBase
         [Option("Tunnel Access", "Adds tunnels for access to left and right sides", WorldGenCategory)]
         [JsonProperty]
         public TunnelAccessType TunnelAccess { get; set; }
-
+        #endregion
 
         #region Debug
 
@@ -184,7 +179,7 @@ namespace MiniBase
 
         public static void Reload()
         {
-            Instance = POptions.ReadSettings<MiniBaseOptions>() ?? new MiniBaseOptions();
+            _instance = POptions.ReadSettings<MiniBaseOptions>() ?? new MiniBaseOptions();
         }
 
         public Vector2I GetBaseSize()
@@ -469,10 +464,32 @@ namespace MiniBase
             [Option("Left and Right", "Adds Left and Right Side Tunnels")]
             BothSides
         }
+        
         public enum SideType
         {
             Space,
             Terrain,
         }
+        
+        #region Singleton implementation
+        public static MiniBaseOptions Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    Reload();   
+                }
+                return _instance;
+            }
+        }
+        private static MiniBaseOptions _instance;
+        #endregion
+        
+        #region Fields
+        private const string WorldGenCategory = "These options are only applied when the map is generated";
+        private const string SizeCategory = "These options change the size of the liveable area\nTo define a custom size, set Map Size to 'Custom'";
+        private const string AnytimeCategory = "These options may be changed at any time";
+        #endregion
     }
 }

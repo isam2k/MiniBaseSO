@@ -79,27 +79,90 @@ namespace MiniBase
             public static void Postfix(ref GameplaySeasons __instance)
             {
                 // Custom meteor showers
-                var MixedMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent("ClusterMinibaseShower", 150f, 4.5f, METEORS.BOMBARDMENT_OFF.NONE, METEORS.BOMBARDMENT_ON.UNLIMITED, ClusterMapMeteorShowerConfig.GetFullID("HeavyDust"))
+                var MixedMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent(
+                        "ClusterMinibaseShower",
+                        150f,
+                        4.5f,
+                        METEORS.BOMBARDMENT_OFF.NONE,
+                        METEORS.BOMBARDMENT_ON.UNLIMITED,
+                        ClusterMapMeteorShowerConfig.GetFullID("HeavyDust"))
                     .AddMeteor(CopperCometConfig.ID, 1f)
                     .AddMeteor(IronCometConfig.ID, 1f)
                     .AddMeteor(GoldCometConfig.ID, 1f)
                     .AddMeteor(UraniumCometConfig.ID, 1f)
                     .AddMeteor(RockCometConfig.ID, 1f));
 
-                var FullereneMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent("FullereneMinibaseShower", 150f, 4.5f, METEORS.BOMBARDMENT_OFF.NONE, METEORS.BOMBARDMENT_ON.UNLIMITED, ClusterMapMeteorShowerConfig.GetFullID("HeavyDust"))
+                var FullereneMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent(
+                        "FullereneMinibaseShower",
+                        150f,
+                        4.5f,
+                        METEORS.BOMBARDMENT_OFF.NONE,
+                        METEORS.BOMBARDMENT_ON.UNLIMITED,
+                        ClusterMapMeteorShowerConfig.GetFullID("HeavyDust"))
                     .AddMeteor(FullereneCometConfig.ID, 1f)
                     .AddMeteor(RockCometConfig.ID, 1f));
 
                 // Vanilla meteor event cannot be used with spaced out starmap, need to redefine them
-                var VanillaMeteorShowerGoldEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent("MiniBaseVanillaMeteorShowerGoldEvent", 3000f, 0.4f, clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Iron"), secondsBombardmentOn: new MathUtil.MinMax(50f, 100f), secondsBombardmentOff: new MathUtil.MinMax(800f, 1200f)).AddMeteor(GoldCometConfig.ID, 2f).AddMeteor(RockCometConfig.ID, 0.5f).AddMeteor(DustCometConfig.ID, 5f));
-                var VanillaMeteorShowerCopperEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent("MiniBaseVanillaMeteorShowerCopperEvent", 4200f, 5.5f, clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Copper"), secondsBombardmentOn: new MathUtil.MinMax(100f, 400f), secondsBombardmentOff: new MathUtil.MinMax(300f, 1200f)).AddMeteor(CopperCometConfig.ID, 1f).AddMeteor(RockCometConfig.ID, 1f));
-                var VanillaMeteorShowerIronEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent("MiniBaseVanillaMeteorShowerIronEvent", 6000f, 1.25f, clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Gold"), secondsBombardmentOn: new MathUtil.MinMax(100f, 400f), secondsBombardmentOff: new MathUtil.MinMax(300f, 1200f)).AddMeteor(IronCometConfig.ID, 1f).AddMeteor(RockCometConfig.ID, 2f).AddMeteor(DustCometConfig.ID, 5f));
+                var VanillaMeteorShowerGoldEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
+                        "MiniBaseVanillaMeteorShowerGoldEvent",
+                        3000f,
+                        0.4f,
+                        clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Iron"),
+                        secondsBombardmentOn: new MathUtil.MinMax(50f, 100f),
+                        secondsBombardmentOff: new MathUtil.MinMax(800f, 1200f))
+                    .AddMeteor(GoldCometConfig.ID, 2f)
+                    .AddMeteor(RockCometConfig.ID, 0.5f)
+                    .AddMeteor(DustCometConfig.ID, 5f));
+                
+                var VanillaMeteorShowerCopperEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
+                        "MiniBaseVanillaMeteorShowerCopperEvent",
+                        4200f,
+                        5.5f,
+                        clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Copper"),
+                        secondsBombardmentOn: new MathUtil.MinMax(100f, 400f),
+                        secondsBombardmentOff: new MathUtil.MinMax(300f, 1200f))
+                    .AddMeteor(CopperCometConfig.ID, 1f)
+                    .AddMeteor(RockCometConfig.ID, 1f));
+                
+                var VanillaMeteorShowerIronEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
+                        "MiniBaseVanillaMeteorShowerIronEvent",
+                        6000f,
+                        1.25f,
+                        clusterMapMeteorShowerID: ClusterMapMeteorShowerConfig.GetFullID("Gold"),
+                        secondsBombardmentOn: new MathUtil.MinMax(100f, 400f),
+                        secondsBombardmentOff: new MathUtil.MinMax(300f, 1200f))
+                    .AddMeteor(IronCometConfig.ID, 1f)
+                    .AddMeteor(RockCometConfig.ID, 2f)
+                    .AddMeteor(DustCometConfig.ID, 5f));
 
-                __instance.Add(new MeteorShowerSeason("FullereneMinibaseShower", GameplaySeason.Type.World, "EXPANSION1_ID", 20f, false, startActive: true, clusterTravelDuration: 6000f)
+                __instance.Add(new MeteorShowerSeason(
+                        "FullereneMinibaseShower",
+                        GameplaySeason.Type.World,
+                        "EXPANSION1_ID",
+                        20f,
+                        false,
+                        startActive: true,
+                        clusterTravelDuration: 6000f)
                     .AddEvent(FullereneMinibaseShower));
-                __instance.Add(new MeteorShowerSeason("MixedMinibaseShower", GameplaySeason.Type.World, "EXPANSION1_ID", 20f, false, startActive: true, clusterTravelDuration: 6000f)
+                
+                __instance.Add(new MeteorShowerSeason(
+                        "MixedMinibaseShower",
+                        GameplaySeason.Type.World,
+                        "EXPANSION1_ID",
+                        20f,
+                        false,
+                        startActive: true,
+                        clusterTravelDuration: 6000f)
                     .AddEvent(MixedMinibaseShower));
-                __instance.Add(new MeteorShowerSeason("VanillaMinibaseShower", GameplaySeason.Type.World, "EXPANSION1_ID", 20f, false, startActive: true, clusterTravelDuration: 6000f)
+                
+                __instance.Add(new MeteorShowerSeason(
+                        "VanillaMinibaseShower",
+                        GameplaySeason.Type.World,
+                        "EXPANSION1_ID",
+                        20f,
+                        false,
+                        startActive: true,
+                        clusterTravelDuration: 6000f)
                     .AddEvent(VanillaMeteorShowerIronEvent)
                     .AddEvent(VanillaMeteorShowerGoldEvent)
                     .AddEvent(VanillaMeteorShowerCopperEvent));
@@ -134,41 +197,72 @@ namespace MiniBase
                 
                 switch (MiniBaseOptions.Instance.SpaceRads)
                 {
-                    case MiniBaseOptions.Intensity.VERY_VERY_LOW: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW); break;
-                    case MiniBaseOptions.Intensity.VERY_LOW: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW); break;
-                    case MiniBaseOptions.Intensity.LOW: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.LOW); break;
-                    case MiniBaseOptions.Intensity.MED_LOW: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW); break;
-                    case MiniBaseOptions.Intensity.MED: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED); break;
-                    case MiniBaseOptions.Intensity.MED_HIGH: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH); break;
-                    case MiniBaseOptions.Intensity.HIGH: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.HIGH); break;
-                    case MiniBaseOptions.Intensity.VERY_HIGH: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH); break;
-                    case MiniBaseOptions.Intensity.VERY_VERY_HIGH: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH); break;
-                    case MiniBaseOptions.Intensity.NONE: minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.NONE); break;
+                    case MiniBaseOptions.Intensity.VERY_VERY_LOW:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW);
+                        break;
+                    case MiniBaseOptions.Intensity.VERY_LOW:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW);
+                        break;
+                    case MiniBaseOptions.Intensity.LOW:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.LOW);
+                        break;
+                    case MiniBaseOptions.Intensity.MED_LOW:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW);
+                        break;
+                    case MiniBaseOptions.Intensity.MED:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED);
+                        break;
+                    case MiniBaseOptions.Intensity.MED_HIGH:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH);
+                        break;
+                    case MiniBaseOptions.Intensity.HIGH:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.HIGH);
+                        break;
+                    case MiniBaseOptions.Intensity.VERY_HIGH:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH);
+                        break;
+                    case MiniBaseOptions.Intensity.VERY_VERY_HIGH:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH);
+                        break;
+                    case MiniBaseOptions.Intensity.NONE:
+                        minibase_world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.NONE);
+                        break;
                 }
 
-                if (MiniBaseOptions.Instance.MeteorShower == MiniBaseOptions.MeteorShowerType.Classic)
-                    minibase_world.seasons.Add("VanillaMinibaseShower");
-                else if (MiniBaseOptions.Instance.MeteorShower == MiniBaseOptions.MeteorShowerType.SpacedOut)
-                    minibase_world.seasons.Add("ClassicStyleStartMeteorShowers");
-                else if (MiniBaseOptions.Instance.MeteorShower == MiniBaseOptions.MeteorShowerType.Radioactive)
-                    minibase_world.seasons.Add("MiniRadioactiveOceanMeteorShowers");
-                else if (MiniBaseOptions.Instance.MeteorShower == MiniBaseOptions.MeteorShowerType.Fullerene)
-                    minibase_world.seasons.Add("FullereneMinibaseShower");
-                else if (MiniBaseOptions.Instance.MeteorShower == MiniBaseOptions.MeteorShowerType.Mixed)
-                    minibase_world.seasons.Add("MixedMinibaseShower");
+                switch (MiniBaseOptions.Instance.MeteorShower)
+                {
+                    case MiniBaseOptions.MeteorShowerType.Classic:
+                        minibase_world.seasons.Add("VanillaMinibaseShower");
+                        break;
+                    case MiniBaseOptions.MeteorShowerType.SpacedOut:
+                        minibase_world.seasons.Add("ClassicStyleStartMeteorShowers");
+                        break;
+                    case MiniBaseOptions.MeteorShowerType.Radioactive:
+                        minibase_world.seasons.Add("MiniRadioactiveOceanMeteorShowers");
+                        break;
+                    case MiniBaseOptions.MeteorShowerType.Fullerene:
+                        minibase_world.seasons.Add("FullereneMinibaseShower");
+                        break;
+                    default:
+                        minibase_world.seasons.Add("MixedMinibaseShower");
+                        break;
+                }
 
                 Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
                 var minibase_layout = clusterCache["clusters/MiniBase"];
 
                 if (DefaultWorldPlacements == null)
+                {
                     DefaultWorldPlacements = minibase_layout.worldPlacements;
+                }
 
                 if (DefaultPOIPlacements == null)
+                {
                     DefaultPOIPlacements = minibase_layout.poiPlacements;
+                }
 
                 minibase_layout.worldPlacements = new List<WorldPlacement>();
                 minibase_layout.poiPlacements = new List<SpaceMapPOIPlacement>(DefaultPOIPlacements);
-
                 minibase_layout.startWorldIndex = 0;
 
                 foreach (var world in DefaultWorldPlacements)

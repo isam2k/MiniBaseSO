@@ -27,14 +27,14 @@ namespace MiniBase
 
         private class MoonletData
         {
-            public MiniBaseBiomeProfile biome;
-            public MiniBaseBiomeProfile core_biome;
+            public MiniBaseBiomeProfile Biome;
+            public MiniBaseBiomeProfile CoreBiome;
             /// <summary>Total size of the map in tiles.</summary>
-            public Vector2I world_size;
+            public Vector2I WorldSize;
             /// <summary>Size of the map without borders.</summary>
-            public Vector2I size;
-            public bool has_core;
-            public int extra_top_margin = 0;
+            public Vector2I Size;
+            public bool HasCore;
+            public int ExtraTopMargin = 0;
             public enum Moonlet
             {
                 Start,
@@ -42,7 +42,7 @@ namespace MiniBase
                 Tree,
                 Niobium
             };
-            public Moonlet type = Moonlet.Start;
+            public Moonlet Type = Moonlet.Start;
         };
 
         private static MoonletData moonlet = new MoonletData();
@@ -64,45 +64,45 @@ namespace MiniBase
             moonlet = new MoonletData();
             MiniBaseOptions options = MiniBaseOptions.Instance;
 
-            moonlet.biome = options.GetBiome();
-            moonlet.core_biome = options.GetCoreBiome();
-            moonlet.has_core = options.HasCore();
+            moonlet.Biome = options.GetBiome();
+            moonlet.CoreBiome = options.GetCoreBiome();
+            moonlet.HasCore = options.HasCore();
 
-            moonlet.world_size = gen.WorldSize;
+            moonlet.WorldSize = gen.WorldSize;
 
             bool is_main = gen.Settings.world.filePath == "worlds/MiniBase";
-            if (is_main) moonlet.type = MoonletData.Moonlet.Start;
+            if (is_main) moonlet.Type = MoonletData.Moonlet.Start;
             bool is_second = gen.Settings.world.filePath == "worlds/BabyOilyMoonlet";
-            if (is_second) moonlet.type = MoonletData.Moonlet.Second;
+            if (is_second) moonlet.Type = MoonletData.Moonlet.Second;
             bool is_tree = gen.Settings.world.filePath == "worlds/BabyMarshyMoonlet";
-            if (is_tree) moonlet.type = MoonletData.Moonlet.Tree;
+            if (is_tree) moonlet.Type = MoonletData.Moonlet.Tree;
             bool is_niobium = gen.Settings.world.filePath == "worlds/BabyNiobiumMoonlet";
-            if (is_niobium) moonlet.type = MoonletData.Moonlet.Niobium;
+            if (is_niobium) moonlet.Type = MoonletData.Moonlet.Niobium;
 
             if (!is_main)
             {
-                moonlet.extra_top_margin = ColonizableExtraMargin;
-                moonlet.has_core = false;
+                moonlet.ExtraTopMargin = ColonizableExtraMargin;
+                moonlet.HasCore = false;
                 if (is_niobium)
                 {
-                    moonlet.biome = MiniBaseBiomeProfiles.NiobiumMoonletProfile;
+                    moonlet.Biome = MiniBaseBiomeProfiles.NiobiumMoonletProfile;
                 }
                 if (is_tree)
                 {
-                    moonlet.biome = MiniBaseBiomeProfiles.TreeMoonletProfile;
+                    moonlet.Biome = MiniBaseBiomeProfiles.TreeMoonletProfile;
                 }
                 if (is_second)
                 {
-                    moonlet.biome = MiniBaseBiomeProfiles.OilMoonletProfile;
-                    moonlet.core_biome = MiniBaseCoreBiomeProfiles.MagmaCoreProfile;
-                    moonlet.has_core = true;
+                    moonlet.Biome = MiniBaseBiomeProfiles.OilMoonletProfile;
+                    moonlet.CoreBiome = MiniBaseCoreBiomeProfiles.MagmaCoreProfile;
+                    moonlet.HasCore = true;
                 }
             }
-            moonlet.size = new Vector2I(moonlet.world_size.x - 2 * BorderSize, moonlet.world_size.y - 2 * BorderSize - TopMargin - moonlet.extra_top_margin);
+            moonlet.Size = new Vector2I(moonlet.WorldSize.x - 2 * BorderSize, moonlet.WorldSize.y - 2 * BorderSize - TopMargin - moonlet.ExtraTopMargin);
             
 
-            Log($"World Size : {moonlet.world_size.x},{moonlet.world_size.y}");
-            Log($"Base Size : {moonlet.size.x},{moonlet.size.y}");
+            Log($"World Size : {moonlet.WorldSize.x},{moonlet.WorldSize.y}");
+            Log($"Base Size : {moonlet.Size.x},{moonlet.Size.y}");
 
             Log($"TOP : {Top(true)}");
             Log($"BOTTOM : {Bottom(true)}");
@@ -125,7 +125,7 @@ namespace MiniBase
             // Initialize noise maps
             Log("Initializing noise maps");
             updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 0f, WorldGenProgressStages.Stages.NoiseMapBuilder);
-            var noiseMap = GenerateNoiseMap(random, moonlet.world_size.x, moonlet.world_size.y);
+            var noiseMap = GenerateNoiseMap(random, moonlet.WorldSize.x, moonlet.WorldSize.y);
             updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 0.9f, WorldGenProgressStages.Stages.NoiseMapBuilder);
 
             // Set biomes
@@ -164,12 +164,12 @@ namespace MiniBase
                 Log("Adding starting items");
                 startingBaseTemplate.pickupables.Clear(); // Remove stray hatch
                 var itemPos = new Vector2I(3, 1);
-                foreach (var entry in moonlet.biome.startingItems) // Add custom defined starting items
+                foreach (var entry in moonlet.Biome.startingItems) // Add custom defined starting items
                     startingBaseTemplate.pickupables.Add(new Prefab(entry.Key, Prefab.Type.Pickupable, itemPos.x, itemPos.y, (SimHashes)0, _units: entry.Value));
                 foreach (Cell cell in startingBaseTemplate.cells)
                 {
                     if (cell.element == SimHashes.SandStone || cell.element == SimHashes.Algae)
-                        cell.element = moonlet.biome.defaultMaterial;
+                        cell.element = moonlet.Biome.defaultMaterial;
                     reservedCells.Add(new Vector2I(cell.location_x, cell.location_y) + startPos);
                 }
                 Log("Looking for starting Terrain Cell");
@@ -188,11 +188,11 @@ namespace MiniBase
                 int GeyserMaxX = Right() - CornerSize - 4;
                 int GeyserMinY = Bottom() + CornerSize + 2;
                 int GeyserMaxY = Top() - CornerSize - 4;
-                Element coverElement = moonlet.biome.DefaultElement();
+                Element coverElement = moonlet.Biome.DefaultElement();
                 PlaceGeyser(data, cells, options.FeatureWest, Vec(Left() + 2, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
                 PlaceGeyser(data, cells, options.FeatureEast, Vec(Right() - 4, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
-                if (moonlet.has_core)
-                    coverElement = moonlet.core_biome.DefaultElement();
+                if (moonlet.HasCore)
+                    coverElement = moonlet.CoreBiome.DefaultElement();
 
                 var bottom_geyser_pos = Vec(random.Next(GeyserMinX, GeyserMaxX + 1), Bottom());
                 PlaceGeyser(data, cells, options.FeatureSouth, bottom_geyser_pos, coverElement);
@@ -203,7 +203,7 @@ namespace MiniBase
                 foreach (var prefab in geyserPrefabs)
                     prefab.GetComponent<PrimaryElement>().SetElement(SimHashes.Katairite);
 
-                if(moonlet.has_core && moonlet.core_biome == MiniBaseCoreBiomeProfiles.RadioactiveCoreProfile)
+                if(moonlet.HasCore && moonlet.CoreBiome == MiniBaseCoreBiomeProfiles.RadioactiveCoreProfile)
                 {
                     // Add a single viable beeta in the radioactive core
                     if(bottom_geyser_pos.x > Left() + Width() / 2)
@@ -214,13 +214,13 @@ namespace MiniBase
                     bottom_geyser_pos.y += 1;
                     coverElement = ElementLoader.FindElementByHash(SimHashes.Wolframite);
 
-                    cells[Grid.XYToCell(bottom_geyser_pos.x, bottom_geyser_pos.y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.biome.defaultTemperature), ElementLoader.elements);
-                    cells[Grid.XYToCell(bottom_geyser_pos.x+1, bottom_geyser_pos.y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.biome.defaultTemperature), ElementLoader.elements);
+                    cells[Grid.XYToCell(bottom_geyser_pos.x, bottom_geyser_pos.y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.Biome.defaultTemperature), ElementLoader.elements);
+                    cells[Grid.XYToCell(bottom_geyser_pos.x+1, bottom_geyser_pos.y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.Biome.defaultTemperature), ElementLoader.elements);
 
                     coverElement = ElementLoader.FindElementByHash(SimHashes.CarbonDioxide);
                     for (int xx = 0; xx<2; xx++)
                         for (int yy = 0; yy < 3; yy++)
-                            cells[Grid.XYToCell(bottom_geyser_pos.x + xx, bottom_geyser_pos.y + 1 + yy)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.biome.defaultTemperature), ElementLoader.elements);
+                            cells[Grid.XYToCell(bottom_geyser_pos.x + xx, bottom_geyser_pos.y + 1 + yy)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.Biome.defaultTemperature), ElementLoader.elements);
 
                     data.gameSpawnData.pickupables.Add(new Prefab("BeeHive", Prefab.Type.Pickupable, bottom_geyser_pos.x, bottom_geyser_pos.y+1, (SimHashes)0));
                 }
@@ -244,11 +244,11 @@ namespace MiniBase
                 int GeyserMinY = Bottom() + CornerSize + 2;
                 int GeyserMaxY = Top() - Height() / 2 - CornerSize - 4;
 
-                Element coverElement = moonlet.biome.DefaultElement();
+                Element coverElement = moonlet.Biome.DefaultElement();
                 PlaceGeyser(data, cells, MiniBaseOptions.FeatureType.OilReservoir, Vec(Left() + 2, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement, false, false);
                 PlaceGeyser(data, cells, MiniBaseOptions.FeatureType.OilReservoir, Vec(Right() - 4, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement, false, false);
-                if (moonlet.has_core)
-                    coverElement = moonlet.core_biome.DefaultElement();
+                if (moonlet.HasCore)
+                    coverElement = moonlet.CoreBiome.DefaultElement();
                 PlaceGeyser(data, cells, MiniBaseOptions.FeatureType.Volcano, Vec(random.Next(GeyserMinX, GeyserMaxX + 1), Bottom()), coverElement);
             }
             else if (is_niobium)
@@ -256,7 +256,6 @@ namespace MiniBase
                 var startPos = Vec(Left() + (Width() / 2) - 1, Bottom() + (Height() / 4) + 2);
                 Element coverElement = ElementLoader.FindElementByHash(SimHashes.Niobium);
                 PlaceGeyser(data, cells, MiniBaseOptions.FeatureType.Niobium, startPos, coverElement);
-
 
                 // Replace niobium near the surface with obsidian
                 coverElement = ElementLoader.FindElementByHash(SimHashes.Obsidian);
@@ -266,7 +265,7 @@ namespace MiniBase
                     {
                         if (ElementLoader.elements[cells[Grid.XYToCell(x, y)].elementIdx].id == SimHashes.Niobium)
                         {
-                            cells[Grid.XYToCell(x, y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.biome.defaultTemperature), ElementLoader.elements);
+                            cells[Grid.XYToCell(x, y)].SetValues(coverElement, GetPhysicsData(coverElement, 1f, moonlet.Biome.defaultTemperature), ElementLoader.elements);
                         }
                     }
                 }
@@ -293,15 +292,14 @@ namespace MiniBase
             // Add plants, critters, and items
             Log("Adding critters, etc");
             updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 0f, WorldGenProgressStages.Stages.PlacingCreatures);
-            PlaceSpawnables(cells, data.gameSpawnData.pickupables, moonlet.biome, biomeCells, reservedCells);
-            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 50f, WorldGenProgressStages.Stages.PlacingCreatures);
-            if (moonlet.has_core)
-                PlaceSpawnables(cells, data.gameSpawnData.pickupables, moonlet.core_biome, coreCells, reservedCells);
-            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
+            PlaceSpawnables(cells, data.gameSpawnData.pickupables, moonlet.Biome, biomeCells, reservedCells);
+            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 0.5f, WorldGenProgressStages.Stages.PlacingCreatures);
+            if (moonlet.HasCore)
+                PlaceSpawnables(cells, data.gameSpawnData.pickupables, moonlet.CoreBiome, coreCells, reservedCells);
+            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 1f, WorldGenProgressStages.Stages.PlacingCreatures);
 
-            // Finish and save
-            Log("Saving world");
-            // gen.SaveWorldGen(); // TODO: make sure this is actually no longer needed
+            // Finish
+            Log("Finishing");
             updateProgressFn(UI.WORLDGEN.COMPLETE.key, 1f, WorldGenProgressStages.Stages.Complete);
             running.SetValue(false);
             return true;
@@ -318,7 +316,7 @@ namespace MiniBase
             overworldCells.Clear();
             //var options = MiniBaseOptions.Instance;
             string SpaceBiome = "subworlds/space/Space";
-            string backgroundBiome = moonlet.biome.backgroundSubworld;
+            string backgroundBiome = moonlet.Biome.backgroundSubworld;
             string sideBiome = SpaceBiome;
 
             TagSet tags;
@@ -351,7 +349,7 @@ namespace MiniBase
             // Liveable cell
             tags = new TagSet();
 
-            if (moonlet.type ==MoonletData.Moonlet.Start)
+            if (moonlet.Type ==MoonletData.Moonlet.Start)
             {
                 tags.Add(WorldGenTags.AtStart);
                 tags.Add(WorldGenTags.StartWorld);
@@ -377,12 +375,12 @@ namespace MiniBase
 
             // Top cell
             tags = new TagSet();
-            bounds = new Polygon(new Rect(0f, Top(), moonlet.world_size.x, moonlet.world_size.y - Top()));
+            bounds = new Polygon(new Rect(0f, Top(), moonlet.WorldSize.x, moonlet.WorldSize.y - Top()));
             CreateOverworldCell(SpaceBiome, bounds, tags);
 
             // Bottom cell
             tags = new TagSet();
-            bounds = new Polygon(new Rect(0f, 0, moonlet.world_size.x, Bottom()));
+            bounds = new Polygon(new Rect(0f, 0, moonlet.WorldSize.x, Bottom()));
             CreateOverworldCell(SpaceBiome, bounds, tags);
 
             // Left side cell
@@ -407,8 +405,8 @@ namespace MiniBase
                 BottomRightNE,
                 TopRightSE,
                 TopRightNW,
-                Vec(moonlet.world_size.x, Top()),
-                Vec(moonlet.world_size.x, Bottom()),
+                Vec(moonlet.WorldSize.x, Top()),
+                Vec(moonlet.WorldSize.x, Bottom()),
             };
             bounds = new Polygon(vertices);
             CreateOverworldCell(sideBiome, bounds, tags);
@@ -488,21 +486,21 @@ namespace MiniBase
                 {
                     var pos = Vec(x, y);
                     int extra = (int)(noiseMap[pos.x, pos.y] * 8f);
-                    if (moonlet.type != MoonletData.Moonlet.Start && y > Bottom() + extra + (2 * Height() / 3)) continue; 
+                    if (moonlet.Type != MoonletData.Moonlet.Start && y > Bottom() + extra + (2 * Height() / 3)) continue; 
 
                     if (InLiveableArea(pos))
                         biomeCells.Add(pos);
                     else
                         sideCells.Add(pos);
                 }
-            SetTerrain(moonlet.biome, biomeCells);
-            SetTerrain(moonlet.biome, sideCells);
+            SetTerrain(moonlet.Biome, biomeCells);
+            SetTerrain(moonlet.Biome, sideCells);
 
             // Core area
-            if (moonlet.has_core)
+            if (moonlet.HasCore)
             {
                 int coreHeight = CoreMin + Height() / 10;
-                int[] heights = GetHorizontalWalk(moonlet.world_size.x, coreHeight, coreHeight + CoreDeviation);
+                int[] heights = GetHorizontalWalk(moonlet.WorldSize.x, coreHeight, coreHeight + CoreDeviation);
                 ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
                 for (int x = relativeLeft; x < relativeRight; x++)
                 {
@@ -525,7 +523,7 @@ namespace MiniBase
                         coreCells.Add(Vec(x, y));
                 }
                 coreCells.ExceptWith(abyssaliteCells);
-                SetTerrain(moonlet.core_biome, coreCells);
+                SetTerrain(moonlet.CoreBiome, coreCells);
                 foreach (Vector2I abyssaliteCell in abyssaliteCells)
                     cells[Grid.PosToCell(abyssaliteCell)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);
                 biomeCells.ExceptWith(coreCells);
@@ -546,12 +544,12 @@ namespace MiniBase
             Element borderMat = WorldGen.unobtaniumElement;
             
             // Top and bottom borders
-            for (int x = 0; x < moonlet.world_size.x; x++)
+            for (int x = 0; x < moonlet.WorldSize.x; x++)
             {
                 // Top border
                 for (int y = Top(false); y < Top(true); y++)
                 {
-                    if (moonlet.type == MoonletData.Moonlet.Start || x < (Left() + CornerSize) ||
+                    if (moonlet.Type == MoonletData.Moonlet.Start || x < (Left() + CornerSize) ||
                         x > (Right() - CornerSize))
                     {
                         AddBorderCell(x, y, borderMat);
@@ -609,7 +607,7 @@ namespace MiniBase
             }
 
             // Space access
-            if (moonlet.type == MoonletData.Moonlet.Start)
+            if (moonlet.Type == MoonletData.Moonlet.Start)
             {
                 if (MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Classic)
                 {
@@ -833,7 +831,7 @@ namespace MiniBase
 
         // The following utility methods all refer to the main liveable area
         // E.g., Width() returns the width of the liveable area, not the whole map
-        private static int SideMargin() { return (moonlet.world_size.x - moonlet.size.x - 2 * BorderSize) / 2; }
+        private static int SideMargin() { return (moonlet.WorldSize.x - moonlet.Size.x - 2 * BorderSize) / 2; }
         /// <summary>
         /// The leftmost tile position that is considered inside the liveable area or its borders.
         /// </summary>
@@ -845,9 +843,9 @@ namespace MiniBase
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public static int Right(bool withBorders = false) { return Left(withBorders) + moonlet.size.x + (withBorders ? BorderSize * 2 : 0); }
-        public static int Top(bool withBorders = false) { return moonlet.world_size.y - TopMargin - moonlet.extra_top_margin - (withBorders ? 0 : BorderSize) + 1; }
-        public static int Bottom(bool withBorders = false) { return Top(withBorders) - moonlet.size.y - (withBorders ? BorderSize * 2 : 0); }
+        public static int Right(bool withBorders = false) { return Left(withBorders) + moonlet.Size.x + (withBorders ? BorderSize * 2 : 0); }
+        public static int Top(bool withBorders = false) { return moonlet.WorldSize.y - TopMargin - moonlet.ExtraTopMargin - (withBorders ? 0 : BorderSize) + 1; }
+        public static int Bottom(bool withBorders = false) { return Top(withBorders) - moonlet.Size.y - (withBorders ? BorderSize * 2 : 0); }
         public static int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
         public static int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
         public static Vector2I TopLeft(bool withBorders = false) { return Vec(Left(withBorders), Top(withBorders)); }
