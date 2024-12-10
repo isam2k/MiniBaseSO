@@ -19,7 +19,12 @@ namespace MiniBase
         public const int CoreDeviation = 3;
         public const int CoreBorder = 3;
 
-        public enum DiseaseID { NONE, SLIMELUNG, FOOD_POISONING };
+        public enum DiseaseID
+        {
+            None,
+            Slimelung,
+            FoodPoisoning
+        };
 
         public const string ClusterName = "MiniBase";
         public const string ClusterMainWorld = "MiniBase";

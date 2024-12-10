@@ -66,7 +66,7 @@ namespace MiniBase
         public float density;
         public DiseaseID disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, DiseaseID disease = DiseaseID.NONE)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, DiseaseID disease = DiseaseID.None)
         {
             this.cumulativeWeight = cumulativeWeight;
             this.elementId = elementId;

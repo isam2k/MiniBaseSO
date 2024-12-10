@@ -459,9 +459,9 @@ namespace MiniBase
                 var DiseaseDb = Db.Get().Diseases;
                 var DiseaseDict = new Dictionary<DiseaseID, byte>()
                 {
-                    { DiseaseID.NONE, byte.MaxValue},
-                    { DiseaseID.SLIMELUNG, DiseaseDb.GetIndex(DiseaseDb.SlimeGerms.id)},
-                    { DiseaseID.FOOD_POISONING, DiseaseDb.GetIndex(DiseaseDb.FoodGerms.id)},
+                    { DiseaseID.None, byte.MaxValue},
+                    { DiseaseID.Slimelung, DiseaseDb.GetIndex(DiseaseDb.SlimeGerms.id)},
+                    { DiseaseID.FoodPoisoning, DiseaseDb.GetIndex(DiseaseDb.FoodGerms.id)},
                 };
 
                 foreach (var pos in positions)
