@@ -130,10 +130,6 @@ namespace MiniBase
         [JsonProperty]
         public TunnelAccessType TunnelAccess { get; set; }
 
-        [Option("Space Access via Tunnel", "Adds space access to the left side", WorldGenCategory)]
-        [JsonProperty]
-        public SpaceTunnelAccessType SpaceTunnelAccess { get; set; }
-
 
         #region Debug
 
@@ -180,7 +176,6 @@ namespace MiniBase
             CustomHeight = 40;
             CarePackageFrequency = 2;
             TunnelAccess = TunnelAccessType.None;
-            SpaceTunnelAccess = SpaceTunnelAccessType.None;
 
             DebugMode = false;
             FastImmigration = false;
@@ -473,13 +468,6 @@ namespace MiniBase
             RightOnly,
             [Option("Left and Right", "Adds Left and Right Side Tunnels")]
             BothSides
-        }
-        public enum SpaceTunnelAccessType
-        {
-            [Option("None", "No left side space access")]
-            None,
-            [Option("Left Side Access", "Adds left side space access")]
-            LeftOnly
         }
         public enum SideType
         {

@@ -30,5 +30,5 @@ _ReSharper*/
 .vs/
 #Nuget packages folder
 packages/
-#Prepare dependency script
-prepare_lib.sh
+#Scripts folder
+scripts/

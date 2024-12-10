@@ -591,15 +591,10 @@ namespace MiniBase
                 {
                     int bottomY = Bottom() + adjustedCornerSize - j;
                     int topY = Top() - adjustedCornerSize + j - 1;
-                    
-                    if (j - i <= DiagonalBorderSize)
-                    {
-                        borderMat = WorldGen.unobtaniumElement;
-                    }
-                    else
-                    {
-                        borderMat = ElementLoader.FindElementByHash(SimHashes.Glass);
-                    }
+
+                    borderMat = j - i <= DiagonalBorderSize
+                        ? WorldGen.unobtaniumElement
+                        : ElementLoader.FindElementByHash(SimHashes.Glass);
                     
                     AddBorderCell(leftCenterX + i, bottomY, borderMat);
                     AddBorderCell(leftCenterX - i, bottomY, borderMat);
@@ -636,15 +631,6 @@ namespace MiniBase
                         {
                             AddBorderCell(x, y, borderMat);
                         }
-                        
-                        if (MiniBaseOptions.Instance.SpaceTunnelAccess == MiniBaseOptions.SpaceTunnelAccessType.LeftOnly)
-                        {
-                            //far left cutout
-                            for (int x = CornerSize; x < CornerSize + SpaceAccessSize; x++)
-                            {
-                                AddBorderCell(x, y, borderMat);
-                            }
-                        }
                     }
                     
                     if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides ||
@@ -674,7 +660,6 @@ namespace MiniBase
                             }
                         }
                     }
-
                 }
                 else if (MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Full)
                 {
