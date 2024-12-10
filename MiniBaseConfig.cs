@@ -7,23 +7,24 @@ namespace MiniBase
     {
         //public static int WORLD_WIDTH = 128;
         //public static int WORLD_HEIGHT = 128;
-        public static int BORDER_SIZE = 3;
-        public static int TOP_MARGIN = 3;
-        public static int COLONIZABLE_EXTRA_MARGIN = 8; // extra space to land rockets
-        public static int CORNER_SIZE = 7;
-        public static int DIAGONAL_BORDER_SIZE = 4;
+        public const int BorderSize = 3;
+        public const int TopMargin = 3;
+        public const int ColonizableExtraMargin = 8; // extra space to land rockets
+        public const int CornerSize = 7;
+        public const int DiagonalBorderSize = 4;
 
-        public static int SPACE_ACCESS_SIZE = 8;
-        public static int CORE_MIN = 0;
-        public static int CORE_DEVIATION = 3;
-        public static int CORE_BORDER = 3;
+        public const int SpaceAccessSize = 8;
+        public const int SideAccessSize = 5;
+        public const int CoreMin = 0;
+        public const int CoreDeviation = 3;
+        public const int CoreBorder = 3;
 
         public enum DiseaseID { NONE, SLIMELUNG, FOOD_POISONING };
 
-        public static string ClusterName = "MiniBase";
-        public static string ClusterMainWorld = "MiniBase";
-        public static string ClusterDescription = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
-        public static string ClusterIconName = "Asteroid_minibase";
+        public const string ClusterName = "MiniBase";
+        public const string ClusterMainWorld = "MiniBase";
+        public const string ClusterDescription = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
+        public const string ClusterIconName = "Asteroid_minibase";
 
         public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
         {

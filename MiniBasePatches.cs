@@ -125,10 +125,10 @@ namespace MiniBase
                 var base_size = MiniBaseOptions.Instance.GetBaseSize();
                 var colonizable_base_size = new Vector2I(50, 60);
 
-                Traverse.Create(minibase_world).Property("worldsize").SetValue(new Vector2I(base_size.x + 2 * BORDER_SIZE, base_size.y + 2 * BORDER_SIZE + TOP_MARGIN));
-                Traverse.Create(oily_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BORDER_SIZE, colonizable_base_size.y + 2 * BORDER_SIZE + TOP_MARGIN + COLONIZABLE_EXTRA_MARGIN));
-                Traverse.Create(marshy_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BORDER_SIZE, colonizable_base_size.y + 2 * BORDER_SIZE + TOP_MARGIN + COLONIZABLE_EXTRA_MARGIN));
-                Traverse.Create(niobium_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BORDER_SIZE, colonizable_base_size.y + 2 * BORDER_SIZE + TOP_MARGIN + COLONIZABLE_EXTRA_MARGIN));
+                Traverse.Create(minibase_world).Property("worldsize").SetValue(new Vector2I(base_size.x + 2 * BorderSize, base_size.y + 2 * BorderSize + TopMargin));
+                Traverse.Create(oily_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BorderSize, colonizable_base_size.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
+                Traverse.Create(marshy_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BorderSize, colonizable_base_size.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
+                Traverse.Create(niobium_minibase_world).Property("worldsize").SetValue(new Vector2I(colonizable_base_size.x + 2 * BorderSize, colonizable_base_size.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
 
                 minibase_world.seasons.Clear();
                 

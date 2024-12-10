@@ -81,7 +81,7 @@ namespace MiniBase
 
             if (!is_main)
             {
-                moonlet.extra_top_margin = COLONIZABLE_EXTRA_MARGIN;
+                moonlet.extra_top_margin = ColonizableExtraMargin;
                 moonlet.has_core = false;
                 if (is_niobium)
                 {
@@ -98,7 +98,7 @@ namespace MiniBase
                     moonlet.has_core = true;
                 }
             }
-            moonlet.size = new Vector2I(moonlet.world_size.x - 2 * BORDER_SIZE, moonlet.world_size.y - 2 * BORDER_SIZE - TOP_MARGIN - moonlet.extra_top_margin);
+            moonlet.size = new Vector2I(moonlet.world_size.x - 2 * BorderSize, moonlet.world_size.y - 2 * BorderSize - TopMargin - moonlet.extra_top_margin);
             
 
             Log($"World Size : {moonlet.world_size.x},{moonlet.world_size.y}");
@@ -184,10 +184,10 @@ namespace MiniBase
             
                 // Geysers
                 Log("Placing features");
-                int GeyserMinX = Left() + CORNER_SIZE + 2;
-                int GeyserMaxX = Right() - CORNER_SIZE - 4;
-                int GeyserMinY = Bottom() + CORNER_SIZE + 2;
-                int GeyserMaxY = Top() - CORNER_SIZE - 4;
+                int GeyserMinX = Left() + CornerSize + 2;
+                int GeyserMaxX = Right() - CornerSize - 4;
+                int GeyserMinY = Bottom() + CornerSize + 2;
+                int GeyserMaxY = Top() - CornerSize - 4;
                 Element coverElement = moonlet.biome.DefaultElement();
                 PlaceGeyser(data, cells, options.FeatureWest, Vec(Left() + 2, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
                 PlaceGeyser(data, cells, options.FeatureEast, Vec(Right() - 4, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
@@ -239,10 +239,10 @@ namespace MiniBase
             }
             else if (is_second)
             {
-                int GeyserMinX = Left() + CORNER_SIZE + 2;
-                int GeyserMaxX = Right() - CORNER_SIZE - 4;
-                int GeyserMinY = Bottom() + CORNER_SIZE + 2;
-                int GeyserMaxY = Top() - Height() / 2 - CORNER_SIZE - 4;
+                int GeyserMinX = Left() + CornerSize + 2;
+                int GeyserMaxX = Right() - CornerSize - 4;
+                int GeyserMinY = Bottom() + CornerSize + 2;
+                int GeyserMaxY = Top() - Height() / 2 - CornerSize - 4;
 
                 Element coverElement = moonlet.biome.DefaultElement();
                 PlaceGeyser(data, cells, MiniBaseOptions.FeatureType.OilReservoir, Vec(Left() + 2, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement, false, false);
@@ -339,14 +339,14 @@ namespace MiniBase
             };
 
             // Vertices of the liveable area (octogon)
-            Vector2I BottomLeftSE = BottomLeft() + Vec(CORNER_SIZE, 0),
-                BottomLeftNW = BottomLeft() + Vec(0, CORNER_SIZE),
-                TopLeftSW = TopLeft() - Vec(0, CORNER_SIZE) - Vec(0, 1),
-                TopLeftNE = TopLeft() + Vec(CORNER_SIZE, 0),
-                TopRightNW = TopRight() - Vec(CORNER_SIZE, 0) - Vec(1, 0),
-                TopRightSE = TopRight() - Vec(0, CORNER_SIZE) - Vec(0, 1),
-                BottomRightNE = BottomRight() + Vec(0, CORNER_SIZE),
-                BottomRightSW = BottomRight() - Vec(CORNER_SIZE, 0);
+            Vector2I BottomLeftSE = BottomLeft() + Vec(CornerSize, 0),
+                BottomLeftNW = BottomLeft() + Vec(0, CornerSize),
+                TopLeftSW = TopLeft() - Vec(0, CornerSize) - Vec(0, 1),
+                TopLeftNE = TopLeft() + Vec(CornerSize, 0),
+                TopRightNW = TopRight() - Vec(CornerSize, 0) - Vec(1, 0),
+                TopRightSE = TopRight() - Vec(0, CornerSize) - Vec(0, 1),
+                BottomRightNE = BottomRight() + Vec(0, CornerSize),
+                BottomRightSW = BottomRight() - Vec(CornerSize, 0);
 
             // Liveable cell
             tags = new TagSet();
@@ -501,20 +501,20 @@ namespace MiniBase
             // Core area
             if (moonlet.has_core)
             {
-                int coreHeight = CORE_MIN + Height() / 10;
-                int[] heights = GetHorizontalWalk(moonlet.world_size.x, coreHeight, coreHeight + CORE_DEVIATION);
+                int coreHeight = CoreMin + Height() / 10;
+                int[] heights = GetHorizontalWalk(moonlet.world_size.x, coreHeight, coreHeight + CoreDeviation);
                 ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
                 for (int x = relativeLeft; x < relativeRight; x++)
                 {
                     // Create abyssalite border of size CORE_BORDER
-                    for (int j = 0; j < CORE_BORDER; j++)
+                    for (int j = 0; j < CoreBorder; j++)
                         abyssaliteCells.Add(Vec(x, Bottom() + heights[x] + j));
 
                     // Ensure border thickness at high slopes
                     if (x > relativeLeft && x < relativeRight - 1)
                         if ((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
                         {
-                            Vector2I top = Vec(x, Bottom() + heights[x] + CORE_BORDER - 1);
+                            Vector2I top = Vec(x, Bottom() + heights[x] + CoreBorder - 1);
                             abyssaliteCells.Add(top + Vec(-1, 0));
                             abyssaliteCells.Add(top + Vec(1, 0));
                             abyssaliteCells.Add(top + Vec(0, 1));
@@ -549,8 +549,8 @@ namespace MiniBase
                 // Top border
                 for (int y = Top(false); y < Top(true); y++)
                 {
-                    if (moonlet.type == MoonletData.Moonlet.Start || x < (Left() + CORNER_SIZE) ||
-                        x > (Right() - CORNER_SIZE))
+                    if (moonlet.type == MoonletData.Moonlet.Start || x < (Left() + CornerSize) ||
+                        x > (Right() - CornerSize))
                     {
                         AddBorderCell(x, y, borderMat);
                     }
@@ -581,7 +581,7 @@ namespace MiniBase
             // Corner structures
             int leftCenterX = (Left(true) + Left(false)) / 2;
             int rightCenterX = (Right(false) + Right(true)) / 2;
-            int adjustedCornerSize = CORNER_SIZE + (int)Math.Ceiling(BORDER_SIZE / 2f);
+            int adjustedCornerSize = CornerSize + (int)Math.Ceiling(BorderSize / 2f);
             for (int i = 0; i < adjustedCornerSize; i++)
             {
                 for (int j = adjustedCornerSize; j > i; j--)
@@ -589,7 +589,7 @@ namespace MiniBase
                     int bottomY = Bottom() + adjustedCornerSize - j;
                     int topY = Top() - adjustedCornerSize + j - 1;
                     
-                    if (j - i <= DIAGONAL_BORDER_SIZE)
+                    if (j - i <= DiagonalBorderSize)
                     {
                         borderMat = WorldGen.unobtaniumElement;
                     }
@@ -623,13 +623,13 @@ namespace MiniBase
                     for (int y = Top(); y < Top(true); y++)
                     {
                         //Left cutout
-                        for (int x = Left() + CORNER_SIZE; x < Math.Min(Left() + CORNER_SIZE + SPACE_ACCESS_SIZE, Right() - CORNER_SIZE); x++)
+                        for (int x = Left() + CornerSize; x < Math.Min(Left() + CornerSize + SpaceAccessSize, Right() - CornerSize); x++)
                         {
                             AddBorderCell(x, y, borderMat);
                         }
                         
                         //Right cutout
-                        for (int x = Math.Max(Right() - CORNER_SIZE - SPACE_ACCESS_SIZE, Left() + CORNER_SIZE); x < Right() - CORNER_SIZE; x++)
+                        for (int x = Math.Max(Right() - CornerSize - SpaceAccessSize, Left() + CornerSize); x < Right() - CornerSize; x++)
                         {
                             AddBorderCell(x, y, borderMat);
                         }
@@ -637,7 +637,7 @@ namespace MiniBase
                         if (MiniBaseOptions.Instance.SpaceTunnelAccess == MiniBaseOptions.SpaceTunnelAccessType.LeftOnly)
                         {
                             //far left cutout
-                            for (int x = CORNER_SIZE; x < CORNER_SIZE + SPACE_ACCESS_SIZE; x++)
+                            for (int x = CornerSize; x < CornerSize + SpaceAccessSize; x++)
                             {
                                 AddBorderCell(x, y, borderMat);
                             }
@@ -649,7 +649,7 @@ namespace MiniBase
                         MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly)
                     {
                         //Space Tunnels
-                        for (int y = Bottom(false) + CORNER_SIZE; y < Bottom(false) + 5 + CORNER_SIZE; y++)
+                        for (int y = Bottom(false) + CornerSize; y < Bottom(false) + SideAccessSize + CornerSize; y++)
                         {
                             if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
                                 MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
@@ -678,7 +678,7 @@ namespace MiniBase
                     borderMat = WorldGen.katairiteElement;
                     for (int y = Top(); y < Top(true); y++)
                     {
-                        for (int x = Left() + CORNER_SIZE; x < Right() - CORNER_SIZE; x++)
+                        for (int x = Left() + CornerSize; x < Right() - CornerSize; x++)
                         {
                             AddBorderCell(x, y, borderMat);
                         }
@@ -848,21 +848,21 @@ namespace MiniBase
 
         // The following utility methods all refer to the main liveable area
         // E.g., Width() returns the width of the liveable area, not the whole map
-        private static int SideMargin() { return (moonlet.world_size.x - moonlet.size.x - 2 * BORDER_SIZE) / 2; }
+        private static int SideMargin() { return (moonlet.world_size.x - moonlet.size.x - 2 * BorderSize) / 2; }
         /// <summary>
         /// The leftmost tile position that is considered inside the liveable area or its borders.
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public static int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : BORDER_SIZE); }
+        public static int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : BorderSize); }
         /// <summary>
         /// The rightmost tile position that is considered inside the liveable area or its borders.
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public static int Right(bool withBorders = false) { return Left(withBorders) + moonlet.size.x + (withBorders ? BORDER_SIZE * 2 : 0); }
-        public static int Top(bool withBorders = false) { return moonlet.world_size.y - TOP_MARGIN - moonlet.extra_top_margin - (withBorders ? 0 : BORDER_SIZE) + 1; }
-        public static int Bottom(bool withBorders = false) { return Top(withBorders) - moonlet.size.y - (withBorders ? BORDER_SIZE * 2 : 0); }
+        public static int Right(bool withBorders = false) { return Left(withBorders) + moonlet.size.x + (withBorders ? BorderSize * 2 : 0); }
+        public static int Top(bool withBorders = false) { return moonlet.world_size.y - TopMargin - moonlet.extra_top_margin - (withBorders ? 0 : BorderSize) + 1; }
+        public static int Bottom(bool withBorders = false) { return Top(withBorders) - moonlet.size.y - (withBorders ? BorderSize * 2 : 0); }
         public static int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
         public static int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
         public static Vector2I TopLeft(bool withBorders = false) { return Vec(Left(withBorders), Top(withBorders)); }
