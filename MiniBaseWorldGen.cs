@@ -538,12 +538,14 @@ namespace MiniBase
         /// Rewrite of WorldGen.DrawWorldBorder
         /// </summary>
         /// <param name="cells"></param>
-        /// <returns></returns>
+        /// <returns>Set of border cells.</returns>
         private static ISet<Vector2I> DrawCustomWorldBorders(Sim.Cell[] cells)
         {
             ISet<Vector2I> borderCells = new HashSet<Vector2I>();
            
             Element borderMat = WorldGen.unobtaniumElement;
+            
+            // Top and bottom borders
             for (int x = 0; x < moonlet.world_size.x; x++)
             {
                 // Top border
@@ -562,7 +564,8 @@ namespace MiniBase
                     AddBorderCell(x, y, borderMat);
                 }
             }
-
+            
+            // Side borders
             for (int y = Bottom(true); y < Top(true); y++)
             {
                 // Left border
