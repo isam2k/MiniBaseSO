@@ -245,8 +245,6 @@ namespace MiniBase
                 GridVisibility.Reveal(0, 0, radius, radius - 1);
             }
         }
-
-
         
         [HarmonyPatch(typeof(ClusterPOIManager), "RegisterTemporalTear")]
         public static class ClusterPOIManager_RegisterTemporalTear_Patch
@@ -264,6 +262,7 @@ namespace MiniBase
                 }
             }
         }
+        
         #region CarePackages
 
         // Immigration Speed
@@ -332,21 +331,20 @@ namespace MiniBase
                 AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
                 AddItem("ColdWheatSeed", 8f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
                 AddItem("BeanPlantSeed", 5f);                           // Nosh Bean
-                AddItem("EvilFlowerSeed", 1f, 36);                      // Sporechid
+                AddItem("EvilFlowerSeed", 1f, 36);                 // Sporechid
                 AddItem("WormPlantSeed", 3f);                           // Grubfruit Plant
                 AddItem("SwampHarvestPlantSeed", 3f);                   // Bog Bucket Plant
-                AddItem("CritterTrapPlantSeed", 1f, 36);                // Satturn Critter Trap
-                                                                        // Critters
+                AddItem("CritterTrapPlantSeed", 1f, 36);           // Satturn Critter Trap
+                // Critters
                 AddItem("PacuEgg", 3f);                                 // Pacu
-                AddItem("BeeBaby", 1f, 36);                             // Beetiny
+                AddItem("BeeBaby", 1f, 36);                        // Beetiny
                 ___carePackages = packageList.ToArray();
             }
 
             private static bool CycleCondition(int cycle) { return GameClock.Instance.GetCycle() >= cycle; }
         }
 
-
-        // Remove the need to discovers items for them to be available in the printing pod
+        // Remove the need to discover items for them to be available in the printing pod
         [HarmonyPatch(typeof(Immigration), "DiscoveredCondition")]
         public static class Immigration_DiscoveredCondition_Patch
         {
@@ -407,7 +405,6 @@ namespace MiniBase
                 // Skip the original method if on minibase world
                 return !IsMiniBaseWorld(__instance);
             }
-
             public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
             {
                 Log("WorldGen_RenderOffline_Patch Postfix");
@@ -491,6 +488,7 @@ namespace MiniBase
                 }
             }
         }
+        
         #endregion
     }
 }

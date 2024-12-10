@@ -29,7 +29,9 @@ namespace MiniBase
         {
             public MiniBaseBiomeProfile biome;
             public MiniBaseBiomeProfile core_biome;
+            /// <summary>Total size of the map in tiles.</summary>
             public Vector2I world_size;
+            /// <summary>Size of the map without borders.</summary>
             public Vector2I size;
             public bool has_core;
             public int extra_top_margin = 0;
@@ -45,7 +47,16 @@ namespace MiniBase
 
         private static MoonletData moonlet = new MoonletData();
 
-        // Rewrite of WorldGen.RenderOffline
+        /// <summary>
+        /// Rewrite of WorldGen.RenderOffline
+        /// </summary>
+        /// <param name="gen"></param>
+        /// <param name="writer"></param>
+        /// <param name="cells"></param>
+        /// <param name="dc"></param>
+        /// <param name="baseId"></param>
+        /// <param name="placedStoryTraits"></param>
+        /// <returns></returns>
         public static bool CreateWorld(WorldGen gen, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits)
         {
             Log("Creating world");
@@ -290,15 +301,18 @@ namespace MiniBase
 
             // Finish and save
             Log("Saving world");
-            //gen.SaveWorldGen();
+            // gen.SaveWorldGen(); // TODO: make sure this is actually no longer needed
             updateProgressFn(UI.WORLDGEN.COMPLETE.key, 1f, WorldGenProgressStages.Stages.Complete);
             running.SetValue(false);
             return true;
         }
 
-        // Set biome background for all cells
-        // Overworld cells are large polygons that divide the map into zones (biomes)
-        // To change a biome, create an appropriate overworld cell and add it to Data.overworldCells
+        /// <summary>
+        /// Set biome background for all cells
+        /// Overworld cells are large polygons that divide the map into zones (biomes)
+        /// To change a biome, create an appropriate overworld cell and add it to Data.overworldCells
+        /// </summary>
+        /// <param name="overworldCells"></param>
         private static void SetBiomes(List<TerrainCell> overworldCells)
         {
             overworldCells.Clear();
@@ -400,7 +414,12 @@ namespace MiniBase
             CreateOverworldCell(sideBiome, bounds, tags);
         }
 
-        // From WorldGen.RenderToMap
+        /// <summary>
+        /// From WorldGen.RenderToMap
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <param name="bgTemp"></param>
+        /// <param name="dc"></param>
         private static void ClearTerrain(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
         {
             for (int index = 0; index < cells.Length; ++index)
@@ -412,7 +431,16 @@ namespace MiniBase
             }
         }
 
-        // Rewrite of WorldGen.ProcessByTerrainCell
+        /// <summary>
+        /// Rewrite of WorldGen.ProcessByTerrainCell
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="cells"></param>
+        /// <param name="bgTemp"></param>
+        /// <param name="dc"></param>
+        /// <param name="noiseMap"></param>
+        /// <param name="coreCells"></param>
+        /// <returns></returns>
         private static ISet<Vector2I> DrawCustomTerrain(Data data, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, float[,] noiseMap, out ISet<Vector2I> coreCells)
         {
             var options = MiniBaseOptions.Instance;
@@ -506,20 +534,14 @@ namespace MiniBase
             return biomeCells;
         }
 
-        // Rewrite of WorldGen.DrawWorldBorder
+        /// <summary>
+        /// Rewrite of WorldGen.DrawWorldBorder
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <returns></returns>
         private static ISet<Vector2I> DrawCustomWorldBorders(Sim.Cell[] cells)
         {
             ISet<Vector2I> borderCells = new HashSet<Vector2I>();
-
-            void AddBorderCell(int x, int y, Element e)
-            {
-                int cell = Grid.XYToCell(x, y);
-                if (Grid.IsValidCell(cell))
-                {
-                    borderCells.Add(Vec(x, y));
-                    cells[cell].SetValues(e, ElementLoader.elements);
-                }
-            }
            
             Element borderMat = WorldGen.unobtaniumElement;
             for (int x = 0; x < moonlet.world_size.x; x++)
@@ -527,24 +549,33 @@ namespace MiniBase
                 // Top border
                 for (int y = Top(false); y < Top(true); y++)
                 {
-                    if(moonlet.type == MoonletData.Moonlet.Start || x < (Left() + CORNER_SIZE) || x > (Right() - CORNER_SIZE))
+                    if (moonlet.type == MoonletData.Moonlet.Start || x < (Left() + CORNER_SIZE) ||
+                        x > (Right() - CORNER_SIZE))
+                    {
                         AddBorderCell(x, y, borderMat);
+                    }
                 }
                 
                 // Bottom border
                 for (int y = Bottom(true); y < Bottom(false); y++)
+                {
                     AddBorderCell(x, y, borderMat);
+                }
             }
 
             for (int y = Bottom(true); y < Top(true); y++)
             {
                 // Left border
                 for (int x = Left(true); x < Left(false); x++)
+                {
                     AddBorderCell(x, y, borderMat);
+                }
 
                 // Right border
                 for (int x = Right(false); x < Right(true); x++)
+                {
                     AddBorderCell(x, y, borderMat);
+                }
             }
 
             // Corner structures
@@ -552,19 +583,27 @@ namespace MiniBase
             int rightCenterX = (Right(false) + Right(true)) / 2;
             int adjustedCornerSize = CORNER_SIZE + (int)Math.Ceiling(BORDER_SIZE / 2f);
             for (int i = 0; i < adjustedCornerSize; i++)
+            {
                 for (int j = adjustedCornerSize; j > i; j--)
                 {
                     int bottomY = Bottom() + adjustedCornerSize - j;
                     int topY = Top() - adjustedCornerSize + j - 1;
+                    
                     if (j - i <= DIAGONAL_BORDER_SIZE)
+                    {
                         borderMat = WorldGen.unobtaniumElement;
+                    }
                     else
+                    {
                         borderMat = ElementLoader.FindElementByHash(SimHashes.Glass);
+                    }
+                    
                     AddBorderCell(leftCenterX + i, bottomY, borderMat);
                     AddBorderCell(leftCenterX - i, bottomY, borderMat);
                     AddBorderCell(rightCenterX + i, bottomY, borderMat);
                     AddBorderCell(rightCenterX - i, bottomY, borderMat);
-                   // if (moonlet.is_starting_asteroid)
+                    
+                    // if (moonlet.is_starting_asteroid)
                     {
                         AddBorderCell(leftCenterX + i, topY, borderMat);
                         AddBorderCell(leftCenterX - i, topY, borderMat);
@@ -572,6 +611,7 @@ namespace MiniBase
                         AddBorderCell(rightCenterX - i, topY, borderMat);
                     }
                 }
+            }
 
             // Space access
             if (moonlet.type == MoonletData.Moonlet.Start)
@@ -584,17 +624,26 @@ namespace MiniBase
                     {
                         //Left cutout
                         for (int x = Left() + CORNER_SIZE; x < Math.Min(Left() + CORNER_SIZE + SPACE_ACCESS_SIZE, Right() - CORNER_SIZE); x++)
+                        {
                             AddBorderCell(x, y, borderMat);
+                        }
+                        
                         //Right cutout
                         for (int x = Math.Max(Right() - CORNER_SIZE - SPACE_ACCESS_SIZE, Left() + CORNER_SIZE); x < Right() - CORNER_SIZE; x++)
+                        {
                             AddBorderCell(x, y, borderMat);
+                        }
+                        
                         if (MiniBaseOptions.Instance.SpaceTunnelAccess == MiniBaseOptions.SpaceTunnelAccessType.LeftOnly)
                         {
                             //far left cutout
                             for (int x = CORNER_SIZE; x < CORNER_SIZE + SPACE_ACCESS_SIZE; x++)
+                            {
                                 AddBorderCell(x, y, borderMat);
+                            }
                         }
                     }
+                    
                     if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides ||
                         MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
                         MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly)
@@ -607,14 +656,18 @@ namespace MiniBase
                             {
                                 //Far left tunnel
                                 for (int x = Left(true); x < Left(false); x++)
+                                {
                                     AddBorderCell(x, y, borderMat);
+                                }
                             }
                             if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly ||
                                 MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
                             {
                                 //Far Right tunnel
                                 for (int x = Right(false); x < Right(true); x++)
+                                {
                                     AddBorderCell(x, y, borderMat);
+                                }
                             }
                         }
                     }
@@ -624,14 +677,37 @@ namespace MiniBase
                 {
                     borderMat = WorldGen.katairiteElement;
                     for (int y = Top(); y < Top(true); y++)
+                    {
                         for (int x = Left() + CORNER_SIZE; x < Right() - CORNER_SIZE; x++)
+                        {
                             AddBorderCell(x, y, borderMat);
+                        }
+                    }
                 }
             }
             return borderCells;
+            
+            void AddBorderCell(int x, int y, Element e)
+            {
+                int cell = Grid.XYToCell(x, y);
+                if (Grid.IsValidCell(cell))
+                {
+                    borderCells.Add(Vec(x, y));
+                    cells[cell].SetValues(e, ElementLoader.elements);
+                }
+            }
         }
 
-        // Create and place a feature (geysers, volcanoes, vents, etc) given a feature type
+        /// <summary>
+        /// Create and place a feature (geysers, volcanoes, vents, etc) given a feature type
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="cells"></param>
+        /// <param name="type"></param>
+        /// <param name="pos"></param>
+        /// <param name="coverMaterial"></param>
+        /// <param name="neutronium"></param>
+        /// <param name="cover"></param>
         private static void PlaceGeyser(Data data, Sim.Cell[] cells, MiniBaseOptions.FeatureType type, Vector2I pos, Element coverMaterial, bool neutronium = true, bool cover = true)
         {
             string featureName;
@@ -745,7 +821,13 @@ namespace MiniBase
             PlaceSpawnables(spawnList, biome.spawnablesInAir, spawnStruct.inAir, Prefab.Type.Pickupable);
         }
 
-        // Add spawnables to the GameSpawnData list
+        /// <summary>
+        /// Add spawnables to the GameSpawnData list
+        /// </summary>
+        /// <param name="spawnList"></param>
+        /// <param name="spawnables"></param>
+        /// <param name="spawnPoints"></param>
+        /// <param name="prefabType"></param>
         private static void PlaceSpawnables(List<Prefab> spawnList, Dictionary<string, float> spawnables, ISet<Vector2I> spawnPoints, Prefab.Type prefabType)
         {
             if (spawnables == null || spawnables.Count == 0 || spawnPoints.Count == 0)
@@ -766,8 +848,18 @@ namespace MiniBase
 
         // The following utility methods all refer to the main liveable area
         // E.g., Width() returns the width of the liveable area, not the whole map
-        public static int SideMargin() { return (moonlet.world_size.x - moonlet.size.x - 2 * BORDER_SIZE) / 2; }
+        private static int SideMargin() { return (moonlet.world_size.x - moonlet.size.x - 2 * BORDER_SIZE) / 2; }
+        /// <summary>
+        /// The leftmost tile position that is considered inside the liveable area or its borders.
+        /// </summary>
+        /// <param name="withBorders"></param>
+        /// <returns></returns>
         public static int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : BORDER_SIZE); }
+        /// <summary>
+        /// The rightmost tile position that is considered inside the liveable area or its borders.
+        /// </summary>
+        /// <param name="withBorders"></param>
+        /// <returns></returns>
         public static int Right(bool withBorders = false) { return Left(withBorders) + moonlet.size.x + (withBorders ? BORDER_SIZE * 2 : 0); }
         public static int Top(bool withBorders = false) { return moonlet.world_size.y - TOP_MARGIN - moonlet.extra_top_margin - (withBorders ? 0 : BORDER_SIZE) + 1; }
         public static int Bottom(bool withBorders = false) { return Top(withBorders) - moonlet.size.y - (withBorders ? BORDER_SIZE * 2 : 0); }
@@ -792,8 +884,14 @@ namespace MiniBase
         }
         public static T ChooseRandom<T>(T[] tArray) { return tArray[random.Next(0, tArray.Length)]; }
 
-        // Returns a coherent noisemap normalized between [0.0, 1.0]
-        // NOTE: currently, the range is actually [yCorrection, 1.0] roughly centered around 0.5
+        /// <summary>
+        /// Returns a coherent noisemap normalized between [0.0, 1.0]
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        /// <remarks>currently, the range is actually [yCorrection, 1.0] roughly centered around 0.5</remarks>
         public static float[,] GenerateNoiseMap(System.Random r, int width, int height)
         {
             Octave oct1 = new Octave(1f, 10f);
@@ -851,7 +949,13 @@ namespace MiniBase
             }
         }
 
-        // Return a description of a vertical movement over a horizontal axis
+        /// <summary>
+        /// Return a description of a vertical movement over a horizontal axis
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static int[] GetHorizontalWalk(int width, int min, int max)
         {
             double WalkChance = 0.7;
