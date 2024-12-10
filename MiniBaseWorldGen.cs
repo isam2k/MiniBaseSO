@@ -601,13 +601,10 @@ namespace MiniBase
                     AddBorderCell(rightCenterX + i, bottomY, borderMat);
                     AddBorderCell(rightCenterX - i, bottomY, borderMat);
                     
-                    // if (moonlet.is_starting_asteroid)
-                    {
-                        AddBorderCell(leftCenterX + i, topY, borderMat);
-                        AddBorderCell(leftCenterX - i, topY, borderMat);
-                        AddBorderCell(rightCenterX + i, topY, borderMat);
-                        AddBorderCell(rightCenterX - i, topY, borderMat);
-                    }
+                    AddBorderCell(leftCenterX + i, topY, borderMat);
+                    AddBorderCell(leftCenterX - i, topY, borderMat);
+                    AddBorderCell(rightCenterX + i, topY, borderMat);
+                    AddBorderCell(rightCenterX - i, topY, borderMat);
                 }
             }
 
