@@ -32,3 +32,5 @@ _ReSharper*/
 packages/
 #Scripts folder
 scripts/
+#Unity and Klei libraries
+lib/
