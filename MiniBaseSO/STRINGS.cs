@@ -1,7 +1,16 @@
-namespace MiniBaseSO
+namespace MiniBase
 {
     internal class STRINGS
     {
+        public class CLUSTER_NAMES
+        {
+            public class DEFAULT
+            {
+                public static LocString NAME = "MiniBase";
+                public static LocString DESCRIPTION = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
+            }
+        }
+        
         public class WORLDS
         {
             public class MINIBASE

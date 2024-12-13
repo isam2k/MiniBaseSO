@@ -9,20 +9,20 @@ difficulty: 5
 
 startWorldIndex: 0
 worldPlacements:
-- world: worlds/MiniBase
+- world: expansion1::worlds/MiniBase
   allowedRings:
     min: 0
     max: 0
-- world: worlds/BabyOilyMoonlet
+- world: expansion1::worlds/BabyOilyMoonlet
   locationType: InnerCluster
   allowedRings:
     min: 3
     max: 3
-- world: worlds/BabyMarshyMoonlet # Isoresin renewable
+- world: expansion1::worlds/BabyMarshyMoonlet # Isoresin renewable
   allowedRings:
     min: 5
     max: 5
-- world: worlds/BabyNiobiumMoonlet # Niobium renewable
+- world: expansion1::worlds/BabyNiobiumMoonlet # Niobium renewable
   allowedRings:
     min: 7
     max: 7

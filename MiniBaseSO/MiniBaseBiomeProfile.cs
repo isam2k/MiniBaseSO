@@ -1,21 +1,10 @@
 ﻿using System.Collections.Generic;
-using static MiniBaseSO.MiniBaseConfig;
+using System.Linq;
 
-namespace MiniBaseSO
+namespace MiniBase
 {
     public class MiniBaseBiomeProfile
     {
-        public string backgroundSubworld;
-        public SimHashes defaultMaterial;
-        public float defaultTemperature;
-        public BandInfo[] bandProfile;
-        public List<KeyValuePair<string, float>> startingItems;
-        public Dictionary<string, float> spawnablesOnFloor;
-        public Dictionary<string, float> spawnablesOnCeil;
-        public Dictionary<string, float> spawnablesInGround;
-        public Dictionary<string, float> spawnablesInLiquid;
-        public Dictionary<string, float> spawnablesInAir;
-
         public MiniBaseBiomeProfile(
             string backgroundSubworld,
             SimHashes defaultMaterial,
@@ -28,34 +17,68 @@ namespace MiniBaseSO
             Dictionary<string, float> spawnablesInLiquid = null,
             Dictionary<string, float> spawnablesInAir = null)
         {
-            this.backgroundSubworld = backgroundSubworld;
-            this.defaultMaterial = defaultMaterial;
-            this.defaultTemperature = defaultTemperature;
-            this.bandProfile = bandProfile;
-            this.startingItems = startingItems ?? new List<KeyValuePair<string, float>>();
-            this.spawnablesOnFloor = spawnablesOnFloor ?? new Dictionary<string, float>();
-            this.spawnablesOnCeil = spawnablesOnCeil ?? new Dictionary<string, float>();
-            this.spawnablesInGround = spawnablesInGround ?? new Dictionary<string, float>();
-            this.spawnablesInLiquid = spawnablesInLiquid ?? new Dictionary<string, float>();
-            this.spawnablesInAir = spawnablesInAir ?? new Dictionary<string, float>();
+            BackgroundSubworld = backgroundSubworld;
+            DefaultMaterial = defaultMaterial;
+            DefaultTemperature = defaultTemperature;
+            BandProfile = bandProfile;
+            StartingItems = startingItems ?? new List<KeyValuePair<string, float>>();
+            SpawnablesOnFloor = spawnablesOnFloor ?? new Dictionary<string, float>();
+            SpawnablesOnCeil = spawnablesOnCeil ?? new Dictionary<string, float>();
+            SpawnablesInGround = spawnablesInGround ?? new Dictionary<string, float>();
+            SpawnablesInLiquid = spawnablesInLiquid ?? new Dictionary<string, float>();
+            SpawnablesInAir = spawnablesInAir ?? new Dictionary<string, float>();
         }
 
-        public Element DefaultElement() { return ElementLoader.FindElementByHash(defaultMaterial); }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Element DefaultElement()
+        {
+            return ElementLoader.FindElementByHash(DefaultMaterial);
+        }
 
-        // Return the corresponding element band info from the float in [0.0, 1.0]
+        /// <summary>
+        /// Return the corresponding element band info from the float in [0.0, 1.0]
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
         public BandInfo GetBand(float f)
         {
-            for (int i = 0; i < bandProfile.Length; i++)
-                if (f < bandProfile[i].cumulativeWeight)
-                    return bandProfile[i];
-            return bandProfile[bandProfile.Length - 1];
+            for (int i = 0; i < BandProfile.Length; i++)
+            {
+                if (f < BandProfile[i].cumulativeWeight)
+                {
+                    return BandProfile[i];
+                }
+            }
+            return BandProfile.Last();
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="band"></param>
+        /// <param name="modifier"></param>
+        /// <returns></returns>
         public Sim.PhysicsData GetPhysicsData(BandInfo band, float modifier = 1f)
         {
-            float temperature = (band.temperature < 0 && defaultTemperature > 0) ? defaultTemperature : band.temperature;
+            float temperature = (band.temperature < 0 && DefaultTemperature > 0) ? DefaultTemperature : band.temperature;
             return MiniBaseWorldGen.GetPhysicsData(band.GetElement(), modifier * band.density, temperature);
         }
+        
+        #region Fields
+        public string BackgroundSubworld;
+        public SimHashes DefaultMaterial;
+        public float DefaultTemperature;
+        public BandInfo[] BandProfile;
+        public List<KeyValuePair<string, float>> StartingItems;
+        public Dictionary<string, float> SpawnablesOnFloor;
+        public Dictionary<string, float> SpawnablesOnCeil;
+        public Dictionary<string, float> SpawnablesInGround;
+        public Dictionary<string, float> SpawnablesInLiquid;
+        public Dictionary<string, float> SpawnablesInAir;
+        #endregion
     }
 
     public struct BandInfo

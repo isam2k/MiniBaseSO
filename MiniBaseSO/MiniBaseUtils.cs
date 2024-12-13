@@ -1,8 +1,8 @@
-﻿using Klei.CustomSettings;
+﻿using System.Collections.Generic;
+using Klei.CustomSettings;
 using ProcGen;
-using System.Collections.Generic;
 
-namespace MiniBaseSO
+namespace MiniBase
 {
     class MiniBaseUtils
     {
@@ -11,7 +11,7 @@ namespace MiniBaseSO
         {
             Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
             var cluster = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id];
-            return cluster.GetStartWorld() == "worlds/MiniBase";
+            return cluster.GetStartWorld() == "expansion1::worlds/MiniBase";
         }
     }
 }

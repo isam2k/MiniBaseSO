@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using static MiniBaseSO.MiniBaseConfig;
 
-namespace MiniBaseSO.Profiles
+namespace MiniBase.Profiles
 {
     class MiniBaseBiomeProfiles
     {

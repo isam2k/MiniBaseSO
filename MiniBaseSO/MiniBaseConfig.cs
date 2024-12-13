@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using static MiniBaseSO.MiniBaseOptions;
 
-namespace MiniBaseSO
+namespace MiniBase
 {
     public class MiniBaseConfig
     {

@@ -1,0 +1,45 @@
+name: STRINGS.WORLDS.MINIBASE.NAME
+description: STRINGS.WORLDS.MINIBASE.DESCRIPTION
+disableWorldTraits: true
+asteroidIcon: Asteroid_minibase_kanim
+
+worldTraitScale: 0.00
+worldsize:
+  X: 76
+  Y: 49
+layoutMethod: PowerTree # Note: We need to add weights to the items in the layer in order to use this.
+
+# List all the zone files to load
+subworldFiles:
+  - name: subworlds/Empty
+
+defaultsOverrides:
+  data:
+    DrawWorldBorder: true
+    DrawWorldBorderTop: false
+    DrawWorldBorderOverVacuum: false
+    WorldBorderThickness: 1
+    WorldBorderRange: 0
+    OverworldDensityMin: 4
+    OverworldDensityMax: 8
+    OverworldAvoidRadius: 3
+    OverworldSampleBehaviour: PoissonDisk
+    OverworldMinNodes: 1
+
+seasons:
+  - MeteorShowers
+
+startSubworldName: subworlds/Empty
+startingBaseTemplate: bases/sandstoneBase
+startingBasePositionHorizontal:
+  min: 0.5
+  max: 0.5
+startingBasePositionVertical:
+  min: 0.5
+  max: 0.5
+
+unknownCellsAllowedSubworlds:
+  - tagcommand: Default
+    command: Replace
+    subworldNames:
+      - subworlds/Empty

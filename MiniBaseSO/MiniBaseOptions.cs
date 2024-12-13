@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using PeterHan.PLib.Options;
-using System.Collections.Generic;
-using static MiniBaseSO.Profiles.MiniBaseBiomeProfiles;
-using static MiniBaseSO.Profiles.MiniBaseCoreBiomeProfiles;
+using static MiniBase.Profiles.MiniBaseBiomeProfiles;
+using static MiniBase.Profiles.MiniBaseCoreBiomeProfiles;
 
-namespace MiniBaseSO
+namespace MiniBase
 {
     [ModInfo("")]
     [ConfigFile("config.json", true)]
@@ -123,14 +123,12 @@ namespace MiniBaseSO
         #endregion
 
         #region Debug
-
         [JsonProperty]
         public bool DebugMode;
         [JsonProperty]
         public bool FastImmigration;
         [JsonProperty]
         public bool SkipLiveableArea;
-
         #endregion
 
         public MiniBaseOptions()
@@ -181,7 +179,9 @@ namespace MiniBaseSO
         public Vector2I GetBaseSize()
         {
             if (Size == BaseSize.Custom)
+            {
                 return new Vector2I(CustomWidth, CustomHeight);
+            }
             return BaseSizeDictionary.ContainsKey(Size) ? BaseSizeDictionary[Size] : BaseSizeDictionary[BaseSize.Normal];
         }
 
@@ -190,7 +190,10 @@ namespace MiniBaseSO
             return BiomeTypeMap.ContainsKey(Biome) ? BiomeTypeMap[Biome] : TemperateProfile;
         }
 
-        public bool HasCore() { return CoreBiome != CoreType.None; }
+        public bool HasCore()
+        {
+            return CoreBiome != CoreType.None;
+        }
 
         public MiniBaseBiomeProfile GetCoreBiome()
         {
@@ -202,7 +205,6 @@ namespace MiniBaseSO
             switch(ResourceMod)
             {
                 case ResourceModifier.Poor: return 0.5f;
-                case ResourceModifier.Normal: return 1.0f;
                 case ResourceModifier.Rich: return 1.5f;
                 default: return 1.0f;
             }
