@@ -2,6 +2,7 @@ name: STRINGS.CLUSTER_NAMES.DEFAULT.NAME
 description: STRINGS.CLUSTER_NAMES.DEFAULT.DESCRIPTION
 coordinatePrefix: V-MINI
 forbiddenDlcId: EXPANSION1_ID
+disableStoryTraits: true
 
 difficulty: 5
 menuOrder: -1
