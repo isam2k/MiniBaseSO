@@ -104,6 +104,7 @@
     <Compile Include="Mod.cs" />
     <Compile Include="MiniBaseUtils.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />
+    <Compile Include="Model\MoonletData.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="Profiles\MiniBaseBiomeProfiles.cs" />
     <Compile Include="Profiles\MiniBaseCoreBiomeProfiles.cs" />

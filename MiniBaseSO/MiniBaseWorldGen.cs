@@ -5,6 +5,7 @@ using System.Linq;
 using Delaunay.Geo;
 using HarmonyLib;
 using Klei;
+using MiniBase.Model;
 using MiniBase.Profiles;
 using ProcGen;
 using ProcGenGame;
@@ -17,58 +18,10 @@ namespace MiniBase
 {
     public class MiniBaseWorldGen
     {
-        private class MoonletData
-        {
-            public enum Moonlet
-            {
-                Start,
-                Second,
-                Tree,
-                Niobium
-            };
-            
-            public int SideMargin() { return (WorldSize.x - Size.x - 2 * BorderSize) / 2; }
-            /// <summary>
-            /// The leftmost tile position that is considered inside the liveable area or its borders.
-            /// </summary>
-            /// <param name="withBorders"></param>
-            /// <returns></returns>
-            public int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : BorderSize); }
-            /// <summary>
-            /// The rightmost tile position that is considered inside the liveable area or its borders.
-            /// </summary>
-            /// <param name="withBorders"></param>
-            /// <returns></returns>
-            public int Right(bool withBorders = false) { return Left(withBorders) + Size.x + (withBorders ? BorderSize * 2 : 0); }
-            public int Top(bool withBorders = false) { return WorldSize.y - TopMargin - ExtraTopMargin - (withBorders ? 0 : BorderSize) + 1; }
-            public int Bottom(bool withBorders = false) { return Top(withBorders) - Size.y - (withBorders ? BorderSize * 2 : 0); }
-            public int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
-            public int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
-            public Vector2I TopLeft(bool withBorders = false) { return new Vector2I(Left(withBorders), Top(withBorders)); }
-            public Vector2I TopRight(bool withBorders = false) { return new Vector2I(Right(withBorders), Top(withBorders)); }
-            public Vector2I BottomLeft(bool withBorders = false) { return new Vector2I(Left(withBorders), Bottom(withBorders)); }
-            public Vector2I BottomRight(bool withBorders = false) { return new Vector2I(Right(withBorders), Bottom(withBorders)); }
-            public bool InLiveableArea(Vector2I pos) { return pos.x >= Left() && pos.x < Right() && pos.y >= Bottom() && pos.y < Top(); }
-            
-            #region Fields
-            public MiniBaseBiomeProfile Biome;
-            public MiniBaseBiomeProfile CoreBiome;
-            /// <summary>Total size of the map in tiles.</summary>
-            public Vector2I WorldSize;
-            /// <summary>Size of the map without borders.</summary>
-            public Vector2I Size;
-            public bool HasCore;
-            public int ExtraTopMargin = 0;
-            public Moonlet Type = Moonlet.Start;
-            #endregion
-        };
-
         public static bool CreateWorld(WorldGen gen, BinaryWriter writer, ref Sim.Cell[] cells,
             ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
         {
-            var moonletData = new MoonletData();
-            moonletData.WorldSize = gen.WorldSize;
-            moonletData.Size = new Vector2I(moonletData.WorldSize.x - 2 * BorderSize, moonletData.WorldSize.y - 2 * BorderSize - TopMargin - moonletData.ExtraTopMargin);
+            var moonletData = new MoonletData(gen);
             return DlcManager.IsExpansion1Active() ?
                 CreateSOWorld(gen, writer, ref cells, ref dc, baseId,
                     moonletData) :
@@ -80,10 +33,6 @@ namespace MiniBase
             ref Sim.DiseaseCell[] dc, int baseId, MoonletData moonletData)
         {
             var options = MiniBaseOptions.Instance;
-            moonletData.Biome = options.GetBiome();
-            moonletData.CoreBiome = options.GetCoreBiome();
-            moonletData.HasCore = true;
-            moonletData.Type = MoonletData.Moonlet.Start;
 
             // Convenience variables, including private fields/properties
             var worldGen = Traverse.Create(gen);
@@ -201,35 +150,6 @@ namespace MiniBase
             ref Sim.DiseaseCell[] dc, int baseId, MoonletData moonletData)
         {
             var options = MiniBaseOptions.Instance;
-            moonletData.Biome = options.GetBiome();
-            moonletData.CoreBiome = options.GetCoreBiome();
-            moonletData.HasCore = options.HasCore();
-            
-            switch (gen.Settings.world.filePath)
-            {
-                case "expansion1::worlds/MiniBase":
-                    moonletData.Type = MoonletData.Moonlet.Start;
-                    break;
-                case "expansion1::worlds/BabyOilyMoonlet":
-                    moonletData.Type = MoonletData.Moonlet.Second;
-                    moonletData.Biome = MiniBaseBiomeProfiles.OilMoonletProfile;
-                    moonletData.CoreBiome = MiniBaseCoreBiomeProfiles.MagmaCoreProfile;
-                    moonletData.ExtraTopMargin = ColonizableExtraMargin;
-                    moonletData.HasCore = true;
-                    break;
-                case "expansion1::worlds/BabyMarshyMoonlet":
-                    moonletData.Type = MoonletData.Moonlet.Tree;
-                    moonletData.Biome = MiniBaseBiomeProfiles.TreeMoonletProfile;
-                    moonletData.ExtraTopMargin = ColonizableExtraMargin;
-                    moonletData.HasCore = false;
-                    break;
-                case "expansion1::worlds/BabyNiobiumMoonlet":
-                    moonletData.Type = MoonletData.Moonlet.Niobium;
-                    moonletData.Biome = MiniBaseBiomeProfiles.NiobiumMoonletProfile;
-                    moonletData.ExtraTopMargin = ColonizableExtraMargin;
-                    moonletData.HasCore = false;
-                    break;
-            }
             
             // Convenience variables, including private fields/properties
             var worldGen = Traverse.Create(gen);
@@ -562,10 +482,15 @@ namespace MiniBase
             var sideCells = new HashSet<Vector2I>();
             var claimedCells = new HashSet<int>();
             coreCells = new HashSet<Vector2I>();
-            for (int index = 0; index < data.terrainCells.Count; ++index)
-                data.terrainCells[index].InitializeCells(claimedCells);
+            foreach (var cell in data.terrainCells)
+            {
+                cell.InitializeCells(claimedCells);
+            }
+
             if (MiniBaseOptions.Instance.SkipLiveableArea)
+            {
                 return biomeCells;
+            }
 
             // Using a smooth noisemap, map the noise values to elements via the element band profile
             void SetTerrain(MiniBaseBiomeProfile biome, ISet<Vector2I> positions)
@@ -598,11 +523,17 @@ namespace MiniBase
             int relativeLeft = moonletData.Left();
             int relativeRight = moonletData.Right();
             for (int x = relativeLeft; x < relativeRight; x++)
+            {
                 for (int y = moonletData.Bottom(); y < moonletData.Top(); y++)
                 {
                     var pos = new Vector2I(x, y);
                     int extra = (int)(noiseMap[pos.x, pos.y] * 8f);
-                    if (moonletData.Type != MoonletData.Moonlet.Start && y > moonletData.Bottom() + extra + (2 * moonletData.Height() / 3)) continue;
+                    
+                    if (moonletData.Type != MoonletData.Moonlet.Start &&
+                        y > moonletData.Bottom() + extra + (2 * moonletData.Height() / 3))
+                    {
+                        continue;
+                    }
 
                     if (moonletData.InLiveableArea(pos))
                     {
@@ -613,44 +544,57 @@ namespace MiniBase
                         sideCells.Add(pos);
                     }
                 }
+            }
+
             SetTerrain(moonletData.Biome, biomeCells);
             SetTerrain(moonletData.Biome, sideCells);
 
-            // Core area
-            if (moonletData.HasCore)
+            if (!moonletData.HasCore)
             {
-                int coreHeight = CoreMin + moonletData.Height() / 10;
-                int[] heights = GetHorizontalWalk(moonletData.WorldSize.x, coreHeight, coreHeight + CoreDeviation);
-                ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
-                for (int x = relativeLeft; x < relativeRight; x++)
-                {
-                    // Create abyssalite border of size CORE_BORDER
-                    for (int j = 0; j < CoreBorder; j++)
-                        abyssaliteCells.Add(new Vector2I(x, moonletData.Bottom() + heights[x] + j));
-
-                    // Ensure border thickness at high slopes
-                    if (x > relativeLeft && x < relativeRight - 1)
-                        if ((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
-                        {
-                            Vector2I top = new Vector2I(x, moonletData.Bottom() + heights[x] + CoreBorder - 1);
-                            abyssaliteCells.Add(top + new Vector2I(-1, 0));
-                            abyssaliteCells.Add(top + new Vector2I(1, 0));
-                            abyssaliteCells.Add(top + new Vector2I(0, 1));
-                        }
-
-                    // Mark core biome cells
-                    for (int y = moonletData.Bottom(); y < moonletData.Bottom() + heights[x]; y++)
-                        coreCells.Add(new Vector2I(x, y));
-                }
-                coreCells.ExceptWith(abyssaliteCells);
-                SetTerrain(moonletData.CoreBiome, coreCells);
-                foreach (Vector2I abyssaliteCell in abyssaliteCells)
-                {
-                    cells[Grid.PosToCell(abyssaliteCell)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);
-                }
-                biomeCells.ExceptWith(coreCells);
-                biomeCells.ExceptWith(abyssaliteCells);
+                return biomeCells;
             }
+            
+            // Core area
+            int coreHeight = CoreMin + moonletData.Height() / 10;
+            int[] heights = GetHorizontalWalk(moonletData.WorldSize.x, coreHeight, coreHeight + CoreDeviation);
+            ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
+            for (int x = relativeLeft; x < relativeRight; x++)
+            {
+                // Create abyssalite border of size CORE_BORDER
+                for (int j = 0; j < CoreBorder; j++)
+                {
+                    abyssaliteCells.Add(new Vector2I(x, moonletData.Bottom() + heights[x] + j));
+                }
+
+                // Ensure border thickness at high slopes
+                if (x > relativeLeft && x < relativeRight - 1)
+                {
+                    if ((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
+                    {
+                        var top = new Vector2I(x, moonletData.Bottom() + heights[x] + CoreBorder - 1);
+                        abyssaliteCells.Add(top + new Vector2I(-1, 0));
+                        abyssaliteCells.Add(top + new Vector2I(1, 0));
+                        abyssaliteCells.Add(top + new Vector2I(0, 1));
+                    }
+                }
+
+                // Mark core biome cells
+                for (int y = moonletData.Bottom(); y < moonletData.Bottom() + heights[x]; y++)
+                {
+                    coreCells.Add(new Vector2I(x, y));
+                }
+            }
+            
+            coreCells.ExceptWith(abyssaliteCells);
+            SetTerrain(moonletData.CoreBiome, coreCells);
+            
+            foreach (var abyssaliteCell in abyssaliteCells)
+            {
+                cells[Grid.PosToCell(abyssaliteCell)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);
+            }
+
+            biomeCells.ExceptWith(coreCells);
+            biomeCells.ExceptWith(abyssaliteCells);
             return biomeCells;
         }
 
@@ -906,15 +850,6 @@ namespace MiniBase
             return spawnPoints;
         }
 
-        public struct SpawnPoints
-        {
-            public ISet<Vector2I> onFloor;
-            public ISet<Vector2I> onCeil;
-            public ISet<Vector2I> inGround;
-            public ISet<Vector2I> inAir;
-            public ISet<Vector2I> inLiquid;
-        }
-
         private static void PlaceSpawnables(Sim.Cell[] cells, List<Prefab> spawnList, MiniBaseBiomeProfile biome, ISet<Vector2I> biomeCells, ISet<Vector2I> reservedCells)
         {
             var spawnStruct = GetSpawnPoints(cells, biomeCells.Except(reservedCells));
@@ -949,9 +884,16 @@ namespace MiniBase
         }
 
         #region Util
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="modifier"></param>
+        /// <param name="temperature"></param>
+        /// <returns></returns>
         public static Sim.PhysicsData GetPhysicsData(Element element, float modifier = 1f, float temperature = -1f)
         {
-            Sim.PhysicsData defaultData = element.defaultValues;
+            var defaultData = element.defaultValues;
             return new Sim.PhysicsData()
             {
                 mass = defaultData.mass * modifier * (element.IsSolid ? MiniBaseOptions.Instance.GetResourceModifier() : 1f),
@@ -959,7 +901,17 @@ namespace MiniBase
                 pressure = defaultData.pressure
             };
         }
-        private static T ChooseRandom<T>(T[] tArray) { return tArray[_random.Next(0, tArray.Length)]; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tArray"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private static T ChooseRandom<T>(T[] tArray)
+        {
+            return tArray[_random.Next(0, tArray.Length)];
+        }
 
         /// <summary>
         /// Returns a coherent noisemap normalized between [0.0, 1.0]
@@ -1015,17 +967,6 @@ namespace MiniBase
             return noiseMap;
         }
 
-        private struct Octave
-        {
-            public float amp;
-            public float freq;
-            public Octave(float amplitude, float frequency)
-            {
-                amp = amplitude;
-                freq = frequency;
-            }
-        }
-
         /// <summary>
         /// Return a description of a vertical movement over a horizontal axis
         /// </summary>
@@ -1045,20 +986,49 @@ namespace MiniBase
                 {
                     int direction;
                     if (height >= max)
+                    {
                         direction = -1;
+                    }
                     else if (height <= min)
+                    {
                         direction = 1;
+                    }
                     else
+                    {
                         direction = _random.NextDouble() < 0.5 ? 1 : -1;
+                    }
+
                     if (_random.NextDouble() < DoubleWalkChance)
+                    {
                         direction *= 2;
+                    }
                     height = Mathf.Clamp(height + direction, min, max);
                 }
                 walk[i] = height;
             }
             return walk;
         }
-
+        #endregion
+        
+        #region Structs
+        private struct Octave
+        {
+            public float amp;
+            public float freq;
+            public Octave(float amplitude, float frequency)
+            {
+                amp = amplitude;
+                freq = frequency;
+            }
+        }
+        public struct SpawnPoints
+        {
+            public ISet<Vector2I> onFloor;
+            public ISet<Vector2I> onCeil;
+            public ISet<Vector2I> inGround;
+            public ISet<Vector2I> inAir;
+            public ISet<Vector2I> inLiquid;
+        }
         #endregion
         
         #region Fields
