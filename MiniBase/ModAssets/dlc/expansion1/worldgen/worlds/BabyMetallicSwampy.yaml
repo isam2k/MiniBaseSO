@@ -1,0 +1,198 @@
+name: STRINGS.WORLDS.MINIMETALLICSWAMPY.NAME
+description: STRINGS.WORLDS.MINIMETALLICSWAMPY.DESCRIPTION
+nameTables: [ SWAMP ]
+asteroidIcon: asteroid_mini_metallicswampy_kanim
+disableWorldTraits: true
+
+worldTraitScale: 0.10 # Adjust with worldSize. Traits are tuned to base game world sizes.
+worldsize:
+  X: 96
+  Y: 96
+layoutMethod: PowerTree
+
+defaultsOverrides:
+  data:
+    DrawWorldBorderForce: false
+    DrawWorldBorder: true
+    WorldBorderThickness: 3
+    WorldBorderRange: 2
+    OverworldDensityMin: 18
+    OverworldDensityMax: 18
+    OverworldAvoidRadius: 3
+    OverworldSampleBehaviour: PoissonDisk
+    poiPadding: 0
+  startingWorldElements: [] # remove the algae check
+
+#worldTraitRules:
+#  - min: 1
+#    max: 1
+#    forbiddenTags:
+#      - StartWorldOnly
+#      - NonStartWorld
+#      - GenericGeysers
+#      - LargeWorld
+#      - Oil
+#      - Radiation
+#      - VeryHot
+#      - Metal
+#    forbiddenTraits:
+#      - expansion1::traits/DistressSignal
+#      - expansion1::traits/CrashedSatellites
+
+subworldMixingRules:
+ - name: (Mixing1)
+   minCount: 1
+   maxCount: 2
+ - name: (Mixing2)
+   minCount: 1
+   maxCount: 2
+
+fixedTraits:
+  - sunlightLow
+  - cosmicRadiationVeryLow
+
+seasons:
+  - MiniMetallicSwampyMeteorShowers
+
+#------------------------------------------------------------------------------
+
+# List all the subworld files to load
+subworldFiles:
+  # - name: expansion1::subworlds/swamp/SwampStartDense
+  #   overridePower: 6
+  # - name: expansion1::subworlds/swamp/SwampMini
+  #   minCount: 1
+  #   maxCount: 2
+  - name: expansion1::subworlds/swamp/Swamp # non-start
+  - name: subworlds/space/Space
+  - name: expansion1::subworlds/space/SpaceWithSwampyBorder
+  - name: expansion1::subworlds/marsh/med_HotMarshInactive
+  - name: expansion1::subworlds/marsh/med_HotMarshMushrooms
+  - name: expansion1::subworlds/metallic/SwampyRenewableMetallicCold
+    overridePower: 1.5
+#  - name: expansion1::subworlds/magma/BottomSmall
+  - name: subworlds/magma/MagmaVent
+    
+unknownCellsAllowedSubworlds: 
+  # Fill
+  - tagcommand: Default
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/marsh/med_HotMarshInactive
+      - expansion1::subworlds/marsh/med_HotMarshMushrooms
+      - expansion1::subworlds/metallic/SwampyRenewableMetallicCold
+      - (Mixing1)
+      - (Mixing2)
+  # # Ring-1
+  # - tagcommand: DistanceFromTag
+  #   tag: AtStart
+  #   minDistance: 1
+  #   maxDistance: 1
+  #   command: Replace
+  #   subworldNames:
+  #     - expansion1::subworlds/marsh/med_HotMarshInactive
+  #     - expansion1::subworlds/marsh/med_HotMarshMushrooms
+  #     - expansion1::subworlds/swamp/SwampMini
+  # Non-Start swamp
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 0
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/swamp/Swamp
+      - expansion1::subworlds/marsh/med_HotMarshMushrooms      
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 0
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/swamp/Swamp      
+  # Space
+  - tagcommand: AtTag
+    tag: AtSurface
+    command: Replace
+    subworldNames:
+      - subworlds/space/Space
+  # Crust
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 0
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/space/SpaceWithSwampyBorder
+  # Core
+  - tagcommand: AtTag
+    tag: AtDepths
+    minDistance: 0
+    maxDistance: 0
+    command: Replace
+    subworldNames:
+#      - expansion1::subworlds/magma/BottomSmall
+      - subworlds/magma/MagmaVent
+  - tagcommand: AtTag # Mixing Core
+    tag: AtDepths
+    command: UnionWith
+    sortOrder: 100 # order after core world traits
+    subworldNames:
+      - (Mixing1)
+      - (Mixing2)
+  - tagcommand: DistanceFromTag # Mixing Surface
+    tag: AtSurface
+    maxDistance: 1
+    command: UnionWith
+    sortOrder: 100 # order after subsurface world traits
+    subworldNames:
+      - (Mixing1)
+      - (Mixing2)   
+
+worldTemplateRules:
+  # SwampyRenewableMetallic
+  - names:
+    - geysers/molten_iron
+    listRule: GuaranteeOne
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 100
+    allowedCellsFilter:
+      - command: Replace
+        tagcommand: DistanceFromTag
+        tag: AtDepths
+        minDistance: 1
+        maxDistance: 2
+  # Surface Ice Chunks
+  - names: 
+    - expansion1::poi/mini/frozen_chunk_ice
+    - expansion1::poi/mini/frozen_chunk_large
+    - expansion1::poi/mini/frozen_chunk_metal
+    - expansion1::poi/mini/frozen_chunk_shape
+    listRule: TryAll
+    allowDuplicates: true
+    allowExtremeTemperatureOverlap: true
+    useRelaxedFiltering: true
+    overrideOffset:
+       X: 0
+       Y: -10
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 200
+    allowedCellsFilter:
+      - command: Replace
+        tagcommand: DistanceFromTag
+        tag: AtSurface
+        minDistance: 1
+        maxDistance: 1
+  # Curated Metal Geysers
+  - names: 
+    - geysers/molten_copper
+    - expansion1::poi/poi_molten_gold_volcano
+    - expansion1::geysers/molten_aluminum
+    - expansion1::geysers/molten_cobalt
+    listRule: TryOne
+    times: 1
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 10
+    allowedCellsFilter:
+      - command: Replace
+        tagcommand: NotAtTag
+        tag: NoGlobalFeatureSpawning

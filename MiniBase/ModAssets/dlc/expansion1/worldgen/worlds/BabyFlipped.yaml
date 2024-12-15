@@ -1,0 +1,224 @@
+name: STRINGS.WORLDS.MINIFLIPPED.NAME
+description: STRINGS.WORLDS.MINIFLIPPED.DESCRIPTION
+nameTables: [ FLIPPED ]
+asteroidIcon: asteroid_mini_flipped_kanim
+disableWorldTraits: true
+
+worldTraitScale: 0.10 # Adjust with worldSize. Traits are tuned to base game world sizes.
+worldsize:
+  X: 96
+  Y: 96
+layoutMethod: PowerTree
+
+defaultsOverrides:
+  data:
+    DrawWorldBorderForce: false
+    DrawWorldBorder: true
+    WorldBorderThickness: 3
+    WorldBorderRange: 2
+    OverworldDensityMin: 18
+    OverworldDensityMax: 18
+    OverworldAvoidRadius: 3
+    OverworldSampleBehaviour: PoissonDisk
+    poiPadding: 0
+  startingWorldElements: [] # remove the algae check
+
+#worldTraitRules:
+#  - min: 1
+#    max: 2
+#    forbiddenTags:
+#      - StartWorldOnly
+#      - GenericGeysers
+#      - Oil
+#      - LargeWorld
+#      - StartChange
+#      - Core
+#      - AboveCore
+#      - Surface
+#      - Crust
+#    forbiddenTraits:
+#      - expansion1::traits/CrashedSatellites
+#      - expansion1::traits/Volcanoes
+
+subworldMixingRules:
+ - name: (Mixing1)
+   minCount: 1
+   maxCount: 2
+ - name: (Mixing2)
+   minCount: 1
+   maxCount: 2
+
+fixedTraits:
+  - sunlightLow
+  - cosmicRadiationMedLow
+
+seasons:
+  - MiniFlippedMeteorShowers # unused
+
+#------------------------------------------------------------------------------
+
+# List all the subworld files to load
+subworldFiles:
+# Start ----------
+  # - name: expansion1::subworlds/sandstone/SandstoneStart
+  #  overridePower: 1.5
+  # - name: expansion1::subworlds/sandstone/SandstoneMiniWater
+  #   maxCount: 3
+# Start ----------    
+  - name: expansion1::subworlds/sandstone/med_SandstoneResourceful
+  - name: expansion1::subworlds/wasteland/WastelandBeetle
+  - name: expansion1::subworlds/wasteland/WastelandWorm    
+  - name: expansion1::subworlds/frozen/FrozenMedium
+  - name: subworlds/space/Space
+  - name: expansion1::subworlds/space/SpaceWithAbyssaliteBorder
+  - name: expansion1::subworlds/magma/BottomSmallNoUnobtanium
+    overridePower: 1.5
+    
+unknownCellsAllowedSubworlds: 
+  # Fill
+  - tagcommand: Default
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/wasteland/WastelandBeetle
+      - expansion1::subworlds/frozen/FrozenMedium
+      - (Mixing1)
+      - (Mixing2)
+  # START ----------
+  # # Ring-1
+  # - tagcommand: DistanceFromTag
+  #   tag: AtStart
+  #   minDistance: 1
+  #   maxDistance: 1
+  #   command: Replace
+  #   subworldNames:
+  #     - expansion1::subworlds/sandstone/SandstoneMiniWater
+  # START ----------
+  # Space
+  - tagcommand: AtTag
+    tag: AtSurface
+    command: Replace
+    subworldNames:
+      - subworlds/space/Space
+  # Crust
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 1
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/space/SpaceWithAbyssaliteBorder
+  # Surface Magma
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 1
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/magma/BottomSmallNoUnobtanium
+  # Wasteland Layer
+  - tagcommand: DistanceFromTag
+    tag: AtSurface
+    minDistance: 2
+    maxDistance: 2
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/wasteland/WastelandBeetle
+      - expansion1::subworlds/wasteland/WastelandWorm  
+      - (Mixing1)
+      - (Mixing2)  
+  # Frozen Layer
+  - tagcommand: DistanceFromTag
+    tag: AtDepths
+    minDistance: 1
+    maxDistance: 1
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/frozen/FrozenMedium
+      - (Mixing1)
+      - (Mixing2)
+  # Core Sandstone
+  - tagcommand: DistanceFromTag
+    tag: AtDepths
+    minDistance: 0
+    maxDistance: 0
+    command: Replace
+    subworldNames:
+      - expansion1::subworlds/sandstone/med_SandstoneResourceful
+      - (Mixing1)
+      - (Mixing2)
+
+worldTemplateRules:
+  # Gravitas
+  # - names:
+  #   - expansion1::poi/warp/sender_mini
+  #   - expansion1::poi/warp/receiver_mini
+  #   #- expansion1::poi/warp/teleporter_mini # START
+  #   listRule: GuaranteeAll
+  #   priority: 90
+  #   allowedCellsFilter:
+  #     - command: Replace
+  #       tagcommand: DistanceFromTag
+  #       tag: AtStart
+  #       minDistance: 1
+  #       maxDistance: 2
+  #     - command: ExceptWith
+  #       tagcommand: DistanceFromTag
+  #       tag: AtDepths
+  #       minDistance: 0
+  #       maxDistance: 0        
+  #     - command: ExceptWith
+  #       zoneTypes: [ Space, MagmaCore ]
+  #     - command: ExceptWith
+  #       tagcommand: AtTag
+  #       tag: NoGravitasFeatures
+  # Guaranteed geyser
+  - names:
+    - expansion1::geysers/liquid_sulfur
+    listRule: GuaranteeAll
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 200
+    allowedCellsFilter:
+      - command: Replace 
+        tagcommand: DistanceFromTag
+        tag: AtDepths
+        minDistance: 0
+        maxDistance: 1    
+  # Guaranteed geyser
+  - names:
+    - geysers/big_volcano
+    - geysers/small_volcano
+    listRule: GuaranteeOne
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 100
+    allowedCellsFilter:
+      - command: Replace
+        zoneTypes: [ MagmaCore ]
+  # Frozen
+  - names:
+      - poi/frozen/heatsink_a
+      - poi/frozen/heatsink_b
+      - poi/frozen/heatsink_c
+      - poi/frozen/heatsink_d
+    listRule: GuaranteeSomeTryMore
+    someCount: 1
+    moreCount: 1
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 100 
+    allowedCellsFilter:
+      - command: Replace
+        zoneTypes: [FrozenWastes]
+  # Curated geysers (no duplicates)
+  - names: 
+    - geysers/big_volcano
+    - geysers/hot_co2
+    - geysers/hot_hydrogen
+    - geysers/methane
+    - geysers/small_volcano
+    listRule: TryOne
+    times: 1
+    useRelaxedFiltering: true # Allow placement in feature-heavy biomes
+    priority: 10
+    allowedCellsFilter:
+      - command: Replace
+        tagcommand: NotAtTag
+        tag: NoGlobalFeatureSpawning 
