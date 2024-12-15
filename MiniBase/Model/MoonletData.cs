@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using Klei.CustomSettings;
 using MiniBase.Profiles;
+using ProcGen;
 using ProcGenGame;
 using static MiniBase.MiniBaseConfig;
 
@@ -23,33 +26,33 @@ namespace MiniBase.Model
         public bool HasCore { get; }
         #endregion
 
-        public MoonletData(WorldGen worldGen)
+        internal MoonletData(WorldGen worldGen)
         {
             var options = MiniBaseOptions.Instance;
             switch (worldGen.Settings.world.filePath)
             {
-                case "worlds/MiniBase":
-                case "expansion1::worlds/MiniBase":
+                case VanillaStartMap:
+                case DlcStartMap:
                     Type = Moonlet.Start;
                     Biome = options.GetBiome();
                     CoreBiome = options.GetCoreBiome();
                     HasCore = options.HasCore();
                     _extraTopMargin = 0;
                     break;
-                case "expansion1::worlds/BabyOilyMoonlet":
+                case DlcSecondMap:
                     Type = Moonlet.Second;
                     Biome = MiniBaseBiomeProfiles.OilMoonletProfile;
                     CoreBiome = MiniBaseCoreBiomeProfiles.MagmaCoreProfile;
                     HasCore = true;
                     _extraTopMargin = ColonizableExtraMargin;
                     break;
-                case "expansion1::worlds/BabyMarshyMoonlet":
+                case DlcMarshyMap:
                     Type = Moonlet.Tree;
                     Biome = MiniBaseBiomeProfiles.TreeMoonletProfile;
                     HasCore = false;
                     _extraTopMargin = ColonizableExtraMargin;
                     break;
-                case "expansion1::worlds/BabyNiobiumMoonlet":
+                case DlcNiobiumMap:
                     Type = Moonlet.Niobium;
                     Biome = MiniBaseBiomeProfiles.NiobiumMoonletProfile;
                     HasCore = false;
@@ -86,9 +89,43 @@ namespace MiniBase.Model
         public bool InLiveableArea(Vector2I pos) { return pos.x >= Left() && pos.x < Right() && pos.y >= Bottom() && pos.y < Top(); }
         #endregion
         
+        #region Static Functions
+        /// <summary>
+        /// Determines if a <see cref="WorldGen"/> instance represents a minibase map.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        internal static bool IsMiniBaseWorld(WorldGen instance) =>
+            instance.Settings.world.filePath == VanillaStartMap ||
+            instance.Settings.world.filePath == DlcStartMap ||
+            instance.Settings.world.filePath == DlcSecondMap ||
+            instance.Settings.world.filePath == DlcMarshyMap ||
+            instance.Settings.world.filePath == DlcNiobiumMap;
+        /// <summary>
+        /// If the starting asteroid is worlds/MiniBase we consider the playthrough
+        /// to be a minibase one (for Cluster Generaton Manager compatibility).
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsMiniBaseCluster()
+        {
+            var clusterCache = SettingsCache.clusterLayouts.clusterCache;
+            var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id].GetStartWorld();
+            return world == DlcStartMap ||
+                   world == VanillaStartMap;
+        }
+        #endregion
+        
         #region Fields
         private readonly Vector2I _size;
         private readonly int _extraTopMargin;
+        #endregion
+        
+        #region Constants
+        internal const string VanillaStartMap = "worlds/MiniBase";
+        internal const string DlcStartMap = "expansion1::worlds/MiniBase";
+        internal const string DlcSecondMap = "expansion1::worlds/BabyOilyMoonlet";
+        internal const string DlcMarshyMap = "expansion1::worlds/BabyMarshyMoonlet";
+        internal const string DlcNiobiumMap = "expansion1::worlds/BabyNiobiumMoonlet";
         #endregion
         
         #region Enum

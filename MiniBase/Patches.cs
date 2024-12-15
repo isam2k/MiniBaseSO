@@ -7,10 +7,10 @@ using HarmonyLib;
 using Klei;
 using Klei.AI;
 using KMod;
+using MiniBase.Model;
 using ProcGen;
 using ProcGenGame;
 using static MiniBase.MiniBaseConfig;
-using static MiniBase.MiniBaseUtils;
 
 namespace MiniBase
 {
@@ -19,7 +19,9 @@ namespace MiniBase
         public static List<WorldPlacement> DefaultWorldPlacements = null;
         public static List<SpaceMapPOIPlacement> DefaultPOIPlacements = null;
         
-        // Reload mod options at asteroid select screen, before world gen happens
+        /// <summary>
+        /// Reload mod options at asteroid select screen, before world gen happens
+        /// </summary>
         [HarmonyPatch(typeof(ColonyDestinationSelectScreen), "LaunchClicked")]
         public static class ColonyDestinationSelectScreen_LaunchClicked_Patch
         {
@@ -293,7 +295,9 @@ namespace MiniBase
             }
         }
 
-        // Reload mod options when game is reloaded from save
+        /// <summary>
+        /// Reload mod options when game is reloaded from save.
+        /// </summary>
         [HarmonyPatch(typeof(Game), "OnPrefabInit")]
         public static class Game_OnPrefabInit_Patch
         {
@@ -303,13 +307,15 @@ namespace MiniBase
             }
         }
 
-        // Reveal map on startup
+        /// <summary>
+        /// Reveal the map on startup.
+        /// </summary>
         [HarmonyPatch(typeof(MinionSelectScreen), "OnProceed")]
         public static class MinionSelectScreen_OnProceed_Patch
         {
             public static void Postfix()
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
@@ -318,12 +324,15 @@ namespace MiniBase
             }
         }
         
+        /// <summary>
+        /// Open the temporal tear if no opener has been found in the cluster.
+        /// </summary>
         [HarmonyPatch(typeof(ClusterPOIManager), "RegisterTemporalTear")]
         public static class ClusterPOIManager_RegisterTemporalTear_Patch
         {
             public static void Postfix(TemporalTear temporalTear, ClusterPOIManager __instance)
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
@@ -382,13 +391,15 @@ namespace MiniBase
         
         #region CarePackages
 
-        // Immigration Speed
+        /// <summary>
+        /// Immigration Speed.
+        /// </summary>
         [HarmonyPatch(typeof(Game), "OnSpawn")]
         public static class Game_OnSpawn_Patch
         {
             public static void Postfix()
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
@@ -400,13 +411,15 @@ namespace MiniBase
             }
         }
 
-        // Add care package drops
+        /// <summary>
+        /// Add care package drops.
+        /// </summary>
         [HarmonyPatch(typeof(Immigration), "ConfigureCarePackages")]
         public static class Immigration_ConfigureCarePackages_Patch
         {
             public static void Postfix(ref CarePackageInfo[] ___carePackages)
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
@@ -419,7 +432,7 @@ namespace MiniBase
                 }
                 void AddItem(string name, float amount, int cycle = -1)
                 {
-                    packageList.Add(new CarePackageInfo(name, amount, cycle < 0 ? IsMiniBaseCluster : (Func<bool>)(() => CycleCondition(cycle) && IsMiniBaseCluster())));
+                    packageList.Add(new CarePackageInfo(name, amount, cycle < 0 ? () => true : (Func<bool>)(() => CycleCondition(cycle))));
                 }
 
                 // Minerals
@@ -463,13 +476,15 @@ namespace MiniBase
             private static bool CycleCondition(int cycle) => GameClock.Instance.GetCycle() >= cycle;
         }
 
-        // Remove the need to discover items for them to be available in the printing pod
+        /// <summary>
+        /// Remove the need to discover items for them to be available in the printing pod.
+        /// </summary>
         [HarmonyPatch(typeof(Immigration), "DiscoveredCondition")]
         public static class Immigration_DiscoveredCondition_Patch
         {
             public static void Postfix(ref bool __result)
             {
-                if (IsMiniBaseCluster())
+                if (MoonletData.IsMiniBaseCluster())
                 {
                     __result = true;
                 }
@@ -480,7 +495,9 @@ namespace MiniBase
 
         #region WorldGen
 
-        // Bypass and rewrite world generation
+        /// <summary>
+        /// Bypass and rewrite world generation.
+        /// </summary>
         [HarmonyPatch(typeof(WorldGen), "RenderOffline")]
         public static class WorldGen_RenderOffline_Patch
         {
@@ -490,18 +507,20 @@ namespace MiniBase
             public static bool Prefix(WorldGen __instance)
             {
                 // Skip the original method if on minibase world
-                return !IsMiniBaseWorld(__instance);
+                return !MoonletData.IsMiniBaseWorld(__instance);
             }
             
             public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
             {
-                if (IsMiniBaseWorld(__instance))
+                if (!MoonletData.IsMiniBaseWorld(__instance))
                 {
-                    __result = MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
-                        ref placedStoryTraits, isStartingWorld);
+                    return;
                 }
-
-                if (!DlcManager.IsExpansion1Active() || !IsMiniBaseCluster())
+                
+                __result = MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
+                    ref placedStoryTraits, isStartingWorld);
+                
+                if (!DlcManager.IsExpansion1Active())
                 {
                     return;
                 }
@@ -522,15 +541,11 @@ namespace MiniBase
                     }
                 }
             }
-            
-            private static bool IsMiniBaseWorld(WorldGen instance) =>
-                instance.Settings.world.filePath == "worlds/MiniBase" ||
-                instance.Settings.world.filePath == "expansion1::worlds/MiniBase" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyOilyMoonlet" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyMarshyMoonlet" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyNiobiumMoonlet";
         }
 
+        /// <summary>
+        /// Add additional harvestable space POI for spaced out to make niobium and resin renewable.
+        /// </summary>
         [HarmonyPatch(typeof(EntityConfigManager), "RegisterEntities")]
         public static class EntityConfigManager_RegisterEntities_Patch
         {

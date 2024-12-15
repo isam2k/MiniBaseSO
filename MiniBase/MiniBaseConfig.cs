@@ -4,14 +4,14 @@ namespace MiniBase
 {
     public class MiniBaseConfig
     {
-        //public static int WORLD_WIDTH = 128;
-        //public static int WORLD_HEIGHT = 128;
+        /// <summary>Thickness of the neutronium border.</summary>
         public const int BorderSize = 3;
+        /// <summary>Non-colonizable margin at the top of the map.</summary>
         public const int TopMargin = 3;
-        public const int ColonizableExtraMargin = 8; // extra space to land rockets
+        /// <summary>Margin at the top of the map that can be built in or be used to land rockets.</summary>
+        public const int ColonizableExtraMargin = 8;
         public const int CornerSize = 7;
         public const int DiagonalBorderSize = 4;
-
         public const int SpaceAccessSize = 8;
         public const int SideAccessSize = 5;
         public const int CoreMin = 0;

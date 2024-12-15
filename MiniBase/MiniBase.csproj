@@ -102,7 +102,6 @@
     <Compile Include="MiniBaseConfig.cs" />
     <Compile Include="MiniBaseOptions.cs" />
     <Compile Include="Mod.cs" />
-    <Compile Include="MiniBaseUtils.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />
     <Compile Include="Model\MoonletData.cs" />
     <Compile Include="Patches.cs" />
