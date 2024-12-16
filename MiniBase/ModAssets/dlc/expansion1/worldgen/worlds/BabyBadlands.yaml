@@ -1,5 +1,5 @@
-name: STRINGS.WORLDS.MINIBADLANDS.NAME
-description: STRINGS.WORLDS.MINIBADLANDS.DESCRIPTION
+name: STRINGS.WORLDS.BADLANDSMINIBASE.NAME
+description: STRINGS.WORLDS.BADLANDSMINIBASE.DESCRIPTION
 nameTables: [ TERRA ]
 asteroidIcon: asteroid_mini_badlands_kanim
 disableWorldTraits: true

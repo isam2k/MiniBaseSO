@@ -1,5 +1,5 @@
-name: STRINGS.WORLDS.MINIFLIPPED.NAME
-description: STRINGS.WORLDS.MINIFLIPPED.DESCRIPTION
+name: STRINGS.WORLDS.FLIPPEDMINIBASE.NAME
+description: STRINGS.WORLDS.FLIPPEDMINIBASE.DESCRIPTION
 nameTables: [ FLIPPED ]
 asteroidIcon: asteroid_mini_flipped_kanim
 disableWorldTraits: true
