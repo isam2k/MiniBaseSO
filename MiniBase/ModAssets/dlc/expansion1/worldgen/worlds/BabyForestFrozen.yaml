@@ -1,5 +1,5 @@
-name: STRINGS.WORLDS.MINIFORESTFROZEN.NAME
-description: STRINGS.WORLDS.MINIFORESTFROZEN.DESCRIPTION
+name: STRINGS.WORLDS.FORESTFROZENMINIBASE.NAME
+description: STRINGS.WORLDS.FORESTFROZENMINIBASE.DESCRIPTION
 nameTables: [ FOREST, TUNDRA ]
 asteroidIcon: asteroid_mini_forestfrozen_kanim
 iconScale: 1.2
@@ -152,7 +152,6 @@ worldTemplateRules:
     useRelaxedFiltering: true # Allow placement in feature-heavy biomes
     priority: 200
     allowExtremeTemperatureOverlap: true
-    useRelaxedFiltering: true
     overrideOffset:
        X: 0
        Y: -15
