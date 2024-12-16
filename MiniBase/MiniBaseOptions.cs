@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using MiniBase.Model;
 using Newtonsoft.Json;
 using PeterHan.PLib.Options;
-using static MiniBase.Profiles.MiniBaseBiomeProfiles;
-using static MiniBase.Profiles.MiniBaseCoreBiomeProfiles;
+using ProcGen;
+using static MiniBase.Model.Profiles.MiniBaseBiomeProfiles;
+using static MiniBase.Model.Profiles.MiniBaseCoreBiomeProfiles;
 
 namespace MiniBase
 {
@@ -12,6 +15,7 @@ namespace MiniBase
     public sealed class MiniBaseOptions
     {
         #region Properties
+        
         [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureWest { get; set; }
@@ -64,7 +68,7 @@ namespace MiniBase
         [Option("Oil mini-moonlet distance", "Distance from the center of starmap the oil mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int OilMoonletDisance { get; set; }
+        public int OilMoonletDistance { get; set; }
 
         [Option("Resin mini-moonlet", "A planetoid with the Experiment 52B (resin tree)", WorldGenCategory)]
         [JsonProperty]
@@ -73,7 +77,7 @@ namespace MiniBase
         [Option("Resin mini-moonlet distance", "Distance from the center of starmap the resin mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int ResinMoonletDisance { get; set; }
+        public int ResinMoonletDistance { get; set; }
 
         [Option("Niobium mini-moonlet", "A planetoid with niobium, and magma, lots of magma", WorldGenCategory)]
         [JsonProperty]
@@ -82,7 +86,47 @@ namespace MiniBase
         [Option("Niobium mini-moonlet distance", "Distance from the center of starmap the niobium mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int NiobiumMoonletDisance { get; set; }
+        public int NiobiumMoonletDistance { get; set; }
+        
+        [Option("Frozen forest mini-moonlet", "A frigid location marked by inhospitably low temperatures throughout.", WorldGenCategory)]
+        [JsonProperty]
+        public bool FrozenForestMoonlet { get; set; }
+        
+        [Option("Frozen forest mini-moonlet distance", "Distance from the center of the starmap the frozen forest mini-moonlet is located", WorldGenCategory)]
+        [Limit(3, 11)]
+        public int FrozenForestMoonletDistance { get; set; }
+
+        [Option("Badlands mini-moonlet", "A rocky and barren mini-moonlet with an overabundance of minerals.", WorldGenCategory)]
+        [JsonProperty]
+        public bool BadlandsMoonlet { get; set; }
+        
+        [Option("Badlands mini-moonlet distance", "Distance from the center of the starmap the badlands mini-moonlet is located", WorldGenCategory)]
+        [Limit(3, 11)]
+        public int BadlandsMoonletDistance { get; set; }
+        
+        [Option("Flipped mini-moonlet", "An asteroid in which the surface is molten hot lava and the core is livable.", WorldGenCategory)]
+        [JsonProperty]
+        public bool FlippedMoonlet { get; set; }
+        
+        [Option("Flipped mini-moonlet distance", "Distance from the center of the starmap the flipped mini-moonlet is located", WorldGenCategory)]
+        [Limit(3, 11)]
+        public int FlippedMoonletDistance { get; set; }
+        
+        [Option("Metallic swampy mini-moonlet", "A small swampy world with an abundance of renewable metal.", WorldGenCategory)]
+        [JsonProperty]
+        public bool MetallicSwampyMoonlet { get; set; }
+        
+        [Option("Metallic swampy mini-moonlet distance", "Distance from the center of the starmap the metallic swampy mini-moonlet is located", WorldGenCategory)]
+        [Limit(3, 11)]
+        public int MetallicSwampyMoonletDistance { get; set; }
+        
+        [Option("Radioactive ocean mini-moonlet", "An irradiated world with renewable water sources.", WorldGenCategory)]
+        [JsonProperty]
+        public bool RadioactiveOceanMoonlet { get; set; }
+        
+        [Option("Radioactive ocean mini-moonlet distance", "Distance from the center of the starmap the radioactive ocean mini-moonlet is located", WorldGenCategory)]
+        [Limit(3, 11)]
+        public int RadioactiveOceanMoonletDistance { get; set; }
 
         [Option("Resin POI", "A new type of space POI where resin can be harvested", WorldGenCategory)]
         [JsonProperty]
@@ -130,20 +174,34 @@ namespace MiniBase
         [JsonProperty]
         public bool SkipLiveableArea;
         #endregion
-
+        
+        #region Constructor
+        
         public MiniBaseOptions()
         {
             MeteorShower = MeteorShowerType.Mixed;
             SpaceRads = Intensity.MED;
 
             OilMoonlet = false;
-            OilMoonletDisance = 3;
+            OilMoonletDistance = 3;
 
             ResinMoonlet = false;
-            ResinMoonletDisance = 5;
+            ResinMoonletDistance = 5;
 
             NiobiumMoonlet = false;
-            NiobiumMoonletDisance = 10;
+            NiobiumMoonletDistance = 10;
+
+            BadlandsMoonlet = false;
+            BadlandsMoonletDistance = 5;
+            
+            FlippedMoonlet = false;
+            FlippedMoonletDistance = 5;
+            
+            MetallicSwampyMoonlet = false;
+            MetallicSwampyMoonletDistance = 5;
+            
+            RadioactiveOceanMoonlet = false;
+            RadioactiveOceanMoonletDistance = 5;
 
             ResinPOI = true;
             ResinPOIDistance = 5;
@@ -170,6 +228,10 @@ namespace MiniBase
             FastImmigration = false;
             SkipLiveableArea = false;
         }
+        
+        #endregion
+        
+        #region Methods
 
         public static void Reload()
         {
@@ -209,6 +271,48 @@ namespace MiniBase
                 default: return 1.0f;
             }
         }
+
+        /// <summary>
+        /// Determines whether a world should be spawned and at what distance.
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="distance">Distance from the cluster center at which to spawn this world.</param>
+        /// <returns>True if the world should be spawned, false otherwise.</returns>
+        public bool GetWorldParameters(WorldPlacement world, out MinMaxI distance)
+        {
+            switch (world.world)
+            {
+                case MoonletData.DlcSecondMap:
+                    distance = new MinMaxI(OilMoonletDistance, OilMoonletDistance);
+                    return OilMoonlet;
+                case MoonletData.DlcMarshyMap:
+                    distance = new MinMaxI(ResinMoonletDistance, ResinMoonletDistance);
+                    return ResinMoonlet;
+                case MoonletData.DlcNiobiumMap:
+                    distance = new MinMaxI(NiobiumMoonletDistance, NiobiumMoonletDistance);
+                    return NiobiumMoonlet;
+                case MoonletData.DlcFrozenForestMap:
+                    distance = new MinMaxI(FrozenForestMoonletDistance, FrozenForestMoonletDistance);
+                    return FrozenForestMoonlet;
+                case MoonletData.DlcBadlandsMap:
+                    distance = new MinMaxI(BadlandsMoonletDistance, BadlandsMoonletDistance);
+                    return BadlandsMoonlet;
+                case MoonletData.DlcFlippedMap:
+                    distance = new MinMaxI(FlippedMoonletDistance, FlippedMoonletDistance);
+                    return FlippedMoonlet;
+                case MoonletData.DlcMetallicSwampyMap:
+                    distance = new MinMaxI(MetallicSwampyMoonletDistance, MetallicSwampyMoonletDistance);
+                    return MetallicSwampyMoonlet;
+                case MoonletData.DlcRadioactiveOceanMap:
+                    distance = new MinMaxI(RadioactiveOceanMoonletDistance, RadioactiveOceanMoonletDistance);
+                    return RadioactiveOceanMoonlet;
+                default: distance = world.allowedRings; return true;
+            }
+        }
+        
+        #endregion
+        
+        #region Enums
 
         public enum Intensity
         {
@@ -344,93 +448,7 @@ namespace MiniBase
             [Option("Custom", "Select to define custom size")]
             Custom,
         }
-
-        private static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
-        {
-            { BaseSize.Tiny, new Vector2I(30, 20) },
-            { BaseSize.Small, new Vector2I(50, 30) },
-            { BaseSize.Normal, new Vector2I(70, 40) },
-            { BaseSize.Large, new Vector2I(90, 50) },
-            { BaseSize.Square, new Vector2I(50, 50) },
-            { BaseSize.MediumSquare, new Vector2I(70, 70) },
-            { BaseSize.LargeSquare, new Vector2I(90, 90) },
-            { BaseSize.Inverted, new Vector2I(40, 70) },
-            { BaseSize.Tall, new Vector2I(40, 100) },
-            { BaseSize.Skinny, new Vector2I(26, 100) },
-        };
-
-        public enum BiomeType
-        {
-            [Option("Temperate", "Inviting and inhabitable")]
-            Temperate,
-            [Option("Forest", "Temperate and earthy")]
-            Forest,
-            [Option("Swamp", "Beware the slime!")]
-            Swamp,
-            [Option("Frozen", "Cold, but at least you get some jackets")]
-            Frozen,
-            [Option("Desert", "Hot and sandy")]
-            Desert,
-            [Option("Barren", "Hard rocks, hard hatches, hard to survive")]
-            Barren,
-            [Option("Str?nge", "#%*@&#^$%(_#$&%^#@*&")]
-            Strange,
-            [Option("Deep Essence", "Filled with vibes")]
-            DeepEssence,
-        }
-
-        private static Dictionary<BiomeType, MiniBaseBiomeProfile> BiomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
-        {
-            { BiomeType.Temperate, TemperateProfile },
-            { BiomeType.Forest, ForestProfile },
-            { BiomeType.Swamp, SwampProfile },
-            { BiomeType.Frozen, FrozenProfile },
-            { BiomeType.Desert, DesertProfile },
-            { BiomeType.Barren, BarrenProfile },
-            { BiomeType.Strange, StrangeProfile },
-            { BiomeType.DeepEssence, DeepEssenceProfile },
-        };
-
-        public enum CoreType
-        {
-            [Option("Molten", "Magma, diamond, and a smattering of tough metals")]
-            Magma,
-            [Option("Ocean", "Saltwater, bleachstone, sand, and crabs")]
-            Ocean,
-            [Option("Frozen", "Cold, cold, and more cold")]
-            Frozen,
-            [Option("Oil", "A whole lot of crude")]
-            Oil,
-            [Option("Metal", "Ores and metals of all varieties")]
-            Metal,
-            [Option("Fertile", "Dirt, water, algae, and iron")]
-            Fertile,
-            [Option("Boneyard", "Cool remains of an ancient world")]
-            Boneyard,
-            [Option("Aesthetic", "Filled with  V I B E S")]
-            Aesthetic,
-            [Option("Pearl Inferno", "Molten inferno of aluminum, glass, steam, \nand some high temperature materials")]
-            Pearl,
-            [Option("Radioactive", "Bees!!! ... and some uranium")]
-            Radioactive,
-            [Option("None", "No core or abyssalite border")]
-            None,
-        }
-
-        private static Dictionary<CoreType, MiniBaseBiomeProfile> CoreTypeMap = new Dictionary<CoreType, MiniBaseBiomeProfile>()
-        {
-            { CoreType.Magma, MagmaCoreProfile },
-            { CoreType.Ocean, OceanCoreProfile },
-            { CoreType.Frozen, FrozenCoreProfile },
-            { CoreType.Oil, OilCoreProfile },
-            { CoreType.Metal, MetalCoreProfile },
-            { CoreType.Fertile, FertileCoreProfile },
-            { CoreType.Boneyard, BoneyardCoreProfile },
-            { CoreType.Aesthetic, AestheticCoreProfile },
-            { CoreType.Pearl, PearlCoreProfile },
-            { CoreType.Radioactive, RadioactiveCoreProfile },
-        };
-
+        
         public enum ResourceModifier
         {
             [Option("Poor", "50% fewer resources")]
@@ -468,6 +486,98 @@ namespace MiniBase
             Space,
             Terrain,
         }
+        
+        public enum BiomeType
+        {
+            [Option("Temperate", "Inviting and inhabitable")]
+            Temperate,
+            [Option("Forest", "Temperate and earthy")]
+            Forest,
+            [Option("Swamp", "Beware the slime!")]
+            Swamp,
+            [Option("Frozen", "Cold, but at least you get some jackets")]
+            Frozen,
+            [Option("Desert", "Hot and sandy")]
+            Desert,
+            [Option("Barren", "Hard rocks, hard hatches, hard to survive")]
+            Barren,
+            [Option("Str?nge", "#%*@&#^$%(_#$&%^#@*&")]
+            Strange,
+            [Option("Deep Essence", "Filled with vibes")]
+            DeepEssence,
+        }
+        
+        public enum CoreType
+        {
+            [Option("Molten", "Magma, diamond, and a smattering of tough metals")]
+            Magma,
+            [Option("Ocean", "Saltwater, bleachstone, sand, and crabs")]
+            Ocean,
+            [Option("Frozen", "Cold, cold, and more cold")]
+            Frozen,
+            [Option("Oil", "A whole lot of crude")]
+            Oil,
+            [Option("Metal", "Ores and metals of all varieties")]
+            Metal,
+            [Option("Fertile", "Dirt, water, algae, and iron")]
+            Fertile,
+            [Option("Boneyard", "Cool remains of an ancient world")]
+            Boneyard,
+            [Option("Aesthetic", "Filled with  V I B E S")]
+            Aesthetic,
+            [Option("Pearl Inferno", "Molten inferno of aluminum, glass, steam, \nand some high temperature materials")]
+            Pearl,
+            [Option("Radioactive", "Bees!!! ... and some uranium")]
+            Radioactive,
+            [Option("None", "No core or abyssalite border")]
+            None,
+        }
+        
+        #endregion
+        
+        #region Dictionaries
+        
+        private static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
+        {
+            { BaseSize.Tiny, new Vector2I(30, 20) },
+            { BaseSize.Small, new Vector2I(50, 30) },
+            { BaseSize.Normal, new Vector2I(70, 40) },
+            { BaseSize.Large, new Vector2I(90, 50) },
+            { BaseSize.Square, new Vector2I(50, 50) },
+            { BaseSize.MediumSquare, new Vector2I(70, 70) },
+            { BaseSize.LargeSquare, new Vector2I(90, 90) },
+            { BaseSize.Inverted, new Vector2I(40, 70) },
+            { BaseSize.Tall, new Vector2I(40, 100) },
+            { BaseSize.Skinny, new Vector2I(26, 100) },
+        };
+
+        private static Dictionary<BiomeType, MiniBaseBiomeProfile> BiomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
+        {
+            { BiomeType.Temperate, TemperateProfile },
+            { BiomeType.Forest, ForestProfile },
+            { BiomeType.Swamp, SwampProfile },
+            { BiomeType.Frozen, FrozenProfile },
+            { BiomeType.Desert, DesertProfile },
+            { BiomeType.Barren, BarrenProfile },
+            { BiomeType.Strange, StrangeProfile },
+            { BiomeType.DeepEssence, DeepEssenceProfile },
+        };
+
+        private static Dictionary<CoreType, MiniBaseBiomeProfile> CoreTypeMap = new Dictionary<CoreType, MiniBaseBiomeProfile>()
+        {
+            { CoreType.Magma, MagmaCoreProfile },
+            { CoreType.Ocean, OceanCoreProfile },
+            { CoreType.Frozen, FrozenCoreProfile },
+            { CoreType.Oil, OilCoreProfile },
+            { CoreType.Metal, MetalCoreProfile },
+            { CoreType.Fertile, FertileCoreProfile },
+            { CoreType.Boneyard, BoneyardCoreProfile },
+            { CoreType.Aesthetic, AestheticCoreProfile },
+            { CoreType.Pearl, PearlCoreProfile },
+            { CoreType.Radioactive, RadioactiveCoreProfile },
+        };
+        
+        #endregion
         
         #region Singleton implementation
         public static MiniBaseOptions Instance

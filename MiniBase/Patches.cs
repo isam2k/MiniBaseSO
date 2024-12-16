@@ -149,22 +149,17 @@ namespace MiniBase
 
             private static void VanillaOnSpawn()
             {
-                var minibaseWorld = SettingsCache.worlds.worldCache["worlds/MiniBase"];
+                var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.VanillaStartMap];
                 var baseSize = MiniBaseOptions.Instance.GetBaseSize();
                 Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * BorderSize, baseSize.y + 2 * BorderSize + TopMargin));
             }
 
             private static void Expansion1OnSpawn()
             {
-                const string miniBasePath = "expansion1::worlds/MiniBase";
-                const string babyOilPath = "expansion1::worlds/BabyOilyMoonlet";
-                const string babyMarshyPath = "expansion1::worlds/BabyMarshyMoonlet";
-                const string babyNiobiumPath = "expansion1::worlds/BabyNiobiumMoonlet";
-                
-                var minibaseWorld = SettingsCache.worlds.worldCache[miniBasePath];
-                var oilyMinibaseWorld = SettingsCache.worlds.worldCache[babyOilPath];
-                var marshyMinibaseWorld = SettingsCache.worlds.worldCache[babyMarshyPath];
-                var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[babyNiobiumPath];
+                var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcStartMap];
+                var oilyMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcSecondMap];
+                var marshyMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcMarshyMap];
+                var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcNiobiumMap];
 
                 var baseSize = MiniBaseOptions.Instance.GetBaseSize();
                 var colonizableBaseSize = new Vector2I(50, 60);
@@ -230,7 +225,7 @@ namespace MiniBase
                 }
 
                 Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
-                var minibase_layout = clusterCache["expansion1::clusters/MiniBase"];
+                var minibase_layout = clusterCache[MoonletData.MiniBaseCluster];
 
                 if (DefaultWorldPlacements == null)
                 {
@@ -248,33 +243,21 @@ namespace MiniBase
 
                 foreach (var world in DefaultWorldPlacements)
                 {
-                    switch (world.world)
+                    if (MiniBaseOptions.Instance.GetWorldParameters(world, out var distance))
                     {
-                        case babyOilPath:
-                            if (MiniBaseOptions.Instance.OilMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.OilMoonletDisance, MiniBaseOptions.Instance.OilMoonletDisance);
-                            }
-                            break;
-                        case babyMarshyPath:
-                            if (MiniBaseOptions.Instance.ResinMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.ResinMoonletDisance, MiniBaseOptions.Instance.ResinMoonletDisance);
-                            }
-                            break;
-                        case babyNiobiumPath:
-                            if (MiniBaseOptions.Instance.NiobiumMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.NiobiumMoonletDisance, MiniBaseOptions.Instance.NiobiumMoonletDisance);
-                            }
-                            break;
+                        world.allowedRings = distance;
+                        minibase_layout.worldPlacements.Add(world);
                     }
-                    minibase_layout.worldPlacements.Add(world);
                 }
                 void AddPOI(string name, int distance)
                 {
-                    FileHandle f = new FileHandle();
-                    var poi = YamlIO.Parse<SpaceMapPOIPlacement>($"pois:\n  - {name}\nnumToSpawn: 1\navoidClumping: true\nallowedRings:\n  min: {distance}\n  max: {distance}", f);
+                    var poi = new SpaceMapPOIPlacement()
+                    {
+                        numToSpawn = 1,
+                        avoidClumping = true,
+                        allowedRings = new MinMaxI(distance, distance)
+                    };
+                    Traverse.Create(poi).Field("pois").SetValue(new List<string> { name });
                     minibase_layout.poiPlacements.Insert(0, poi);
                 };
 

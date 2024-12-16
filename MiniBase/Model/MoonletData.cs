@@ -1,6 +1,5 @@
-using System.Collections.Generic;
 using Klei.CustomSettings;
-using MiniBase.Profiles;
+using MiniBase.Model.Profiles;
 using ProcGen;
 using ProcGenGame;
 using static MiniBase.MiniBaseConfig;
@@ -58,6 +57,21 @@ namespace MiniBase.Model
                     HasCore = false;
                     _extraTopMargin = ColonizableExtraMargin;
                     break;
+                case DlcFrozenForestMap:
+                    Type = Moonlet.FrozenForest;
+                    break;
+                case DlcBadlandsMap:
+                    Type = Moonlet.Badlands;
+                    break;
+                case DlcFlippedMap:
+                    Type = Moonlet.Flipped;
+                    break;
+                case DlcMetallicSwampyMap:
+                    Type = Moonlet.MetallicSwampy;
+                    break;
+                case DlcRadioactiveOceanMap:
+                    Type = Moonlet.RadioactiveOcean;
+                    break;
             }
             WorldSize = worldGen.WorldSize;
             _size = new Vector2I(WorldSize.x - 2 * BorderSize,
@@ -102,6 +116,17 @@ namespace MiniBase.Model
             instance.Settings.world.filePath == DlcMarshyMap ||
             instance.Settings.world.filePath == DlcNiobiumMap;
         /// <summary>
+        /// Determines if a <see cref="WorldGen"/> instance represents a natural minibase map.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        internal static bool IsMiniBaseNatural(WorldGen instance) =>
+            instance.Settings.world.filePath == DlcFrozenForestMap ||
+            instance.Settings.world.filePath == DlcBadlandsMap ||
+            instance.Settings.world.filePath == DlcFlippedMap ||
+            instance.Settings.world.filePath == DlcMetallicSwampyMap ||
+            instance.Settings.world.filePath == DlcRadioactiveOceanMap;
+        /// <summary>
         /// If the starting asteroid is worlds/MiniBase we consider the playthrough
         /// to be a minibase one (for Cluster Generaton Manager compatibility).
         /// </summary>
@@ -111,6 +136,7 @@ namespace MiniBase.Model
             var clusterCache = SettingsCache.clusterLayouts.clusterCache;
             var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id].GetStartWorld();
             return world == DlcStartMap ||
+                   world == DlcFrozenForestMap ||
                    world == VanillaStartMap;
         }
         #endregion
@@ -121,11 +147,17 @@ namespace MiniBase.Model
         #endregion
         
         #region Constants
+        internal const string MiniBaseCluster = "expansion1::clusters/MiniBase";
         internal const string VanillaStartMap = "worlds/MiniBase";
         internal const string DlcStartMap = "expansion1::worlds/MiniBase";
         internal const string DlcSecondMap = "expansion1::worlds/BabyOilyMoonlet";
         internal const string DlcMarshyMap = "expansion1::worlds/BabyMarshyMoonlet";
         internal const string DlcNiobiumMap = "expansion1::worlds/BabyNiobiumMoonlet";
+        internal const string DlcFrozenForestMap = "expansion1::worlds/BabyFrozedForestStart";
+        internal const string DlcBadlandsMap = "expansion1::worlds/BabyBadlands";
+        internal const string DlcFlippedMap = "expansion1::worlds/BabyFlipped";
+        internal const string DlcMetallicSwampyMap = "expansion1::worlds/BabyMetallicSwampy";
+        internal const string DlcRadioactiveOceanMap = "expansion1::worlds/BabyRadioactiveOcean";
         #endregion
         
         #region Enum
@@ -134,7 +166,12 @@ namespace MiniBase.Model
             Start,
             Second,
             Tree,
-            Niobium
+            Niobium,
+            FrozenForest,
+            Badlands,
+            Flipped,
+            MetallicSwampy,
+            RadioactiveOcean
         }
         #endregion
     }

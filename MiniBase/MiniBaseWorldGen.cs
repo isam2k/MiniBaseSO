@@ -6,7 +6,7 @@ using Delaunay.Geo;
 using HarmonyLib;
 using Klei;
 using MiniBase.Model;
-using MiniBase.Profiles;
+using MiniBase.Model.Profiles;
 using ProcGen;
 using ProcGenGame;
 using TemplateClasses;

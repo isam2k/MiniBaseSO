@@ -121,7 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ILRepack.targets" />
-    <Content Include="ModAssets\dlc\expansion1\worldgen\clusters\BabyClusterForestFrozenStart.yaml" />
     <Content Include="ModAssets\dlc\expansion1\worldgen\clusters\MiniBase.yaml" />
     <Content Include="ModAssets\dlc\expansion1\worldgen\worlds\BabyBadlands.yaml" />
     <Content Include="ModAssets\dlc\expansion1\worldgen\worlds\BabyFlipped.yaml" />
