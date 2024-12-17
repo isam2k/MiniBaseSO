@@ -195,7 +195,7 @@ namespace MiniBase
                     cluster.worldPlacements.Add(world);
                 }
 
-                void AddPOI(string name, int distance)
+                var addPoi = new Action<string, int>((name, distance) =>
                 {
                     var poi = new SpaceMapPOIPlacement()
                     {
@@ -205,18 +205,18 @@ namespace MiniBase
                     };
                     Traverse.Create(poi).Property("pois").SetValue(new List<string> { name });
                     cluster.poiPlacements.Insert(0, poi);
-                };
+                });
 
                 // spawn the poi for renewable resin
                 if (MiniBaseOptions.Instance.ResinPOI)
                 {
-                    AddPOI("HarvestableSpacePOI_ResinAsteroidField", MiniBaseOptions.Instance.ResinPOIDistance);
+                    addPoi("HarvestableSpacePOI_ResinAsteroidField", MiniBaseOptions.Instance.ResinPOIDistance);
                 }
                 
                 // spawn the poi for renewable niobium
                 if (MiniBaseOptions.Instance.NiobiumPOI)
                 {
-                    AddPOI("HarvestableSpacePOI_NiobiumAsteroidField", MiniBaseOptions.Instance.NiobiumPOIDistance);
+                    addPoi("HarvestableSpacePOI_NiobiumAsteroidField", MiniBaseOptions.Instance.NiobiumPOIDistance);
                 }
                 
                 // modify the distance to the fullerene poi
@@ -360,50 +360,50 @@ namespace MiniBase
                 
                 // Add new care packages
                 var packageList = ___carePackages.ToList();
-                void AddElement(SimHashes element, float amount, int cycle = -1)
+                var addItem = new Action<string, float, int>((name, amount, cycle) =>
                 {
-                    AddItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle);
-                }
-                void AddItem(string name, float amount, int cycle = -1)
+                    packageList.Add(new CarePackageInfo(name, amount, cycle <= 0 ? () => true : (Func<bool>)(() => CycleCondition(cycle))));
+                });
+                var addElement = new Action<SimHashes, float, int>((element, amount, cycle) =>
                 {
-                    packageList.Add(new CarePackageInfo(name, amount, cycle < 0 ? () => true : (Func<bool>)(() => CycleCondition(cycle))));
-                }
+                    addItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle);
+                });
 
                 // Minerals
-                AddElement(SimHashes.Granite, 2000f);
-                AddElement(SimHashes.IgneousRock, 2000f);
-                AddElement(SimHashes.Obsidian, 2000f, 24);
-                AddElement(SimHashes.Salt, 2000f);
-                AddElement(SimHashes.BleachStone, 2000f, 12);
-                AddElement(SimHashes.Fossil, 1000f, 24);
+                addElement(SimHashes.Granite, 2000f, 0);
+                addElement(SimHashes.IgneousRock, 2000f, 0);
+                addElement(SimHashes.Obsidian, 2000f, 24);
+                addElement(SimHashes.Salt, 2000f, 0);
+                addElement(SimHashes.BleachStone, 2000f, 12);
+                addElement(SimHashes.Fossil, 1000f, 24);
                 // Metals
-                AddElement(SimHashes.IronOre, 1000f);
-                AddElement(SimHashes.FoolsGold, 1000f, 12);
-                AddElement(SimHashes.Wolframite, 500f, 24);
-                AddElement(SimHashes.Lead, 1000f, 36);
-                AddElement(SimHashes.AluminumOre, 500f, 24);
-                AddElement(SimHashes.UraniumOre, 400f, 36);
+                addElement(SimHashes.IronOre, 1000f, 0);
+                addElement(SimHashes.FoolsGold, 1000f, 12);
+                addElement(SimHashes.Wolframite, 500f, 24);
+                addElement(SimHashes.Lead, 1000f, 36);
+                addElement(SimHashes.AluminumOre, 500f, 24);
+                addElement(SimHashes.UraniumOre, 400f, 36);
                 // Liquids
-                AddElement(SimHashes.DirtyWater, 2000f, 12);
-                AddElement(SimHashes.CrudeOil, 1000f, 24);
-                AddElement(SimHashes.Petroleum, 1000f, 48);
+                addElement(SimHashes.DirtyWater, 2000f, 12);
+                addElement(SimHashes.CrudeOil, 1000f, 24);
+                addElement(SimHashes.Petroleum, 1000f, 48);
                 // Gases
-                AddElement(SimHashes.ChlorineGas, 50f);
-                AddElement(SimHashes.Methane, 50f, 24);
+                addElement(SimHashes.ChlorineGas, 50f, 0);
+                addElement(SimHashes.Methane, 50f, 24);
                 // Plants
-                AddItem("BasicSingleHarvestPlantSeed", 4f);             // Mealwood
-                AddItem("SeaLettuceSeed", 3f);                          // Waterweed
-                AddItem("SaltPlantSeed", 3f);                           // Dasha Saltvine
-                AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
-                AddItem("ColdWheatSeed", 8f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
-                AddItem("BeanPlantSeed", 5f);                           // Nosh Bean
-                AddItem("EvilFlowerSeed", 1f, 36);                 // Sporechid
-                AddItem("WormPlantSeed", 3f);                           // Grubfruit Plant
-                AddItem("SwampHarvestPlantSeed", 3f);                   // Bog Bucket Plant
-                AddItem("CritterTrapPlantSeed", 1f, 36);           // Satturn Critter Trap
+                addItem("BasicSingleHarvestPlantSeed", 4f, 0);     // Mealwood
+                addItem("SeaLettuceSeed", 3f, 0);                  // Waterweed
+                addItem("SaltPlantSeed", 3f, 0);                   // Dasha Saltvine
+                addItem("BulbPlantSeed", 3f, 0);                   // Buddy Bud
+                addItem("ColdWheatSeed", 8f, 0);                   // Sleet Wheat
+                addItem("BeanPlantSeed", 5f, 0);                   // Nosh Bean
+                addItem("EvilFlowerSeed", 1f, 36);                 // Sporechid
+                addItem("WormPlantSeed", 3f, 0);                   // Grubfruit Plant
+                addItem("SwampHarvestPlantSeed", 3f, 0);           // Bog Bucket Plant
+                addItem("CritterTrapPlantSeed", 1f, 36);           // Satturn Critter Trap
                 // Critters
-                AddItem("PacuEgg", 3f);                                 // Pacu
-                AddItem("BeeBaby", 1f, 36);                        // Beetiny
+                addItem("PacuEgg", 3f, 0);                         // Pacu
+                addItem("BeeBaby", 1f, 36);                        // Beetiny
                 ___carePackages = packageList.ToArray();
             }
 
@@ -490,15 +490,17 @@ namespace MiniBase
                     return;
                 }
 
-                void AddPrefab(HarvestablePOIConfig.HarvestablePOIParams poi_config)
+                var addPrefab = new Action<HarvestablePOIConfig.HarvestablePOIParams>((poiConfig) =>
                 {
-                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poi_config.id, poi_config.anim, (string)Strings.Get(poi_config.nameStringKey), poi_config.descStringKey, poi_config.poiType.idHash, poi_config.poiType.canProvideArtifacts);
+                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poiConfig.id, poiConfig.anim,
+                        (string)Strings.Get(poiConfig.nameStringKey), poiConfig.descStringKey,
+                        poiConfig.poiType.idHash, poiConfig.poiType.canProvideArtifacts);
                     KPrefabID component = prefab.GetComponent<KPrefabID>();
-                    component.prefabInitFn += new KPrefabID.PrefabFn(config.OnPrefabInit);
-                    component.prefabSpawnFn += new KPrefabID.PrefabFn(config.OnSpawn);
+                    component.prefabInitFn += config.OnPrefabInit;
+                    component.prefabSpawnFn += config.OnSpawn;
                     Assets.AddPrefab(component);
-                }
-                AddPrefab(new HarvestablePOIConfig.HarvestablePOIParams("metallic_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("NiobiumAsteroidField", new Dictionary<SimHashes, float>()
+                });
+                addPrefab(new HarvestablePOIConfig.HarvestablePOIParams("metallic_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("NiobiumAsteroidField", new Dictionary<SimHashes, float>()
                 {
                     {
                         SimHashes.Obsidian,
@@ -513,7 +515,7 @@ namespace MiniBase
                         0.03f
                     }
                 })));
-                AddPrefab(new HarvestablePOIConfig.HarvestablePOIParams("gilded_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("ResinAsteroidField", new Dictionary<SimHashes, float>()
+                addPrefab(new HarvestablePOIConfig.HarvestablePOIParams("gilded_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("ResinAsteroidField", new Dictionary<SimHashes, float>()
                 {
                     {
                         SimHashes.Fossil,
