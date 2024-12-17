@@ -355,20 +355,21 @@ namespace MiniBase
             string backgroundBiome = moonletData.Biome.BackgroundSubworld;
 
             uint cellId = 0;
-            void CreateOverworldCell(string type, Polygon bs, TagSet ts)
+
+            var createOverworldCell = new Action<string, Polygon, TagSet>((type, bs, ts) =>
             {
-                ProcGen.Map.Cell cell = new ProcGen.Map.Cell(); // biome
+                var cell = new ProcGen.Map.Cell(); // biome
                 cell.SetType(type);
                 foreach (var tag in ts)
                 {
                     cell.tags.Add(tag);
                 }
-                Diagram.Site site = new Diagram.Site();
+                var site = new Diagram.Site();
                 site.id = cellId++;
                 site.poly = bs; // bounds of the overworld cell
                 site.position = site.poly.Centroid();
                 overworldCells.Add(new TerrainCellLogged(cell, site, new Dictionary<Tag, int>()));
-            };
+            });
 
             // Vertices of the liveable area (octogon)
             Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(CornerSize, 0),
@@ -402,17 +403,17 @@ namespace MiniBase
                 bottomRightSw
             };
             var bounds = new Polygon(vertices);
-            CreateOverworldCell(backgroundBiome, bounds, tags);
+            createOverworldCell(backgroundBiome, bounds, tags);
 
             // Top cell
             tags = new TagSet();
             bounds = new Polygon(new Rect(0f, moonletData.Top(), moonletData.WorldSize.x, moonletData.WorldSize.y - moonletData.Top()));
-            CreateOverworldCell(spaceBiome, bounds, tags);
+            createOverworldCell(spaceBiome, bounds, tags);
 
             // Bottom cell
             tags = new TagSet();
             bounds = new Polygon(new Rect(0f, 0, moonletData.WorldSize.x, moonletData.Bottom()));
-            CreateOverworldCell(spaceBiome, bounds, tags);
+            createOverworldCell(spaceBiome, bounds, tags);
 
             // Left side cell
             tags = new TagSet();
@@ -426,7 +427,7 @@ namespace MiniBase
                 bottomLeftSe,
             };
             bounds = new Polygon(vertices);
-            CreateOverworldCell(spaceBiome, bounds, tags);
+            createOverworldCell(spaceBiome, bounds, tags);
 
             // Right side cell
             tags = new TagSet();
@@ -440,7 +441,7 @@ namespace MiniBase
                 new Vector2I(moonletData.WorldSize.x, moonletData.Bottom()),
             };
             bounds = new Polygon(vertices);
-            CreateOverworldCell(spaceBiome, bounds, tags);
+            createOverworldCell(spaceBiome, bounds, tags);
         }
 
         /// <summary>
@@ -477,7 +478,6 @@ namespace MiniBase
         private static ISet<Vector2I> DrawCustomTerrain(MoonletData moonletData, Data data, Sim.Cell[] cells,
             float[] bgTemp, Sim.DiseaseCell[] dc, float[,] noiseMap, out ISet<Vector2I> coreCells)
         {
-            var options = MiniBaseOptions.Instance;
             var biomeCells = new HashSet<Vector2I>();
             var sideCells = new HashSet<Vector2I>();
             var claimedCells = new HashSet<int>();
@@ -493,31 +493,31 @@ namespace MiniBase
             }
 
             // Using a smooth noisemap, map the noise values to elements via the element band profile
-            void SetTerrain(MiniBaseBiomeProfile biome, ISet<Vector2I> positions)
+            var setTerrain = new Action<MiniBaseBiomeProfile, ISet<Vector2I>>((biome, positions) =>
             {
-                var DiseaseDb = Db.Get().Diseases;
-                var DiseaseDict = new Dictionary<MiniBaseConfig.DiseaseID, byte>()
+                var diseaseDb = Db.Get().Diseases;
+                var diseaseDict = new Dictionary<MiniBaseConfig.DiseaseID, byte>()
                 {
-                    { MiniBaseConfig.DiseaseID.None, byte.MaxValue},
-                    { MiniBaseConfig.DiseaseID.Slimelung, DiseaseDb.GetIndex(DiseaseDb.SlimeGerms.id)},
-                    { MiniBaseConfig.DiseaseID.FoodPoisoning, DiseaseDb.GetIndex(DiseaseDb.FoodGerms.id)},
+                    { DiseaseID.None, byte.MaxValue},
+                    { DiseaseID.Slimelung, diseaseDb.GetIndex(diseaseDb.SlimeGerms.id)},
+                    { DiseaseID.FoodPoisoning, diseaseDb.GetIndex(diseaseDb.FoodGerms.id)},
                 };
 
                 foreach (var pos in positions)
                 {
                     float e = noiseMap[pos.x, pos.y];
-                    BandInfo bandInfo = biome.GetBand(e);
-                    Element element = bandInfo.GetElement();
-                    Sim.PhysicsData elementData = biome.GetPhysicsData(bandInfo);
+                    var bandInfo = biome.GetBand(e);
+                    var element = bandInfo.GetElement();
+                    var elementData = biome.GetPhysicsData(bandInfo);
                     int cell = Grid.PosToCell(pos);
                     cells[cell].SetValues(element, elementData, ElementLoader.elements);
                     dc[cell] = new Sim.DiseaseCell()
                     {
-                        diseaseIdx = Db.Get().Diseases.GetIndex(DiseaseDict[bandInfo.disease]),
+                        diseaseIdx = Db.Get().Diseases.GetIndex(diseaseDict[bandInfo.disease]),
                         elementCount = _random.Next(10000, 1000000),
                     };
                 }
-            }
+            });
 
             // Main biome
             int relativeLeft = moonletData.Left();
@@ -546,8 +546,8 @@ namespace MiniBase
                 }
             }
 
-            SetTerrain(moonletData.Biome, biomeCells);
-            SetTerrain(moonletData.Biome, sideCells);
+            setTerrain(moonletData.Biome, biomeCells);
+            setTerrain(moonletData.Biome, sideCells);
 
             if (!moonletData.HasCore)
             {
@@ -586,7 +586,7 @@ namespace MiniBase
             }
             
             coreCells.ExceptWith(abyssaliteCells);
-            SetTerrain(moonletData.CoreBiome, coreCells);
+            setTerrain(moonletData.CoreBiome, coreCells);
             
             foreach (var abyssaliteCell in abyssaliteCells)
             {
@@ -606,9 +606,19 @@ namespace MiniBase
         /// <returns>Set of border cells.</returns>
         private static ISet<Vector2I> DrawCustomWorldBorders(MoonletData moonletData, Sim.Cell[] cells)
         {
-            ISet<Vector2I> borderCells = new HashSet<Vector2I>();
+            var borderCells = new HashSet<Vector2I>();
            
-            Element borderMat = WorldGen.unobtaniumElement;
+            var borderMat = WorldGen.unobtaniumElement;
+
+            var addBorderCell = new Action<int, int, Element>((x, y, e) =>
+            {
+                int cell = Grid.XYToCell(x, y);
+                if (Grid.IsValidCell(cell))
+                {
+                    borderCells.Add(new Vector2I(x, y));
+                    cells[cell].SetValues(e, ElementLoader.elements);
+                }
+            });
             
             // Top and bottom borders
             for (int x = 0; x < moonletData.WorldSize.x; x++)
@@ -619,14 +629,14 @@ namespace MiniBase
                     if (moonletData.Type == MoonletData.Moonlet.Start || x < (moonletData.Left() + CornerSize) ||
                         x > (moonletData.Right() - CornerSize))
                     {
-                        AddBorderCell(x, y, borderMat);
+                        addBorderCell(x, y, borderMat);
                     }
                 }
                 
                 // Bottom border
                 for (int y = moonletData.Bottom(true); y < moonletData.Bottom(false); y++)
                 {
-                    AddBorderCell(x, y, borderMat);
+                    addBorderCell(x, y, borderMat);
                 }
             }
             
@@ -636,13 +646,13 @@ namespace MiniBase
                 // Left border
                 for (int x = moonletData.Left(true); x < moonletData.Left(false); x++)
                 {
-                    AddBorderCell(x, y, borderMat);
+                    addBorderCell(x, y, borderMat);
                 }
 
                 // Right border
                 for (int x = moonletData.Right(false); x < moonletData.Right(true); x++)
                 {
-                    AddBorderCell(x, y, borderMat);
+                    addBorderCell(x, y, borderMat);
                 }
             }
 
@@ -661,15 +671,15 @@ namespace MiniBase
                         ? WorldGen.unobtaniumElement
                         : ElementLoader.FindElementByHash(SimHashes.Glass);
                     
-                    AddBorderCell(leftCenterX + i, bottomY, borderMat);
-                    AddBorderCell(leftCenterX - i, bottomY, borderMat);
-                    AddBorderCell(rightCenterX + i, bottomY, borderMat);
-                    AddBorderCell(rightCenterX - i, bottomY, borderMat);
+                    addBorderCell(leftCenterX + i, bottomY, borderMat);
+                    addBorderCell(leftCenterX - i, bottomY, borderMat);
+                    addBorderCell(rightCenterX + i, bottomY, borderMat);
+                    addBorderCell(rightCenterX - i, bottomY, borderMat);
                     
-                    AddBorderCell(leftCenterX + i, topY, borderMat);
-                    AddBorderCell(leftCenterX - i, topY, borderMat);
-                    AddBorderCell(rightCenterX + i, topY, borderMat);
-                    AddBorderCell(rightCenterX - i, topY, borderMat);
+                    addBorderCell(leftCenterX + i, topY, borderMat);
+                    addBorderCell(leftCenterX - i, topY, borderMat);
+                    addBorderCell(rightCenterX + i, topY, borderMat);
+                    addBorderCell(rightCenterX - i, topY, borderMat);
                 }
             }
 
@@ -685,13 +695,13 @@ namespace MiniBase
                         //Left cutout
                         for (int x = moonletData.Left() + CornerSize; x < Math.Min(moonletData.Left() + CornerSize + SpaceAccessSize, moonletData.Right() - CornerSize); x++)
                         {
-                            AddBorderCell(x, y, borderMat);
+                            addBorderCell(x, y, borderMat);
                         }
                         
                         //Right cutout
                         for (int x = Math.Max(moonletData.Right() - CornerSize - SpaceAccessSize, moonletData.Left() + CornerSize); x < moonletData.Right() - CornerSize; x++)
                         {
-                            AddBorderCell(x, y, borderMat);
+                            addBorderCell(x, y, borderMat);
                         }
                     }
                     
@@ -708,7 +718,7 @@ namespace MiniBase
                                 //Far left tunnel
                                 for (int x = moonletData.Left(true); x < moonletData.Left(false); x++)
                                 {
-                                    AddBorderCell(x, y, borderMat);
+                                    addBorderCell(x, y, borderMat);
                                 }
                             }
                             if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly ||
@@ -717,7 +727,7 @@ namespace MiniBase
                                 //Far Right tunnel
                                 for (int x = moonletData.Right(false); x < moonletData.Right(true); x++)
                                 {
-                                    AddBorderCell(x, y, borderMat);
+                                    addBorderCell(x, y, borderMat);
                                 }
                             }
                         }
@@ -730,22 +740,12 @@ namespace MiniBase
                     {
                         for (int x = moonletData.Left() + CornerSize; x < moonletData.Right() - CornerSize; x++)
                         {
-                            AddBorderCell(x, y, borderMat);
+                            addBorderCell(x, y, borderMat);
                         }
                     }
                 }
             }
             return borderCells;
-            
-            void AddBorderCell(int x, int y, Element e)
-            {
-                int cell = Grid.XYToCell(x, y);
-                if (Grid.IsValidCell(cell))
-                {
-                    borderCells.Add(new Vector2I(x, y));
-                    cells[cell].SetValues(e, ElementLoader.elements);
-                }
-            }
         }
 
         /// <summary>
@@ -767,54 +767,63 @@ namespace MiniBase
                     featureName = null;
                     break;
                 case MiniBaseOptions.FeatureType.RandomAny:
-                    MiniBaseOptions.FeatureType feature_type;
-                    do
-                    {
-                        feature_type = ChooseRandom(GeyserDictionary.Keys.ToArray());
-                    } while (feature_type == MiniBaseOptions.FeatureType.Niobium);
-                    featureName = GeyserDictionary[feature_type];
+                    var featureType = GeyserDictionary.Keys
+                        .Where(x => x != MiniBaseOptions.FeatureType.Niobium)
+                        .GetRandom();
+                    featureName = GeyserDictionary[featureType];
                     break;
                 case MiniBaseOptions.FeatureType.RandomWater:
-                    featureName = GeyserDictionary[ChooseRandom(RandomWaterFeatures)];
+                    featureName = GeyserDictionary[RandomWaterFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomUseful:
-                    featureName = GeyserDictionary[ChooseRandom(RandomUsefulFeatures)];
+                    featureName = GeyserDictionary[RandomUsefulFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomVolcano:
-                    featureName = GeyserDictionary[ChooseRandom(RandomVolcanoFeatures)];
+                    featureName = GeyserDictionary[RandomVolcanoFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomMagmaVolcano:
-                    featureName = GeyserDictionary[ChooseRandom(RandomMagmaVolcanoFeatures)];
+                    featureName = GeyserDictionary[RandomMagmaVolcanoFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomMetalVolcano:
-                    featureName = GeyserDictionary[ChooseRandom(RandomMetalVolcanoFeatures)];
+                    featureName = GeyserDictionary[RandomMetalVolcanoFeatures.GetRandom()];
                     break;
                 default:
-                    if (GeyserDictionary.ContainsKey(type))
-                        featureName = GeyserDictionary[type];
-                    else
-                        featureName = null;
+                    if (!GeyserDictionary.TryGetValue(type, out featureName))
+                    {
+                        return;
+                    }
                     break;
             }
-            if (featureName == null)
-                return;
 
-            Prefab feature = new Prefab(featureName, Prefab.Type.Other, pos.x, pos.y, SimHashes.Katairite);
+            if (featureName == null)
+            {
+                return;
+            }
+
+            var feature = new Prefab(featureName, Prefab.Type.Other, pos.x, pos.y, SimHashes.Katairite);
             data.gameSpawnData.otherEntities.Add(feature);
 
             // Base
             if (neutronium)
             {
                 for (int x = pos.x - 1; x < pos.x + 3; x++)
+                {
                     cells[Grid.XYToCell(x, pos.y - 1)].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+                }
             }
             // Cover feature
             if (cover)
             {
                 for (int x = pos.x; x < pos.x + 2; x++)
+                {
                     for (int y = pos.y; y < pos.y + 3; y++)
+                    {
                         if (!ElementLoader.elements[cells[Grid.XYToCell(x, y)].elementIdx].IsSolid)
+                        {
                             cells[Grid.XYToCell(x, y)].SetValues(coverMaterial, GetPhysicsData(coverMaterial), ElementLoader.elements);
+                        }
+                    }
+                }
             }
         }
 
@@ -829,22 +838,31 @@ namespace MiniBase
                 inLiquid = new HashSet<Vector2I>(),
             };
 
-            foreach (Vector2I pos in biomeCells)
+            foreach (var pos in biomeCells)
             {
                 int cell = Grid.PosToCell(pos);
-                Element element = ElementLoader.elements[cells[cell].elementIdx];
-                if (element.IsSolid && element.id != SimHashes.Katairite && element.id != SimHashes.Unobtanium && cells[cell].temperature < 373f)
+                var element = ElementLoader.elements[cells[cell].elementIdx];
+                if (element.IsSolid && element.id != SimHashes.Katairite && element.id != SimHashes.Unobtanium &&
+                    cells[cell].temperature < 373f)
+                {
                     spawnPoints.inGround.Add(pos);
+                }
                 else if (element.IsGas)
                 {
-                    Element elementBelow = ElementLoader.elements[cells[Grid.CellBelow(cell)].elementIdx];
+                    var elementBelow = ElementLoader.elements[cells[Grid.CellBelow(cell)].elementIdx];
                     if (elementBelow.IsSolid)
+                    {
                         spawnPoints.onFloor.Add(pos);
+                    }
                     else
+                    {
                         spawnPoints.inAir.Add(pos);
+                    }
                 }
                 else if (element.IsLiquid)
+                {
                     spawnPoints.inLiquid.Add(pos);
+                }
             }
 
             return spawnPoints;
@@ -870,7 +888,9 @@ namespace MiniBase
         private static void PlaceSpawnables(List<Prefab> spawnList, Dictionary<string, float> spawnables, ISet<Vector2I> spawnPoints, Prefab.Type prefabType)
         {
             if (spawnables == null || spawnables.Count == 0 || spawnPoints.Count == 0)
+            {
                 return;
+            }
             foreach (KeyValuePair<string, float> spawnable in spawnables)
             {
                 int numSpawnables = (int)Math.Ceiling(spawnable.Value * spawnPoints.Count);
@@ -900,17 +920,6 @@ namespace MiniBase
                 temperature = temperature == -1 ? defaultData.temperature : temperature,
                 pressure = defaultData.pressure
             };
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tArray"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        private static T ChooseRandom<T>(T[] tArray)
-        {
-            return tArray[_random.Next(0, tArray.Length)];
         }
 
         /// <summary>
@@ -955,6 +964,7 @@ namespace MiniBase
             // Center the distribution at 0.5 and stretch it to fill out [0, 1]
             float average = total / noiseMap.Length;
             for (int i = 0; i < width; i++)
+            {
                 for (int j = 0; j < height; j++)
                 {
                     float f = noiseMap[i, j];
@@ -963,6 +973,7 @@ namespace MiniBase
                     f += 0.5f;
                     noiseMap[i, j] = Mathf.Clamp(f, 0f, 1f);
                 }
+            }
 
             return noiseMap;
         }

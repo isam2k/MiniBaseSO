@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Database;
 using HarmonyLib;
-using Klei;
 using Klei.AI;
 using KMod;
 using MiniBase.Model;
