@@ -16,9 +16,6 @@ namespace MiniBase
 {
     internal class Patches
     {
-        public static List<WorldPlacement> DefaultWorldPlacements = null;
-        public static List<SpaceMapPOIPlacement> DefaultPOIPlacements = null;
-        
         /// <summary>
         /// Reload mod options at asteroid select screen, before world gen happens
         /// </summary>
@@ -162,93 +159,43 @@ namespace MiniBase
                 var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcNiobiumMap];
 
                 var baseSize = MiniBaseOptions.Instance.GetBaseSize();
-                var colonizableBaseSize = new Vector2I(50, 60);
-
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * BorderSize, baseSize.y + 2 * BorderSize + TopMargin));
-                Traverse.Create(oilyMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
-                Traverse.Create(marshyMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
-                Traverse.Create(niobiumMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
-
-                minibaseWorld.seasons.Clear();
                 
-                switch (MiniBaseOptions.Instance.SpaceRads)
+                // we're getting a reference and should create a new
+                // instance of the vector, otherwise we'll change the
+                // default option sizes
+                baseSize = new Vector2I(
+                    baseSize.x + (2 * BorderSize),
+                    baseSize.y + (2 * BorderSize) + TopMargin);
+                
+                var colonizableBaseSize = new Vector2I(
+                    50 + (2 * BorderSize), 
+                    60 + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
+
+                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(baseSize);
+                Traverse.Create(oilyMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
+                Traverse.Create(marshyMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
+                Traverse.Create(niobiumMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
+                MiniBaseOptions.Instance.Configure(minibaseWorld);
+                
+                var cluster = SettingsCache.clusterLayouts.clusterCache[MoonletData.MiniBaseCluster];
+                
+                cluster.startWorldIndex = 0;
+                
+                // get the list of worlds to spawn, which will also contain
+                // some worlds the user can disallow in the options. process
+                // the list according to the options and save the updated list
+                var defaultPlacements = cluster.worldPlacements;
+                cluster.worldPlacements = new List<WorldPlacement>();
+                foreach (var world in defaultPlacements)
                 {
-                    case MiniBaseOptions.Intensity.VERY_VERY_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.MED_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.MED:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED);
-                        break;
-                    case MiniBaseOptions.Intensity.MED_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_VERY_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.NONE:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.NONE);
-                        break;
-                }
-
-                switch (MiniBaseOptions.Instance.MeteorShower)
-                {
-                    case MiniBaseOptions.MeteorShowerType.Classic:
-                        minibaseWorld.seasons.Add("VanillaMinibaseShower");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.SpacedOut:
-                        minibaseWorld.seasons.Add("ClassicStyleStartMeteorShowers");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.Radioactive:
-                        minibaseWorld.seasons.Add("MiniRadioactiveOceanMeteorShowers");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.Fullerene:
-                        minibaseWorld.seasons.Add("FullereneMinibaseShower");
-                        break;
-                    default:
-                        minibaseWorld.seasons.Add("MixedMinibaseShower");
-                        break;
-                }
-
-                Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
-                var minibase_layout = clusterCache[MoonletData.MiniBaseCluster];
-
-                if (DefaultWorldPlacements == null)
-                {
-                    DefaultWorldPlacements = minibase_layout.worldPlacements;
-                }
-
-                if (DefaultPOIPlacements == null)
-                {
-                    DefaultPOIPlacements = minibase_layout.poiPlacements;
-                }
-
-                minibase_layout.worldPlacements = new List<WorldPlacement>();
-                minibase_layout.poiPlacements = new List<SpaceMapPOIPlacement>(DefaultPOIPlacements);
-                minibase_layout.startWorldIndex = 0;
-
-                foreach (var world in DefaultWorldPlacements)
-                {
-                    if (MiniBaseOptions.Instance.GetWorldParameters(world, out var distance))
+                    if (!MiniBaseOptions.Instance.GetWorldParameters(world, out var distance))
                     {
-                        world.allowedRings = distance;
-                        minibase_layout.worldPlacements.Add(world);
+                        continue;
                     }
+                    world.allowedRings = distance;
+                    cluster.worldPlacements.Add(world);
                 }
+
                 void AddPOI(string name, int distance)
                 {
                     var poi = new SpaceMapPOIPlacement()
@@ -257,23 +204,28 @@ namespace MiniBase
                         avoidClumping = true,
                         allowedRings = new MinMaxI(distance, distance)
                     };
-                    Traverse.Create(poi).Field("pois").SetValue(new List<string> { name });
-                    minibase_layout.poiPlacements.Insert(0, poi);
+                    Traverse.Create(poi).Property("pois").SetValue(new List<string> { name });
+                    cluster.poiPlacements.Insert(0, poi);
                 };
 
+                // spawn the poi for renewable resin
                 if (MiniBaseOptions.Instance.ResinPOI)
                 {
                     AddPOI("HarvestableSpacePOI_ResinAsteroidField", MiniBaseOptions.Instance.ResinPOIDistance);
                 }
+                
+                // spawn the poi for renewable niobium
                 if (MiniBaseOptions.Instance.NiobiumPOI)
                 {
                     AddPOI("HarvestableSpacePOI_NiobiumAsteroidField", MiniBaseOptions.Instance.NiobiumPOIDistance);
                 }
-
-                foreach (var poiPlacement in minibase_layout.poiPlacements.Where(poiPlacement => poiPlacement.pois.Count == 1 && poiPlacement.pois[0] == "HarvestableSpacePOI_GildedAsteroidField"))
+                
+                // modify the distance to the fullerene poi
+                var placement = cluster.poiPlacements
+                    .FirstOrDefault(p => p.pois.Contains("HarvestableSpacePOI_GildedAsteroidField"));
+                if (placement != null)
                 {
-                    poiPlacement.allowedRings = new MinMaxI(MiniBaseOptions.Instance.GildedAsteroidDistance, MiniBaseOptions.Instance.GildedAsteroidDistance);
-                    break;
+                    placement.allowedRings = new MinMaxI(MiniBaseOptions.Instance.GildedAsteroidDistance, MiniBaseOptions.Instance.GildedAsteroidDistance);
                 }
             }
         }

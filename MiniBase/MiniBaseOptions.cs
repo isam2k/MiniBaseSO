@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using MiniBase.Model;
 using Newtonsoft.Json;
 using PeterHan.PLib.Options;
@@ -269,6 +268,65 @@ namespace MiniBase
                 case ResourceModifier.Poor: return 0.5f;
                 case ResourceModifier.Rich: return 1.5f;
                 default: return 1.0f;
+            }
+        }
+
+        public void Configure(ProcGen.World world)
+        {
+            // configure cosmic radiation intensity
+            switch (SpaceRads)
+            {
+                case Intensity.VERY_VERY_LOW:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW);
+                    break;
+                case Intensity.VERY_LOW:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW);
+                    break;
+                case Intensity.LOW:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.LOW);
+                    break;
+                case Intensity.MED_LOW:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW);
+                    break;
+                case Intensity.MED:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED);
+                    break;
+                case Intensity.MED_HIGH:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH);
+                    break;
+                case Intensity.HIGH:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.HIGH);
+                    break;
+                case Intensity.VERY_HIGH:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH);
+                    break;
+                case Intensity.VERY_VERY_HIGH:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH);
+                    break;
+                case Intensity.NONE:
+                    world.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.NONE);
+                    break;
+            }
+            
+            // configure meteor showers
+            world.seasons.Clear();
+            switch (MeteorShower)
+            {
+                case MeteorShowerType.Classic:
+                    world.seasons.Add("VanillaMinibaseShower");
+                    break;
+                case MeteorShowerType.SpacedOut:
+                    world.seasons.Add("ClassicStyleStartMeteorShowers");
+                    break;
+                case MeteorShowerType.Radioactive:
+                    world.seasons.Add("MiniRadioactiveOceanMeteorShowers");
+                    break;
+                case MeteorShowerType.Fullerene:
+                    world.seasons.Add("FullereneMinibaseShower");
+                    break;
+                default:
+                    world.seasons.Add("MixedMinibaseShower");
+                    break;
             }
         }
 
