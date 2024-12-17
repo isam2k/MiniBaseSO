@@ -134,7 +134,8 @@ namespace MiniBase.Model
         internal static bool IsMiniBaseCluster()
         {
             var clusterCache = SettingsCache.clusterLayouts.clusterCache;
-            var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id].GetStartWorld();
+            var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id]
+                .GetStartWorld();
             return world == DlcStartMap ||
                    world == DlcFrozenForestMap ||
                    world == VanillaStartMap;
