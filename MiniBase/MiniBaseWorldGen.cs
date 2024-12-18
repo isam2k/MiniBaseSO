@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Delaunay.Geo;
+using FMODUnity;
 using HarmonyLib;
 using Klei;
+using Klei.CustomSettings;
 using MiniBase.Model;
 using MiniBase.Model.Profiles;
 using ProcGen;
@@ -225,13 +227,6 @@ namespace MiniBase
                     startingBaseTemplate.cells.RemoveAll((c) => (c.location_x == -8) || (c.location_x == 9)); // Trim the starting base area
                     templateSpawnTargets.Add(new TemplateSpawning.TemplateSpawner(startPos,startingBaseTemplate.GetTemplateBounds(), startingBaseTemplate, terrainCell));
                     
-                    // warp portal if oil moonlet is also active
-                    if (MiniBaseOptions.Instance.OilMoonlet)
-                    {
-                        var portal = new Prefab("WarpPortal", Prefab.Type.Other, startPos.x - 5, startPos.y, SimHashes.Katairite);
-                        gen.data.gameSpawnData.otherEntities.Add(portal);
-                    }
-                    
                     // Geysers
                     geyserMinX = moonletData.Left() + CornerSize + 2;
                     geyserMaxX = moonletData.Right() - CornerSize - 4;
@@ -244,9 +239,11 @@ namespace MiniBase
                     {
                         coverElement = moonletData.CoreBiome.DefaultElement();
                     }
-
                     var bottomGeyserPos = new Vector2I(_random.Next(geyserMinX, geyserMaxX + 1), moonletData.Bottom());
                     PlaceGeyser(gen.data, cells, options.FeatureSouth, bottomGeyserPos, coverElement);
+                    
+                    // teleporters
+                    reservedCells.UnionWith(PlaceWarpPortals(gen.data, cells, moonletData));
                     
                     if(moonletData.HasCore && moonletData.CoreBiome == MiniBaseCoreBiomeProfiles.RadioactiveCoreProfile)
                     {
@@ -274,17 +271,14 @@ namespace MiniBase
                     }
                     break;
                 case MoonletData.Moonlet.Second:
-                    startPos = new Vector2I(moonletData.Left() + (moonletData.Width() / 2) - 1, moonletData.Bottom() + (moonletData.Height() / 2) + 2);
+                    // teleporters
+                    reservedCells.UnionWith(PlaceWarpPortals(gen.data, cells, moonletData));
                     
-                    // spawn warp receiver
-                    var receiver = new Prefab("WarpReceiver", Prefab.Type.Other, startPos.x - 5, startPos.y, SimHashes.Katairite);
-                    gen.data.gameSpawnData.otherEntities.Add(receiver);
-                    
+                    // geysers
                     geyserMinX = moonletData.Left() + CornerSize + 2;
                     geyserMaxX = moonletData.Right() - CornerSize - 4;
                     geyserMinY = moonletData.Bottom() + CornerSize + 2;
                     geyserMaxY = moonletData.Top() - moonletData.Height() / 2 - CornerSize - 4;
-
                     coverElement = moonletData.Biome.DefaultElement();
                     PlaceGeyser(gen.data, cells, MiniBaseOptions.FeatureType.OilReservoir, new Vector2I(moonletData.Left() + 2, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement, false, false);
                     PlaceGeyser(gen.data, cells, MiniBaseOptions.FeatureType.OilReservoir, new Vector2I(moonletData.Right() - 4, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement, false, false);
@@ -385,14 +379,18 @@ namespace MiniBase
             });
 
             // Vertices of the liveable area (octogon)
-            Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(CornerSize, 0),
-                bottomLeftNw = moonletData.BottomLeft() + new Vector2I(0, CornerSize),
+            int bottomCornerSize =
+                moonletData.Type == MoonletData.Moonlet.Start &&
+                MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners ?
+                    0 : CornerSize;
+            Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(bottomCornerSize, 0),
+                bottomLeftNw = moonletData.BottomLeft() + new Vector2I(0, bottomCornerSize),
                 topLeftSw = moonletData.TopLeft() - new Vector2I(0, CornerSize) - new Vector2I(0, 1),
                 topLeftNe = moonletData.TopLeft() + new Vector2I(CornerSize, 0),
                 topRightNw = moonletData.TopRight() - new Vector2I(CornerSize, 0) - new Vector2I(1, 0),
                 topRightSe = moonletData.TopRight() - new Vector2I(0, CornerSize) - new Vector2I(0, 1),
-                bottomRightNe = moonletData.BottomRight() + new Vector2I(0, CornerSize),
-                bottomRightSw = moonletData.BottomRight() - new Vector2I(CornerSize, 0);
+                bottomRightNe = moonletData.BottomRight() + new Vector2I(0, bottomCornerSize),
+                bottomRightSw = moonletData.BottomRight() - new Vector2I(bottomCornerSize, 0);
 
             // Liveable cell
             var tags = new TagSet();
@@ -619,6 +617,11 @@ namespace MiniBase
         /// <returns>Set of border cells.</returns>
         private static ISet<Vector2I> DrawCustomWorldBorders(MoonletData moonletData, Sim.Cell[] cells)
         {
+            bool skipBottomCorners = MiniBaseOptions.Instance.OilMoonlet &&
+                                     CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.Teleporters).id == "Enabled" &&
+                                     MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners &&
+                                     moonletData.Type == MoonletData.Moonlet.Start;
+            
             var borderCells = new HashSet<Vector2I>();
            
             var borderMat = WorldGen.unobtaniumElement;
@@ -684,15 +687,20 @@ namespace MiniBase
                         ? WorldGen.unobtaniumElement
                         : ElementLoader.FindElementByHash(SimHashes.Glass);
                     
-                    addBorderCell(leftCenterX + i, bottomY, borderMat);
-                    addBorderCell(leftCenterX - i, bottomY, borderMat);
-                    addBorderCell(rightCenterX + i, bottomY, borderMat);
-                    addBorderCell(rightCenterX - i, bottomY, borderMat);
-                    
                     addBorderCell(leftCenterX + i, topY, borderMat);
                     addBorderCell(leftCenterX - i, topY, borderMat);
                     addBorderCell(rightCenterX + i, topY, borderMat);
                     addBorderCell(rightCenterX - i, topY, borderMat);
+                    
+                    if (skipBottomCorners)
+                    {
+                        continue;
+                    }
+                    
+                    addBorderCell(leftCenterX + i, bottomY, borderMat);
+                    addBorderCell(leftCenterX - i, bottomY, borderMat);
+                    addBorderCell(rightCenterX + i, bottomY, borderMat);
+                    addBorderCell(rightCenterX - i, bottomY, borderMat);
                 }
             }
 
@@ -840,7 +848,115 @@ namespace MiniBase
                 }
             }
         }
+        
+        /// <summary>
+        /// Places teleporters and warp conduits if enabled by the player.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="cells"></param>
+        /// <param name="moonletData"></param>
+        /// <returns>Set of reserved positions by the teleporters.</returns>
+        private static ISet<Vector2I> PlaceWarpPortals(Data data, Sim.Cell[] cells, MoonletData moonletData)
+        {
+            var reserved = new HashSet<Vector2I>();
+            
+            // don't spawn the teleporter if the destination is not being used
+            // or teleporters have been turned off
+            if (!MiniBaseOptions.Instance.OilMoonlet ||
+                CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.Teleporters).id != "Enabled")
+            {
+                return reserved;
+            }
 
+            bool inCorners = MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners;
+            
+            var vacuum = ElementLoader.FindElementByHash(SimHashes.Vacuum);
+            
+            var clearCells = new Action<int, int, int, int>((x0, x1, y0, y1) =>
+            {
+                // skip clearing if teleporters are to
+                // be placed in the bottom corners
+                if (inCorners && moonletData.Type == MoonletData.Moonlet.Start)
+                {
+                    return;
+                }
+                
+                for (int x = x0; x < x1; x++)
+                {
+                    for (int y = y0; y < y1; y++)
+                    {
+                        cells[Grid.XYToCell(x, y)].SetValues(vacuum, ElementLoader.elements);
+                        reserved.Add(new Vector2I(x, y));
+                    }
+                    data.gameSpawnData.buildings.Add(new Prefab("TilePOI", Prefab.Type.Building, x, y0 - 1, SimHashes.SandStone));
+                    reserved.Add(new Vector2I(x, y0 - 1));
+                }
+            });
+            
+            // center of the moonlet
+            var tpSenderPos = new Vector2I(
+                inCorners ? moonletData.Left() + BorderSize + 2 : moonletData.Width() / 2 + 1,
+                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+            var tpReceiverPos = new Vector2I(
+                inCorners ? moonletData.Right() - BorderSize - 3 : moonletData.Width() / 2 + 4,
+                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+            var wcSenderPos = new Vector2I(
+                inCorners ? moonletData.Left() + BorderSize - 2 : moonletData.Width() / 2 - 3,
+                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+            var wcReceiverPos = new Vector2I(
+                inCorners ? moonletData.Right() - BorderSize : moonletData.Width() / 2 + 7,
+                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+
+            Prefab portal;
+            switch (moonletData.Type)
+            {
+                case MoonletData.Moonlet.Start:
+                    // dupe teleporter sender
+                    portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    // dupe teleporter receiver
+                    portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    // conduit sender
+                    portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    // conduit receiver
+                    portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    break;
+                case MoonletData.Moonlet.Second:
+                    // dupe teleporter sender
+                    portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    // dupe teleporter receiver
+                    portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    // conduit sender
+                    portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    // conduit receiver
+                    portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
+                    data.gameSpawnData.otherEntities.Add(portal);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    break;
+            }
+
+            return reserved;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <param name="biomeCells"></param>
+        /// <returns></returns>
         private static SpawnPoints GetSpawnPoints(Sim.Cell[] cells, IEnumerable<Vector2I> biomeCells)
         {
             var spawnPoints = new SpawnPoints()
@@ -882,6 +998,14 @@ namespace MiniBase
             return spawnPoints;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <param name="spawnList"></param>
+        /// <param name="biome"></param>
+        /// <param name="biomeCells"></param>
+        /// <param name="reservedCells"></param>
         private static void PlaceSpawnables(Sim.Cell[] cells, List<Prefab> spawnList, MiniBaseBiomeProfile biome, ISet<Vector2I> biomeCells, ISet<Vector2I> reservedCells)
         {
             var spawnStruct = GetSpawnPoints(cells, biomeCells.Except(reservedCells));

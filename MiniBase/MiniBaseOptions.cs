@@ -163,6 +163,11 @@ namespace MiniBase
         [Option("Tunnel Access", "Adds tunnels for access to left and right sides", WorldGenCategory)]
         [JsonProperty]
         public TunnelAccessType TunnelAccess { get; set; }
+
+        [Option("Teleporter placement", "Controls where teleporters are placed if enabled.")]
+        [JsonProperty]
+        public WarpPlacementType TeleporterPlacement { get; set; }
+
         #endregion
 
         #region Debug
@@ -222,6 +227,7 @@ namespace MiniBase
             CustomHeight = 40;
             CarePackageFrequency = 2;
             TunnelAccess = TunnelAccessType.None;
+            TeleporterPlacement = WarpPlacementType.Corners;
 
             DebugMode = false;
             FastImmigration = false;
@@ -589,6 +595,14 @@ namespace MiniBase
             Radioactive,
             [Option("None", "No core or abyssalite border")]
             None,
+        }
+
+        public enum WarpPlacementType
+        {
+            [Option("Center", "Teleporters spawn in the center.")]
+            Center,
+            [Option("Corners", "Teleporters spawn in the bottom corners.")]
+            Corners
         }
         
         #endregion
