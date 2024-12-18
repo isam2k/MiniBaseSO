@@ -326,7 +326,7 @@ namespace MiniBase
         #region CarePackages
 
         /// <summary>
-        /// Immigration Speed.
+        /// Patching the frequency at which care packages become available.
         /// </summary>
         [HarmonyPatch(typeof(Game), "OnSpawn")]
         public static class Game_OnSpawn_Patch
@@ -362,7 +362,7 @@ namespace MiniBase
                 var packageList = ___carePackages.ToList();
                 var addItem = new Action<string, float, int>((name, amount, cycle) =>
                 {
-                    packageList.Add(new CarePackageInfo(name, amount, cycle <= 0 ? () => true : (Func<bool>)(() => CycleCondition(cycle))));
+                    packageList.Add(new CarePackageInfo(name, amount, () => GameClock.Instance.GetCycle() >= cycle));
                 });
                 var addElement = new Action<SimHashes, float, int>((element, amount, cycle) =>
                 {
@@ -406,8 +406,6 @@ namespace MiniBase
                 addItem("BeeBaby", 1f, 36);                        // Beetiny
                 ___carePackages = packageList.ToArray();
             }
-
-            private static bool CycleCondition(int cycle) => GameClock.Instance.GetCycle() >= cycle;
         }
 
         /// <summary>
@@ -450,9 +448,19 @@ namespace MiniBase
                 {
                     return;
                 }
-                
-                __result = MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
-                    ref placedStoryTraits, isStartingWorld);
+
+                try
+                {
+                    MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
+                        ref placedStoryTraits, isStartingWorld);
+                    __result = true;
+                }
+                catch (Exception e)
+                {
+                    __instance.ReportWorldGenError(e);
+                    __result = false;
+                    return;
+                }
                 
                 if (!DlcManager.IsExpansion1Active())
                 {
@@ -465,15 +473,11 @@ namespace MiniBase
                 {
                     return;
                 }
-                
-                foreach (var spawner in __instance.POISpawners.Where(s => s.container.buildings != null))
-                {
-                    if (spawner.container.buildings.Exists(b => b.id == "TemporalTearOpener"))
-                    {
-                        FoundTemporalTearOpener = true;
-                        break;
-                    }
-                }
+
+                var spawner = __instance.POISpawners
+                    .Where(s => s.container.buildings != null)
+                    .FirstOrDefault(s => s.container.buildings.Exists(b => b.id == "TemporalTearOpener"));
+                FoundTemporalTearOpener = spawner != null;
             }
         }
 
