@@ -1,5 +1,5 @@
-name: STRINGS.WORLDS.RADIOACTIVEOCEANMINIBASE.NAME
-description: STRINGS.WORLDS.RADIOACTIVEOCEANMINIBASE.DESCRIPTION
+name: STRINGS.WORLDS.MINIRADIOACTIVEOCEAN.NAME
+description: STRINGS.WORLDS.MINIRADIOACTIVEOCEAN.DESCRIPTION
 nameTables: [ WATER, RADIOACTIVE ]
 asteroidIcon: asteroid_mini_radiation_kanim
 disableWorldTraits: true
@@ -168,10 +168,11 @@ worldTemplateRules:
     priority: 100 
     allowedCellsFilter:
       - command: Replace
-        tagcommand: DistanceFromTag
+        zoneTypes: [Ocean]
+      - tagcommand: DistanceFromTag
         tag: AtSurface
-        minDistance: 1
-        maxDistance: 1
+        minDistance: 0
+        maxDistance: 2
   - names:
       - expansion1::poi/radioactive/uranium_fields_liquid_co2_geyser
       - expansion1::poi/radioactive/uranium_fields_liquid_co2_geyser_b
@@ -185,7 +186,7 @@ worldTemplateRules:
       - command: IntersectWith
         subworldNames:
           - expansion1::subworlds/radioactive/med_UraniumFields
-          - expansion1::subworlds/radioactive/med_FrozenUraniumFields
+          - expansion1::subworlds/radioactive/med_FrozenUraniumFields     
   # Curated Water geysers
   - names: 
     - geysers/filthy_water
