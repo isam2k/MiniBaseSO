@@ -164,10 +164,28 @@ namespace MiniBase
         [JsonProperty]
         public TunnelAccessType TunnelAccess { get; set; }
 
-        [Option("Teleporter placement", "Controls where teleporters are placed if enabled.")]
+        [Option("Teleporter placement", "Controls where teleporters are placed if enabled.", WorldGenCategory)]
         [JsonProperty]
         public WarpPlacementType TeleporterPlacement { get; set; }
 
+        #endregion
+        
+        #region Constants
+        
+        /// <summary>Thickness of the neutronium border.</summary>
+        public const int BorderSize = 3;
+        /// <summary>Non-colonizable margin at the top of the map.</summary>
+        public const int TopMargin = 3;
+        /// <summary>Margin at the top of the map that can be built in or be used to land rockets.</summary>
+        public const int ColonizableExtraMargin = 8;
+        public const int CornerSize = 7;
+        public const int DiagonalBorderSize = 4;
+        public const int SpaceAccessSize = 8;
+        public const int SideAccessSize = 5;
+        public const int CoreMin = 0;
+        public const int CoreDeviation = 3;
+        public const int CoreBorder = 3;
+        
         #endregion
 
         #region Debug
@@ -237,11 +255,6 @@ namespace MiniBase
         #endregion
         
         #region Methods
-
-        public static void Reload()
-        {
-            _instance = POptions.ReadSettings<MiniBaseOptions>() ?? new MiniBaseOptions();
-        }
 
         public Vector2I GetBaseSize()
         {
@@ -372,6 +385,24 @@ namespace MiniBase
                     return RadioactiveOceanMoonlet;
                 default: distance = world.allowedRings; return true;
             }
+        }
+        
+        public int GetCornerSize(CornerType type, MoonletData.Moonlet moonlet)
+        {
+            return moonlet == MoonletData.Moonlet.Start &&
+                   TeleporterPlacement == WarpPlacementType.Corners &&
+                   type == CornerType.Bottom
+                ? 0
+                : CornerSize;
+        }
+        
+        #endregion
+        
+        #region Static functions
+        
+        public static void Reload()
+        {
+            _instance = POptions.ReadSettings<MiniBaseOptions>() ?? new MiniBaseOptions();
         }
         
         #endregion
@@ -605,6 +636,19 @@ namespace MiniBase
             Corners
         }
         
+        public enum CornerType
+        {
+            Top,
+            Bottom
+        }
+        
+        public enum DiseaseID
+        {
+            None,
+            Slimelung,
+            FoodPoisoning
+        };
+        
         #endregion
         
         #region Dictionaries
@@ -647,6 +691,88 @@ namespace MiniBase
             { CoreType.Aesthetic, AestheticCoreProfile },
             { CoreType.Pearl, PearlCoreProfile },
             { CoreType.Radioactive, RadioactiveCoreProfile },
+        };
+        
+        public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
+        {
+            { FeatureType.WarmWater, "GeyserGeneric_" + GeyserGenericConfig.HotWater },
+            { FeatureType.SaltWater, "GeyserGeneric_" + GeyserGenericConfig.SaltWater },
+            { FeatureType.SlushSaltWater, "GeyserGeneric_" + GeyserGenericConfig.SlushSaltWater },
+            { FeatureType.PollutedWater, "GeyserGeneric_" + GeyserGenericConfig.FilthyWater },
+            { FeatureType.CoolSlush, "GeyserGeneric_" + GeyserGenericConfig.SlushWater },
+            { FeatureType.CoolSteam, "GeyserGeneric_" + GeyserGenericConfig.Steam },
+            { FeatureType.HotSteam, "GeyserGeneric_" + GeyserGenericConfig.HotSteam },
+            { FeatureType.NaturalGas, "GeyserGeneric_" + GeyserGenericConfig.Methane },
+            { FeatureType.Hydrogen, "GeyserGeneric_" + GeyserGenericConfig.HotHydrogen },
+            { FeatureType.OilFissure, "GeyserGeneric_" + GeyserGenericConfig.OilDrip },
+            { FeatureType.OilReservoir, "OilWell" },
+            { FeatureType.SmallVolcano, "GeyserGeneric_" + GeyserGenericConfig.SmallVolcano },
+            { FeatureType.Volcano, "GeyserGeneric_" + GeyserGenericConfig.BigVolcano },
+            { FeatureType.Copper, "GeyserGeneric_" + GeyserGenericConfig.MoltenCopper },
+            { FeatureType.Gold, "GeyserGeneric_" + GeyserGenericConfig.MoltenGold },
+            { FeatureType.Iron, "GeyserGeneric_" + GeyserGenericConfig.MoltenIron },
+            { FeatureType.Cobalt, "GeyserGeneric_" + GeyserGenericConfig.MoltenCobalt },
+            { FeatureType.Aluminum, "GeyserGeneric_" + GeyserGenericConfig.MoltenAluminum },
+            { FeatureType.Tungsten, "GeyserGeneric_" + GeyserGenericConfig.MoltenTungsten },
+            { FeatureType.Niobium, "GeyserGeneric_" + GeyserGenericConfig.MoltenNiobium },
+            { FeatureType.Sulfur, "GeyserGeneric_" + GeyserGenericConfig.LiquidSulfur },
+            { FeatureType.ColdCO2, "GeyserGeneric_" + GeyserGenericConfig.LiquidCO2 },
+            { FeatureType.HotCO2, "GeyserGeneric_" + GeyserGenericConfig.HotCO2 },
+            { FeatureType.InfectedPO2, "GeyserGeneric_" + GeyserGenericConfig.SlimyPO2 },
+            { FeatureType.HotPO2, "GeyserGeneric_" + GeyserGenericConfig.HotPO2 },
+            { FeatureType.Chlorine, "GeyserGeneric_" + GeyserGenericConfig.ChlorineGas },
+        };
+
+        public static FeatureType[] RandomWaterFeatures =
+        {
+            FeatureType.WarmWater,
+            FeatureType.SaltWater,
+            FeatureType.PollutedWater,
+            FeatureType.CoolSlush,
+            FeatureType.SlushSaltWater,
+        };
+
+        public static FeatureType[] RandomUsefulFeatures =
+        {
+            FeatureType.WarmWater,
+            FeatureType.SaltWater,
+            FeatureType.SlushSaltWater,
+            FeatureType.PollutedWater,
+            FeatureType.CoolSlush,
+            FeatureType.CoolSteam,
+            FeatureType.HotSteam,
+            FeatureType.NaturalGas,
+            FeatureType.Hydrogen,
+            FeatureType.OilFissure,
+            FeatureType.OilReservoir,
+        };
+
+        public static FeatureType[] RandomMagmaVolcanoFeatures =
+        {
+            FeatureType.SmallVolcano,
+            FeatureType.Volcano,
+        };
+
+        public static FeatureType[] RandomVolcanoFeatures =
+        {
+            FeatureType.SmallVolcano,
+            FeatureType.Volcano,
+            FeatureType.Copper,
+            FeatureType.Gold,
+            FeatureType.Iron,
+            FeatureType.Cobalt,
+            FeatureType.Aluminum,
+            FeatureType.Tungsten,
+        };
+
+        public static FeatureType[] RandomMetalVolcanoFeatures =
+        {
+            FeatureType.Copper,
+            FeatureType.Gold,
+            FeatureType.Iron,
+            FeatureType.Cobalt,
+            FeatureType.Aluminum,
+            FeatureType.Tungsten,
         };
         
         #endregion

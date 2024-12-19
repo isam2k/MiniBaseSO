@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Delaunay.Geo;
-using FMODUnity;
 using HarmonyLib;
 using Klei;
 using Klei.CustomSettings;
@@ -14,7 +13,7 @@ using ProcGenGame;
 using TemplateClasses;
 using UnityEngine;
 using VoronoiTree;
-using static MiniBase.MiniBaseConfig;
+//using static MiniBase.MiniBaseOptions;
 
 namespace MiniBase
 {
@@ -99,10 +98,10 @@ namespace MiniBase
             templateSpawnTargets.Add(new TemplateSpawning.TemplateSpawner(startPos,startingBaseTemplate.GetTemplateBounds(), startingBaseTemplate, terrainCell));
 
             // Geysers
-            int GeyserMinX = moonletData.Left() + CornerSize + 2;
-            int GeyserMaxX = moonletData.Right() - CornerSize - 4;
-            int GeyserMinY = moonletData.Bottom() + CornerSize + 2;
-            int GeyserMaxY = moonletData.Top() - CornerSize - 4;
+            int GeyserMinX = moonletData.Left() + MiniBaseOptions.CornerSize + 2;
+            int GeyserMaxX = moonletData.Right() - MiniBaseOptions.CornerSize - 4;
+            int GeyserMinY = moonletData.Bottom() + MiniBaseOptions.CornerSize + 2;
+            int GeyserMaxY = moonletData.Top() - MiniBaseOptions.CornerSize - 4;
             var coverElement = moonletData.Biome.DefaultElement();
             PlaceGeyser(data, cells, options.FeatureWest, new Vector2I(moonletData.Left() + 2, _random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
             PlaceGeyser(data, cells, options.FeatureEast, new Vector2I(moonletData.Right() - 4, _random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
@@ -228,10 +227,10 @@ namespace MiniBase
                     templateSpawnTargets.Add(new TemplateSpawning.TemplateSpawner(startPos,startingBaseTemplate.GetTemplateBounds(), startingBaseTemplate, terrainCell));
                     
                     // Geysers
-                    geyserMinX = moonletData.Left() + CornerSize + 2;
-                    geyserMaxX = moonletData.Right() - CornerSize - 4;
-                    geyserMinY = moonletData.Bottom() + CornerSize + 2;
-                    geyserMaxY = moonletData.Top() - CornerSize - 4;
+                    geyserMinX = moonletData.Left() + MiniBaseOptions.CornerSize + 2;
+                    geyserMaxX = moonletData.Right() - MiniBaseOptions.CornerSize - 4;
+                    geyserMinY = moonletData.Bottom() + MiniBaseOptions.CornerSize + 2;
+                    geyserMaxY = moonletData.Top() - MiniBaseOptions.CornerSize - 4;
                     coverElement = moonletData.Biome.DefaultElement();
                     PlaceGeyser(gen.data, cells, options.FeatureWest, new Vector2I(moonletData.Left() + 2, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement);
                     PlaceGeyser(gen.data, cells, options.FeatureEast, new Vector2I(moonletData.Right() - 4, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement);
@@ -275,10 +274,10 @@ namespace MiniBase
                     reservedCells.UnionWith(PlaceWarpPortals(gen.data, cells, moonletData));
                     
                     // geysers
-                    geyserMinX = moonletData.Left() + CornerSize + 2;
-                    geyserMaxX = moonletData.Right() - CornerSize - 4;
-                    geyserMinY = moonletData.Bottom() + CornerSize + 2;
-                    geyserMaxY = moonletData.Top() - moonletData.Height() / 2 - CornerSize - 4;
+                    geyserMinX = moonletData.Left() + MiniBaseOptions.CornerSize + 2;
+                    geyserMaxX = moonletData.Right() - MiniBaseOptions.CornerSize - 4;
+                    geyserMinY = moonletData.Bottom() + MiniBaseOptions.CornerSize + 2;
+                    geyserMaxY = moonletData.Top() - moonletData.Height() / 2 - MiniBaseOptions.CornerSize - 4;
                     coverElement = moonletData.Biome.DefaultElement();
                     PlaceGeyser(gen.data, cells, MiniBaseOptions.FeatureType.OilReservoir, new Vector2I(moonletData.Left() + 2, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement, false, false);
                     PlaceGeyser(gen.data, cells, MiniBaseOptions.FeatureType.OilReservoir, new Vector2I(moonletData.Right() - 4, _random.Next(geyserMinY, geyserMaxY + 1)), coverElement, false, false);
@@ -379,16 +378,13 @@ namespace MiniBase
             });
 
             // Vertices of the liveable area (octogon)
-            int bottomCornerSize =
-                moonletData.Type == MoonletData.Moonlet.Start &&
-                MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners ?
-                    0 : CornerSize;
+            int bottomCornerSize = MiniBaseOptions.Instance.GetCornerSize(MiniBaseOptions.CornerType.Bottom, moonletData.Type);
             Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(bottomCornerSize, 0),
                 bottomLeftNw = moonletData.BottomLeft() + new Vector2I(0, bottomCornerSize),
-                topLeftSw = moonletData.TopLeft() - new Vector2I(0, CornerSize) - new Vector2I(0, 1),
-                topLeftNe = moonletData.TopLeft() + new Vector2I(CornerSize, 0),
-                topRightNw = moonletData.TopRight() - new Vector2I(CornerSize, 0) - new Vector2I(1, 0),
-                topRightSe = moonletData.TopRight() - new Vector2I(0, CornerSize) - new Vector2I(0, 1),
+                topLeftSw = moonletData.TopLeft() - new Vector2I(0, MiniBaseOptions.CornerSize) - new Vector2I(0, 1),
+                topLeftNe = moonletData.TopLeft() + new Vector2I(MiniBaseOptions.CornerSize, 0),
+                topRightNw = moonletData.TopRight() - new Vector2I(MiniBaseOptions.CornerSize, 0) - new Vector2I(1, 0),
+                topRightSe = moonletData.TopRight() - new Vector2I(0, MiniBaseOptions.CornerSize) - new Vector2I(0, 1),
                 bottomRightNe = moonletData.BottomRight() + new Vector2I(0, bottomCornerSize),
                 bottomRightSw = moonletData.BottomRight() - new Vector2I(bottomCornerSize, 0);
 
@@ -507,11 +503,11 @@ namespace MiniBase
             var setTerrain = new Action<MiniBaseBiomeProfile, ISet<Vector2I>>((biome, positions) =>
             {
                 var diseaseDb = Db.Get().Diseases;
-                var diseaseDict = new Dictionary<MiniBaseConfig.DiseaseID, byte>()
+                var diseaseDict = new Dictionary<MiniBaseOptions.DiseaseID, byte>()
                 {
-                    { DiseaseID.None, byte.MaxValue},
-                    { DiseaseID.Slimelung, diseaseDb.GetIndex(diseaseDb.SlimeGerms.id)},
-                    { DiseaseID.FoodPoisoning, diseaseDb.GetIndex(diseaseDb.FoodGerms.id)},
+                    { MiniBaseOptions.DiseaseID.None, byte.MaxValue},
+                    { MiniBaseOptions.DiseaseID.Slimelung, diseaseDb.GetIndex(diseaseDb.SlimeGerms.id)},
+                    { MiniBaseOptions.DiseaseID.FoodPoisoning, diseaseDb.GetIndex(diseaseDb.FoodGerms.id)},
                 };
 
                 foreach (var pos in positions)
@@ -566,13 +562,13 @@ namespace MiniBase
             }
             
             // Core area
-            int coreHeight = CoreMin + moonletData.Height() / 10;
-            int[] heights = GetHorizontalWalk(moonletData.WorldSize.x, coreHeight, coreHeight + CoreDeviation);
+            int coreHeight = MiniBaseOptions.CoreMin + moonletData.Height() / 10;
+            int[] heights = GetHorizontalWalk(moonletData.WorldSize.x, coreHeight, coreHeight + MiniBaseOptions.CoreDeviation);
             ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
             for (int x = relativeLeft; x < relativeRight; x++)
             {
                 // Create abyssalite border of size CORE_BORDER
-                for (int j = 0; j < CoreBorder; j++)
+                for (int j = 0; j < MiniBaseOptions.CoreBorder; j++)
                 {
                     abyssaliteCells.Add(new Vector2I(x, moonletData.Bottom() + heights[x] + j));
                 }
@@ -582,7 +578,7 @@ namespace MiniBase
                 {
                     if ((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
                     {
-                        var top = new Vector2I(x, moonletData.Bottom() + heights[x] + CoreBorder - 1);
+                        var top = new Vector2I(x, moonletData.Bottom() + heights[x] + MiniBaseOptions.CoreBorder - 1);
                         abyssaliteCells.Add(top + new Vector2I(-1, 0));
                         abyssaliteCells.Add(top + new Vector2I(1, 0));
                         abyssaliteCells.Add(top + new Vector2I(0, 1));
@@ -642,8 +638,8 @@ namespace MiniBase
                 // Top border
                 for (int y = moonletData.Top(false); y < moonletData.Top(true); y++)
                 {
-                    if (moonletData.Type == MoonletData.Moonlet.Start || x < (moonletData.Left() + CornerSize) ||
-                        x > (moonletData.Right() - CornerSize))
+                    if (moonletData.Type == MoonletData.Moonlet.Start || x < (moonletData.Left() + MiniBaseOptions.CornerSize) ||
+                        x > (moonletData.Right() - MiniBaseOptions.CornerSize))
                     {
                         addBorderCell(x, y, borderMat);
                     }
@@ -675,7 +671,7 @@ namespace MiniBase
             // Corner structures
             int leftCenterX = (moonletData.Left(true) + moonletData.Left(false)) / 2;
             int rightCenterX = (moonletData.Right(false) + moonletData.Right(true)) / 2;
-            int adjustedCornerSize = CornerSize + (int)Math.Ceiling(BorderSize / 2f);
+            int adjustedCornerSize = MiniBaseOptions.CornerSize + (int)Math.Ceiling(MiniBaseOptions.BorderSize / 2f);
             for (int i = 0; i < adjustedCornerSize; i++)
             {
                 for (int j = adjustedCornerSize; j > i; j--)
@@ -683,7 +679,7 @@ namespace MiniBase
                     int bottomY = moonletData.Bottom() + adjustedCornerSize - j;
                     int topY = moonletData.Top() - adjustedCornerSize + j - 1;
 
-                    borderMat = j - i <= DiagonalBorderSize
+                    borderMat = j - i <= MiniBaseOptions.DiagonalBorderSize
                         ? WorldGen.unobtaniumElement
                         : ElementLoader.FindElementByHash(SimHashes.Glass);
                     
@@ -714,13 +710,13 @@ namespace MiniBase
                     for (int y = moonletData.Top(); y < moonletData.Top(true); y++)
                     {
                         //Left cutout
-                        for (int x = moonletData.Left() + CornerSize; x < Math.Min(moonletData.Left() + CornerSize + SpaceAccessSize, moonletData.Right() - CornerSize); x++)
+                        for (int x = moonletData.Left() + MiniBaseOptions.CornerSize; x < Math.Min(moonletData.Left() + MiniBaseOptions.CornerSize + MiniBaseOptions.SpaceAccessSize, moonletData.Right() - MiniBaseOptions.CornerSize); x++)
                         {
                             addBorderCell(x, y, borderMat);
                         }
                         
                         //Right cutout
-                        for (int x = Math.Max(moonletData.Right() - CornerSize - SpaceAccessSize, moonletData.Left() + CornerSize); x < moonletData.Right() - CornerSize; x++)
+                        for (int x = Math.Max(moonletData.Right() - MiniBaseOptions.CornerSize - MiniBaseOptions.SpaceAccessSize, moonletData.Left() + MiniBaseOptions.CornerSize); x < moonletData.Right() - MiniBaseOptions.CornerSize; x++)
                         {
                             addBorderCell(x, y, borderMat);
                         }
@@ -731,7 +727,7 @@ namespace MiniBase
                         MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly)
                     {
                         //Space Tunnels
-                        for (int y = moonletData.Bottom(false) + CornerSize; y < moonletData.Bottom(false) + SideAccessSize + CornerSize; y++)
+                        for (int y = moonletData.Bottom(false) + MiniBaseOptions.CornerSize; y < moonletData.Bottom(false) + MiniBaseOptions.SideAccessSize + MiniBaseOptions.CornerSize; y++)
                         {
                             if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
                                 MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
@@ -759,7 +755,7 @@ namespace MiniBase
                     borderMat = WorldGen.katairiteElement;
                     for (int y = moonletData.Top(); y < moonletData.Top(true); y++)
                     {
-                        for (int x = moonletData.Left() + CornerSize; x < moonletData.Right() - CornerSize; x++)
+                        for (int x = moonletData.Left() + MiniBaseOptions.CornerSize; x < moonletData.Right() - MiniBaseOptions.CornerSize; x++)
                         {
                             addBorderCell(x, y, borderMat);
                         }
@@ -788,28 +784,28 @@ namespace MiniBase
                     featureName = null;
                     break;
                 case MiniBaseOptions.FeatureType.RandomAny:
-                    var featureType = GeyserDictionary.Keys
+                    var featureType = MiniBaseOptions.GeyserDictionary.Keys
                         .Where(x => x != MiniBaseOptions.FeatureType.Niobium)
                         .GetRandom();
-                    featureName = GeyserDictionary[featureType];
+                    featureName = MiniBaseOptions.GeyserDictionary[featureType];
                     break;
                 case MiniBaseOptions.FeatureType.RandomWater:
-                    featureName = GeyserDictionary[RandomWaterFeatures.GetRandom()];
+                    featureName = MiniBaseOptions.GeyserDictionary[MiniBaseOptions.RandomWaterFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomUseful:
-                    featureName = GeyserDictionary[RandomUsefulFeatures.GetRandom()];
+                    featureName = MiniBaseOptions.GeyserDictionary[MiniBaseOptions.RandomUsefulFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomVolcano:
-                    featureName = GeyserDictionary[RandomVolcanoFeatures.GetRandom()];
+                    featureName = MiniBaseOptions.GeyserDictionary[MiniBaseOptions.RandomVolcanoFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomMagmaVolcano:
-                    featureName = GeyserDictionary[RandomMagmaVolcanoFeatures.GetRandom()];
+                    featureName = MiniBaseOptions.GeyserDictionary[MiniBaseOptions.RandomMagmaVolcanoFeatures.GetRandom()];
                     break;
                 case MiniBaseOptions.FeatureType.RandomMetalVolcano:
-                    featureName = GeyserDictionary[RandomMetalVolcanoFeatures.GetRandom()];
+                    featureName = MiniBaseOptions.GeyserDictionary[MiniBaseOptions.RandomMetalVolcanoFeatures.GetRandom()];
                     break;
                 default:
-                    if (!GeyserDictionary.TryGetValue(type, out featureName))
+                    if (!MiniBaseOptions.GeyserDictionary.TryGetValue(type, out featureName))
                     {
                         return;
                     }
@@ -872,15 +868,8 @@ namespace MiniBase
             
             var vacuum = ElementLoader.FindElementByHash(SimHashes.Vacuum);
             
-            var clearCells = new Action<int, int, int, int>((x0, x1, y0, y1) =>
+            var clearCellsBuildFloor = new Action<int, int, int, int>((x0, x1, y0, y1) =>
             {
-                // skip clearing if teleporters are to
-                // be placed in the bottom corners
-                if (inCorners && moonletData.Type == MoonletData.Moonlet.Start)
-                {
-                    return;
-                }
-                
                 for (int x = x0; x < x1; x++)
                 {
                     for (int y = y0; y < y1; y++)
@@ -893,18 +882,33 @@ namespace MiniBase
                 }
             });
             
-            // center of the moonlet
+            var clearCells = new Action<int, int, int, int>((x0, x1, y0, y1) =>
+            {
+                for (int x = x0; x < x1; x++)
+                {
+                    for (int y = y0; y < y1; y++)
+                    {
+                        cells[Grid.XYToCell(x, y)].SetValues(vacuum, ElementLoader.elements);
+                        reserved.Add(new Vector2I(x, y));
+                    }
+                }
+            });
+            
+            var clearDelegate = inCorners && moonletData.Type == MoonletData.Moonlet.Start ?
+                clearCells : clearCellsBuildFloor;
+            
+            // teleporter positions
             var tpSenderPos = new Vector2I(
-                inCorners ? moonletData.Left() + BorderSize + 2 : moonletData.Width() / 2 + 1,
+                inCorners ? moonletData.Left() + MiniBaseOptions.BorderSize + 2 : moonletData.Width() / 2 + 1,
                 moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
             var tpReceiverPos = new Vector2I(
-                inCorners ? moonletData.Right() - BorderSize - 3 : moonletData.Width() / 2 + 4,
+                inCorners ? moonletData.Right() - MiniBaseOptions.BorderSize - 3 : moonletData.Width() / 2 + 4,
                 moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
             var wcSenderPos = new Vector2I(
-                inCorners ? moonletData.Left() + BorderSize - 2 : moonletData.Width() / 2 - 3,
+                inCorners ? moonletData.Left() + MiniBaseOptions.BorderSize - 2 : moonletData.Width() / 2 - 3,
                 moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
             var wcReceiverPos = new Vector2I(
-                inCorners ? moonletData.Right() - BorderSize : moonletData.Width() / 2 + 7,
+                inCorners ? moonletData.Right() - MiniBaseOptions.BorderSize : moonletData.Width() / 2 + 7,
                 moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
 
             Prefab portal;
@@ -914,37 +918,37 @@ namespace MiniBase
                     // dupe teleporter sender
                     portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // dupe teleporter receiver
                     portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // conduit sender
                     portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     // conduit receiver
                     portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     break;
                 case MoonletData.Moonlet.Second:
                     // dupe teleporter sender
                     portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // dupe teleporter receiver
                     portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // conduit sender
                     portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     // conduit receiver
                     portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     break;
             }
 

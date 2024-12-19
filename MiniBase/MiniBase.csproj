@@ -99,7 +99,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MiniBaseBiomeProfile.cs" />
-    <Compile Include="MiniBaseConfig.cs" />
     <Compile Include="MiniBaseOptions.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />

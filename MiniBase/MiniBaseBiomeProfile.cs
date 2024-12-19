@@ -87,9 +87,9 @@ namespace MiniBase
         public SimHashes elementId;
         public float temperature;
         public float density;
-        public MiniBaseConfig.DiseaseID disease;
+        public MiniBaseOptions.DiseaseID disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, MiniBaseConfig.DiseaseID disease = MiniBaseConfig.DiseaseID.None)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, MiniBaseOptions.DiseaseID disease = MiniBaseOptions.DiseaseID.None)
         {
             this.cumulativeWeight = cumulativeWeight;
             this.elementId = elementId;

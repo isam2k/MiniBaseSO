@@ -9,7 +9,6 @@ using KMod;
 using MiniBase.Model;
 using ProcGen;
 using ProcGenGame;
-using static MiniBase.MiniBaseConfig;
 
 namespace MiniBase
 {
@@ -147,7 +146,7 @@ namespace MiniBase
             {
                 var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.VanillaStartMap];
                 var baseSize = MiniBaseOptions.Instance.GetBaseSize();
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * BorderSize, baseSize.y + 2 * BorderSize + TopMargin));
+                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * MiniBaseOptions.BorderSize, baseSize.y + 2 * MiniBaseOptions.BorderSize + MiniBaseOptions.TopMargin));
             }
 
             private static void Expansion1OnSpawn()
@@ -163,12 +162,12 @@ namespace MiniBase
                 // instance of the vector, otherwise we'll change the
                 // default option sizes
                 baseSize = new Vector2I(
-                    baseSize.x + (2 * BorderSize),
-                    baseSize.y + (2 * BorderSize) + TopMargin);
+                    baseSize.x + (2 * MiniBaseOptions.BorderSize),
+                    baseSize.y + (2 * MiniBaseOptions.BorderSize) + MiniBaseOptions.TopMargin);
                 
                 var colonizableBaseSize = new Vector2I(
-                    50 + (2 * BorderSize), 
-                    60 + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
+                    50 + (2 * MiniBaseOptions.BorderSize), 
+                    60 + (2 * MiniBaseOptions.BorderSize) + MiniBaseOptions.TopMargin + MiniBaseOptions.ColonizableExtraMargin);
 
                 Traverse.Create(minibaseWorld).Property("worldsize").SetValue(baseSize);
                 Traverse.Create(oilyMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
