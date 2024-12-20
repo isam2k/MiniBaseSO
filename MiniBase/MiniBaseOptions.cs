@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Klei.CustomSettings;
 using MiniBase.Model;
 using Newtonsoft.Json;
 using PeterHan.PLib.Options;
@@ -167,6 +168,12 @@ namespace MiniBase
         [Option("Teleporter placement", "Controls where teleporters are placed if enabled.", WorldGenCategory)]
         [JsonProperty]
         public WarpPlacementType TeleporterPlacement { get; set; }
+        
+        [JsonIgnore]
+        public bool TeleportersEnabled =>
+            OilMoonlet &&
+            CustomGameSettings.Instance
+                .GetCurrentQualitySetting(CustomGameSettingConfigs.Teleporters).id == "Enabled";
 
         #endregion
         
@@ -385,15 +392,6 @@ namespace MiniBase
                     return RadioactiveOceanMoonlet;
                 default: distance = world.allowedRings; return true;
             }
-        }
-        
-        public int GetCornerSize(CornerType type, MoonletData.Moonlet moonlet)
-        {
-            return moonlet == MoonletData.Moonlet.Start &&
-                   TeleporterPlacement == WarpPlacementType.Corners &&
-                   type == CornerType.Bottom
-                ? 0
-                : CornerSize;
         }
         
         #endregion

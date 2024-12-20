@@ -42,7 +42,7 @@ namespace MiniBase.Model
                     Biome = MiniBaseBiomeProfiles.OilMoonletProfile;
                     CoreBiome = MiniBaseCoreBiomeProfiles.MagmaCoreProfile;
                     HasCore = true;
-                    _extraTopMargin = MiniBaseOptions.ColonizableExtraMargin;
+                    _extraTopMargin = 0;
                     break;
                 case DlcMarshyMap:
                     Type = Moonlet.Tree;
@@ -73,7 +73,8 @@ namespace MiniBase.Model
                     break;
             }
             WorldSize = worldGen.WorldSize;
-            _size = new Vector2I(WorldSize.x - 2 * MiniBaseOptions.BorderSize,
+            _size = new Vector2I(
+                WorldSize.x - 2 * MiniBaseOptions.BorderSize,
                 WorldSize.y - 2 * MiniBaseOptions.BorderSize - MiniBaseOptions.TopMargin - _extraTopMargin);
         }
         
@@ -110,7 +111,7 @@ namespace MiniBase.Model
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        internal static bool IsMiniBaseWorld(WorldGen instance) =>
+        public static bool IsMiniBaseWorld(WorldGen instance) =>
             instance.Settings.world.filePath == VanillaStartMap ||
             instance.Settings.world.filePath == DlcStartMap ||
             instance.Settings.world.filePath == DlcSecondMap ||
@@ -121,7 +122,7 @@ namespace MiniBase.Model
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        internal static bool IsMiniBaseNatural(WorldGen instance) =>
+        public static bool IsMiniBaseNatural(WorldGen instance) =>
             instance.Settings.world.filePath == DlcFrozenForestMap ||
             instance.Settings.world.filePath == DlcBadlandsMap ||
             instance.Settings.world.filePath == DlcFlippedMap ||
@@ -132,7 +133,7 @@ namespace MiniBase.Model
         /// to be a minibase one (for Cluster Generaton Manager compatibility).
         /// </summary>
         /// <returns></returns>
-        internal static bool IsMiniBaseCluster()
+        public static bool IsMiniBaseCluster()
         {
             var clusterCache = SettingsCache.clusterLayouts.clusterCache;
             var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id]

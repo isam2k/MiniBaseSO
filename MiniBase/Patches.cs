@@ -323,7 +323,7 @@ namespace MiniBase
         }
         
         #region CarePackages
-
+        
         /// <summary>
         /// Patching the frequency at which care packages become available.
         /// </summary>
@@ -341,69 +341,6 @@ namespace MiniBase
                 float frequency = MiniBaseOptions.Instance.FastImmigration ? 10f : (MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay);
                 immigration.spawnInterval = new float[] { frequency, frequency };
                 immigration.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
-            }
-        }
-
-        /// <summary>
-        /// Add care package drops.
-        /// </summary>
-        [HarmonyPatch(typeof(Immigration), "ConfigureCarePackages")]
-        public static class Immigration_ConfigureCarePackages_Patch
-        {
-            public static void Postfix(ref CarePackageInfo[] ___carePackages)
-            {
-                if (!MoonletData.IsMiniBaseCluster())
-                {
-                    return;
-                }
-                
-                // Add new care packages
-                var packageList = ___carePackages.ToList();
-                var addItem = new Action<string, float, int>((name, amount, cycle) =>
-                {
-                    packageList.Add(new CarePackageInfo(name, amount, () => GameClock.Instance.GetCycle() >= cycle));
-                });
-                var addElement = new Action<SimHashes, float, int>((element, amount, cycle) =>
-                {
-                    addItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle);
-                });
-
-                // Minerals
-                addElement(SimHashes.Granite, 2000f, 0);
-                addElement(SimHashes.IgneousRock, 2000f, 0);
-                addElement(SimHashes.Obsidian, 2000f, 24);
-                addElement(SimHashes.Salt, 2000f, 0);
-                addElement(SimHashes.BleachStone, 2000f, 12);
-                addElement(SimHashes.Fossil, 1000f, 24);
-                // Metals
-                addElement(SimHashes.IronOre, 1000f, 0);
-                addElement(SimHashes.FoolsGold, 1000f, 12);
-                addElement(SimHashes.Wolframite, 500f, 24);
-                addElement(SimHashes.Lead, 1000f, 36);
-                addElement(SimHashes.AluminumOre, 500f, 24);
-                addElement(SimHashes.UraniumOre, 400f, 36);
-                // Liquids
-                addElement(SimHashes.DirtyWater, 2000f, 12);
-                addElement(SimHashes.CrudeOil, 1000f, 24);
-                addElement(SimHashes.Petroleum, 1000f, 48);
-                // Gases
-                addElement(SimHashes.ChlorineGas, 50f, 0);
-                addElement(SimHashes.Methane, 50f, 24);
-                // Plants
-                addItem("BasicSingleHarvestPlantSeed", 4f, 0);     // Mealwood
-                addItem("SeaLettuceSeed", 3f, 0);                  // Waterweed
-                addItem("SaltPlantSeed", 3f, 0);                   // Dasha Saltvine
-                addItem("BulbPlantSeed", 3f, 0);                   // Buddy Bud
-                addItem("ColdWheatSeed", 8f, 0);                   // Sleet Wheat
-                addItem("BeanPlantSeed", 5f, 0);                   // Nosh Bean
-                addItem("EvilFlowerSeed", 1f, 36);                 // Sporechid
-                addItem("WormPlantSeed", 3f, 0);                   // Grubfruit Plant
-                addItem("SwampHarvestPlantSeed", 3f, 0);           // Bog Bucket Plant
-                addItem("CritterTrapPlantSeed", 1f, 36);           // Satturn Critter Trap
-                // Critters
-                addItem("PacuEgg", 3f, 0);                         // Pacu
-                addItem("BeeBaby", 1f, 36);                        // Beetiny
-                ___carePackages = packageList.ToArray();
             }
         }
 

@@ -378,15 +378,15 @@ namespace MiniBase
             });
 
             // Vertices of the liveable area (octogon)
-            int bottomCornerSize = MiniBaseOptions.Instance.GetCornerSize(MiniBaseOptions.CornerType.Bottom, moonletData.Type);
-            Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(bottomCornerSize, 0),
-                bottomLeftNw = moonletData.BottomLeft() + new Vector2I(0, bottomCornerSize),
-                topLeftSw = moonletData.TopLeft() - new Vector2I(0, MiniBaseOptions.CornerSize) - new Vector2I(0, 1),
-                topLeftNe = moonletData.TopLeft() + new Vector2I(MiniBaseOptions.CornerSize, 0),
-                topRightNw = moonletData.TopRight() - new Vector2I(MiniBaseOptions.CornerSize, 0) - new Vector2I(1, 0),
-                topRightSe = moonletData.TopRight() - new Vector2I(0, MiniBaseOptions.CornerSize) - new Vector2I(0, 1),
-                bottomRightNe = moonletData.BottomRight() + new Vector2I(0, bottomCornerSize),
-                bottomRightSw = moonletData.BottomRight() - new Vector2I(bottomCornerSize, 0);
+            int cornerSize = MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners ? 0 : MiniBaseOptions.CornerSize;
+            Vector2I bottomLeftSe = moonletData.BottomLeft() + new Vector2I(cornerSize, 0),
+                bottomLeftNw = moonletData.BottomLeft() + new Vector2I(0, cornerSize),
+                topLeftSw = moonletData.TopLeft() - new Vector2I(0, cornerSize) - new Vector2I(0, 1),
+                topLeftNe = moonletData.TopLeft() + new Vector2I(cornerSize, 0),
+                topRightNw = moonletData.TopRight() - new Vector2I(cornerSize, 0) - new Vector2I(1, 0),
+                topRightSe = moonletData.TopRight() - new Vector2I(0, cornerSize) - new Vector2I(0, 1),
+                bottomRightNe = moonletData.BottomRight() + new Vector2I(0, cornerSize),
+                bottomRightSw = moonletData.BottomRight() - new Vector2I(cornerSize, 0);
 
             // Liveable cell
             var tags = new TagSet();
@@ -537,6 +537,7 @@ namespace MiniBase
                     int extra = (int)(noiseMap[pos.x, pos.y] * 8f);
                     
                     if (moonletData.Type != MoonletData.Moonlet.Start &&
+                        (moonletData.Type != MoonletData.Moonlet.Second || !MiniBaseOptions.Instance.TeleportersEnabled) &&
                         y > moonletData.Bottom() + extra + (2 * moonletData.Height() / 3))
                     {
                         continue;
@@ -613,10 +614,11 @@ namespace MiniBase
         /// <returns>Set of border cells.</returns>
         private static ISet<Vector2I> DrawCustomWorldBorders(MoonletData moonletData, Sim.Cell[] cells)
         {
-            bool skipBottomCorners = MiniBaseOptions.Instance.OilMoonlet &&
-                                     CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.Teleporters).id == "Enabled" &&
-                                     MiniBaseOptions.Instance.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners &&
-                                     moonletData.Type == MoonletData.Moonlet.Start;
+            var options = MiniBaseOptions.Instance;
+            
+            bool skipCorners = options.OilMoonlet &&
+                 options.TeleportersEnabled &&
+                 options.TeleporterPlacement == MiniBaseOptions.WarpPlacementType.Corners;
             
             var borderCells = new HashSet<Vector2I>();
            
@@ -669,41 +671,39 @@ namespace MiniBase
             }
 
             // Corner structures
-            int leftCenterX = (moonletData.Left(true) + moonletData.Left(false)) / 2;
-            int rightCenterX = (moonletData.Right(false) + moonletData.Right(true)) / 2;
-            int adjustedCornerSize = MiniBaseOptions.CornerSize + (int)Math.Ceiling(MiniBaseOptions.BorderSize / 2f);
-            for (int i = 0; i < adjustedCornerSize; i++)
+            if (!skipCorners)
             {
-                for (int j = adjustedCornerSize; j > i; j--)
+                int leftCenterX = (moonletData.Left(true) + moonletData.Left(false)) / 2;
+                int rightCenterX = (moonletData.Right(false) + moonletData.Right(true)) / 2;
+                int adjustedCornerSize = MiniBaseOptions.CornerSize + (int)Math.Ceiling(MiniBaseOptions.BorderSize / 2f);
+                for (int i = 0; i < adjustedCornerSize; i++)
                 {
-                    int bottomY = moonletData.Bottom() + adjustedCornerSize - j;
-                    int topY = moonletData.Top() - adjustedCornerSize + j - 1;
-
-                    borderMat = j - i <= MiniBaseOptions.DiagonalBorderSize
-                        ? WorldGen.unobtaniumElement
-                        : ElementLoader.FindElementByHash(SimHashes.Glass);
-                    
-                    addBorderCell(leftCenterX + i, topY, borderMat);
-                    addBorderCell(leftCenterX - i, topY, borderMat);
-                    addBorderCell(rightCenterX + i, topY, borderMat);
-                    addBorderCell(rightCenterX - i, topY, borderMat);
-                    
-                    if (skipBottomCorners)
+                    for (int j = adjustedCornerSize; j > i; j--)
                     {
-                        continue;
-                    }
+                        int bottomY = moonletData.Bottom() + adjustedCornerSize - j;
+                        int topY = moonletData.Top() - adjustedCornerSize + j - 1;
+
+                        borderMat = j - i <= MiniBaseOptions.DiagonalBorderSize
+                            ? WorldGen.unobtaniumElement
+                            : ElementLoader.FindElementByHash(SimHashes.Glass);
                     
-                    addBorderCell(leftCenterX + i, bottomY, borderMat);
-                    addBorderCell(leftCenterX - i, bottomY, borderMat);
-                    addBorderCell(rightCenterX + i, bottomY, borderMat);
-                    addBorderCell(rightCenterX - i, bottomY, borderMat);
+                        addBorderCell(leftCenterX + i, bottomY, borderMat);
+                        addBorderCell(leftCenterX - i, bottomY, borderMat);
+                        addBorderCell(rightCenterX + i, bottomY, borderMat);
+                        addBorderCell(rightCenterX - i, bottomY, borderMat);
+                    
+                        addBorderCell(leftCenterX + i, topY, borderMat);
+                        addBorderCell(leftCenterX - i, topY, borderMat);
+                        addBorderCell(rightCenterX + i, topY, borderMat);
+                        addBorderCell(rightCenterX - i, topY, borderMat);
+                    }
                 }
             }
 
             // Space access
             if (moonletData.Type == MoonletData.Moonlet.Start)
             {
-                if (MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Classic)
+                if (options.SpaceAccess == MiniBaseOptions.AccessType.Classic)
                 {
                     borderMat = WorldGen.katairiteElement;
 
@@ -722,15 +722,15 @@ namespace MiniBase
                         }
                     }
                     
-                    if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides ||
-                        MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
-                        MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly)
+                    if (options.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides ||
+                        options.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
+                        options.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly)
                     {
                         //Space Tunnels
                         for (int y = moonletData.Bottom(false) + MiniBaseOptions.CornerSize; y < moonletData.Bottom(false) + MiniBaseOptions.SideAccessSize + MiniBaseOptions.CornerSize; y++)
                         {
-                            if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
-                                MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
+                            if (options.TunnelAccess == MiniBaseOptions.TunnelAccessType.LeftOnly ||
+                                options.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
                             {
                                 //Far left tunnel
                                 for (int x = moonletData.Left(true); x < moonletData.Left(false); x++)
@@ -738,8 +738,8 @@ namespace MiniBase
                                     addBorderCell(x, y, borderMat);
                                 }
                             }
-                            if (MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly ||
-                                MiniBaseOptions.Instance.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
+                            if (options.TunnelAccess == MiniBaseOptions.TunnelAccessType.RightOnly ||
+                                options.TunnelAccess == MiniBaseOptions.TunnelAccessType.BothSides)
                             {
                                 //Far Right tunnel
                                 for (int x = moonletData.Right(false); x < moonletData.Right(true); x++)
@@ -750,7 +750,7 @@ namespace MiniBase
                         }
                     }
                 }
-                else if (MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Full)
+                else if (options.SpaceAccess == MiniBaseOptions.AccessType.Full)
                 {
                     borderMat = WorldGen.katairiteElement;
                     for (int y = moonletData.Top(); y < moonletData.Top(true); y++)
@@ -868,7 +868,7 @@ namespace MiniBase
             
             var vacuum = ElementLoader.FindElementByHash(SimHashes.Vacuum);
             
-            var clearCellsBuildFloor = new Action<int, int, int, int>((x0, x1, y0, y1) =>
+            var clearCells = new Action<int, int, int, int>((x0, x1, y0, y1) =>
             {
                 for (int x = x0; x < x1; x++)
                 {
@@ -882,34 +882,19 @@ namespace MiniBase
                 }
             });
             
-            var clearCells = new Action<int, int, int, int>((x0, x1, y0, y1) =>
-            {
-                for (int x = x0; x < x1; x++)
-                {
-                    for (int y = y0; y < y1; y++)
-                    {
-                        cells[Grid.XYToCell(x, y)].SetValues(vacuum, ElementLoader.elements);
-                        reserved.Add(new Vector2I(x, y));
-                    }
-                }
-            });
-            
-            var clearDelegate = inCorners && moonletData.Type == MoonletData.Moonlet.Start ?
-                clearCells : clearCellsBuildFloor;
-            
             // teleporter positions
             var tpSenderPos = new Vector2I(
                 inCorners ? moonletData.Left() + MiniBaseOptions.BorderSize + 2 : moonletData.Width() / 2 + 1,
-                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+                inCorners ? moonletData.Top() - MiniBaseOptions.BorderSize : moonletData.Height() / 2 + 1);
             var tpReceiverPos = new Vector2I(
                 inCorners ? moonletData.Right() - MiniBaseOptions.BorderSize - 3 : moonletData.Width() / 2 + 4,
-                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+                inCorners ? moonletData.Top() - MiniBaseOptions.BorderSize : moonletData.Height() / 2 + 1);
             var wcSenderPos = new Vector2I(
                 inCorners ? moonletData.Left() + MiniBaseOptions.BorderSize - 2 : moonletData.Width() / 2 - 3,
-                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+                inCorners ? moonletData.Top() - MiniBaseOptions.BorderSize : moonletData.Height() / 2 + 1);
             var wcReceiverPos = new Vector2I(
                 inCorners ? moonletData.Right() - MiniBaseOptions.BorderSize : moonletData.Width() / 2 + 7,
-                moonletData.Type == MoonletData.Moonlet.Start && inCorners ? moonletData.Bottom() : moonletData.Height() / 2 + 1);
+                inCorners ? moonletData.Top() - MiniBaseOptions.BorderSize : moonletData.Height() / 2 + 1);
 
             Prefab portal;
             switch (moonletData.Type)
@@ -918,37 +903,37 @@ namespace MiniBase
                     // dupe teleporter sender
                     portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // dupe teleporter receiver
                     portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // conduit sender
                     portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     // conduit receiver
                     portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     break;
                 case MoonletData.Moonlet.Second:
                     // dupe teleporter sender
                     portal = new Prefab("WarpPortal", Prefab.Type.Other, tpSenderPos.x, tpSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // dupe teleporter receiver
                     portal = new Prefab("WarpReceiver", Prefab.Type.Other, tpReceiverPos.x, tpReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 2, portal.location_y, portal.location_y + 3);
                     // conduit sender
                     portal = new Prefab("WarpConduitSender", Prefab.Type.Other, wcSenderPos.x, wcSenderPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     // conduit receiver
                     portal = new Prefab("WarpConduitReceiver", Prefab.Type.Other, wcReceiverPos.x, wcReceiverPos.y, SimHashes.Katairite);
                     data.gameSpawnData.otherEntities.Add(portal);
-                    clearDelegate(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
+                    clearCells(portal.location_x - 1, portal.location_x + 3, portal.location_y, portal.location_y + 3);
                     break;
             }
 
