@@ -43,7 +43,7 @@ namespace MiniBase
                 public static LocString DESCRIPTION = "An inhospitable world full of magma and precious metals";
             }
 
-            public class BADLANDSMINIBASE
+            public class MINIBADLANDS
             {
                 public static LocString NAME = "MiniBase Badlands Moonlet";
                 public static LocString DESCRIPTION = "A barren location with an overabundance of mineral resources.\n\n<smallcaps>The rocky terrain of The Badlands poses no immediate threats, but sparse resource availability will make expansion and technological progress challenging.</smallcaps>\n\n";
@@ -67,7 +67,7 @@ namespace MiniBase
                 public static LocString DESCRIPTION = "A small swampy world with an abundance of renewable metal.\n\n<smallcaps>Metallic Swampy Asteroids have a high concentration of metal and a swampy, polluted atmosphere.</smallcaps>";
             }
             
-            public class RADIOACTIVEOCEANMINIBASE
+            public class MINIRADIOACTIVEOCEAN
             {
                 public static LocString NAME = "MiniBase Radioactive Ocean Moonlet";
                 public static LocString DESCRIPTION = "An irradiated world with renewable water sources.\n\n<smallcaps>Both the radioactive biome and the ocean biome present unique challenges yet considerable payoffs.</smallcaps>\n\n";
