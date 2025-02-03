@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using MiniBase.Model.Enums;
 
 namespace MiniBase
 {
@@ -45,7 +46,7 @@ namespace MiniBase
         /// <returns></returns>
         public BandInfo GetBand(float f)
         {
-            for (int i = 0; i < BandProfile.Length; i++)
+            for (var i = 0; i < BandProfile.Length; i++)
             {
                 if (f < BandProfile[i].cumulativeWeight)
                 {
@@ -63,7 +64,7 @@ namespace MiniBase
         /// <returns></returns>
         public Sim.PhysicsData GetPhysicsData(BandInfo band, float modifier = 1f)
         {
-            float temperature = (band.temperature < 0 && DefaultTemperature > 0) ? DefaultTemperature : band.temperature;
+            var temperature = (band.temperature < 0 && DefaultTemperature > 0) ? DefaultTemperature : band.temperature;
             return MiniBaseWorldGen.GetPhysicsData(band.GetElement(), modifier * band.density, temperature);
         }
         
@@ -87,9 +88,9 @@ namespace MiniBase
         public SimHashes elementId;
         public float temperature;
         public float density;
-        public MiniBaseOptions.DiseaseID disease;
+        public DiseaseID disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, MiniBaseOptions.DiseaseID disease = MiniBaseOptions.DiseaseID.None)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, DiseaseID disease = DiseaseID.None)
         {
             this.cumulativeWeight = cumulativeWeight;
             this.elementId = elementId;

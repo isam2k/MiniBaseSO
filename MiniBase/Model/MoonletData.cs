@@ -1,4 +1,5 @@
 using Klei.CustomSettings;
+using MiniBase.Model.Enums;
 using MiniBase.Model.Profiles;
 using ProcGen;
 using ProcGenGame;
@@ -11,8 +12,11 @@ namespace MiniBase.Model
         /// <summary>Total size of the map in tiles.</summary>
         public Vector2I WorldSize { get; }
 
+        /// <summary>Size of the map where a borders and biomes will spawn.</summary>
+        public Vector2I BaseSize { get; }
+
         /// <summary>The type of mini moonlet of this instance.</summary>
-        public Moonlet Type { get; }
+        internal Moonlet Type { get; }
 
         /// <summary>Main moonlet biome.</summary>
         public MiniBaseBiomeProfile Biome { get; }
@@ -73,16 +77,19 @@ namespace MiniBase.Model
                     break;
             }
             WorldSize = worldGen.WorldSize;
-            _size = new Vector2I(
-                WorldSize.x - 2 * MiniBaseOptions.BorderSize,
-                WorldSize.y - 2 * MiniBaseOptions.BorderSize - MiniBaseOptions.TopMargin - _extraTopMargin);
+            BaseSize = MiniBaseOptions.Instance.GetBaseSize(Type);
         }
         
         #region Methods
-        
-        public int SideMargin() { return (WorldSize.x - _size.x - 2 * MiniBaseOptions.BorderSize) / 2; }
+        /// <summary>
+        /// Width of the vacuum area to the side of the base, outside of the borders. These areas are
+        /// accessible via the side tunnels if enabled.
+        /// </summary>
+        /// <returns></returns>
+        public int SideMargin() { return (WorldSize.x - BaseSize.x - 2 * MiniBaseOptions.BorderSize) / 2; }
         /// <summary>
         /// The leftmost tile position that is considered inside the liveable area or its borders.
+        /// Tiles in the liveable area are part of the main biome.
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
@@ -92,9 +99,9 @@ namespace MiniBase.Model
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public int Right(bool withBorders = false) { return Left(withBorders) + _size.x + (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
+        public int Right(bool withBorders = false) { return Left(withBorders) + BaseSize.x + (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
         public int Top(bool withBorders = false) { return WorldSize.y - MiniBaseOptions.TopMargin - _extraTopMargin - (withBorders ? 0 : MiniBaseOptions.BorderSize) + 1; }
-        public int Bottom(bool withBorders = false) { return Top(withBorders) - _size.y - (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
+        public int Bottom(bool withBorders = false) { return Top(withBorders) - BaseSize.y - (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
         public int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
         public int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
         public Vector2I TopLeft(bool withBorders = false) { return new Vector2I(Left(withBorders), Top(withBorders)); }
@@ -145,8 +152,10 @@ namespace MiniBase.Model
         #endregion
         
         #region Fields
-        private readonly Vector2I _size;
+        
+        /// <summary>Additional margin at the top for landing rockets</summary>
         private readonly int _extraTopMargin;
+
         #endregion
         
         #region Constants
@@ -161,21 +170,6 @@ namespace MiniBase.Model
         internal const string DlcFlippedMap = "expansion1::worlds/BabyFlipped";
         internal const string DlcMetallicSwampyMap = "expansion1::worlds/BabyMetallicSwampy";
         internal const string DlcRadioactiveOceanMap = "expansion1::worlds/BabyRadioactiveOcean";
-        #endregion
-        
-        #region Enum
-        public enum Moonlet
-        {
-            Start,
-            Second,
-            Tree,
-            Niobium,
-            FrozenForest,
-            Badlands,
-            Flipped,
-            MetallicSwampy,
-            RadioactiveOcean
-        }
         #endregion
     }
 }
