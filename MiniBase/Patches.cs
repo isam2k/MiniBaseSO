@@ -7,6 +7,7 @@ using HarmonyLib;
 using Klei.AI;
 using KMod;
 using MiniBase.Model;
+using MiniBase.Model.Enums;
 using ProcGen;
 using ProcGenGame;
 
@@ -14,6 +15,8 @@ namespace MiniBase
 {
     internal class Patches
     {
+        #region Misc
+        
         /// <summary>
         /// Reload mod options at asteroid select screen, before world gen happens
         /// </summary>
@@ -145,8 +148,10 @@ namespace MiniBase
             private static void VanillaOnSpawn()
             {
                 var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.VanillaStartMap];
-                var baseSize = MiniBaseOptions.Instance.GetBaseSize();
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * MiniBaseOptions.BorderSize, baseSize.y + 2 * MiniBaseOptions.BorderSize + MiniBaseOptions.TopMargin));
+                Traverse
+                    .Create(minibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Start));
             }
 
             private static void Expansion1OnSpawn()
@@ -156,23 +161,23 @@ namespace MiniBase
                 var marshyMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcMarshyMap];
                 var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcNiobiumMap];
 
-                var baseSize = MiniBaseOptions.Instance.GetBaseSize();
+                Traverse
+                    .Create(minibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Start));
+                Traverse
+                    .Create(oilyMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Second));
+                Traverse
+                    .Create(marshyMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Tree));
+                Traverse
+                    .Create(niobiumMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Niobium));
                 
-                // we're getting a reference and should create a new
-                // instance of the vector, otherwise we'll change the
-                // default option sizes
-                baseSize = new Vector2I(
-                    baseSize.x + (2 * MiniBaseOptions.BorderSize),
-                    baseSize.y + (2 * MiniBaseOptions.BorderSize) + MiniBaseOptions.TopMargin);
-                
-                var colonizableBaseSize = new Vector2I(
-                    50 + (2 * MiniBaseOptions.BorderSize), 
-                    60 + (2 * MiniBaseOptions.BorderSize) + MiniBaseOptions.TopMargin + MiniBaseOptions.ColonizableExtraMargin);
-
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(baseSize);
-                Traverse.Create(oilyMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
-                Traverse.Create(marshyMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
-                Traverse.Create(niobiumMinibaseWorld).Property("worldsize").SetValue(colonizableBaseSize);
                 MiniBaseOptions.Instance.Configure(minibaseWorld);
                 
                 var cluster = SettingsCache.clusterLayouts.clusterCache[MoonletData.MiniBaseCluster];
@@ -252,7 +257,7 @@ namespace MiniBase
                 {
                     return;
                 }
-                int radius = (int)(Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f);
+                var radius = (int)(Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f);
                 GridVisibility.Reveal(0, 0, radius, radius - 1);
             }
         }
@@ -307,13 +312,13 @@ namespace MiniBase
 
             private static void LoadStrings()
             {
-                string code = Localization.GetLocale()?.Code;
+                var code = Localization.GetLocale()?.Code;
                 if (code.IsNullOrWhiteSpace())
                 {
                     return;
                 }
                 
-                string path = System.IO.Path.Combine(ModUtils.Constants.ModPath, "translations",
+                var path = System.IO.Path.Combine(ModUtils.Constants.ModPath, "translations",
                     code + ".po");
                 if (File.Exists(path))
                 {
@@ -321,6 +326,8 @@ namespace MiniBase
                 }
             }
         }
+        
+        #endregion
         
         #region CarePackages
         
@@ -338,7 +345,7 @@ namespace MiniBase
                 }
                 var immigration = Immigration.Instance;
                 const float SecondsPerDay = 600f;
-                float frequency = MiniBaseOptions.Instance.FastImmigration ? 10f : (MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay);
+                var frequency = MiniBaseOptions.Instance.FastImmigration ? 10f : (MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay);
                 immigration.spawnInterval = new float[] { frequency, frequency };
                 immigration.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
             }
@@ -364,7 +371,8 @@ namespace MiniBase
         #region WorldGen
 
         /// <summary>
-        /// Bypass and rewrite world generation.
+        /// Bypass and rewrite world generation. Spawn temporal tear and open it since
+        /// the minibase cluster does not spawn a moonlet with a temporal tear opener.
         /// </summary>
         [HarmonyPatch(typeof(WorldGen), "RenderOffline")]
         public static class WorldGen_RenderOffline_Patch
@@ -435,7 +443,7 @@ namespace MiniBase
                     var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poiConfig.id, poiConfig.anim,
                         (string)Strings.Get(poiConfig.nameStringKey), poiConfig.descStringKey,
                         poiConfig.poiType.idHash, poiConfig.poiType.canProvideArtifacts);
-                    KPrefabID component = prefab.GetComponent<KPrefabID>();
+                    var component = prefab.GetComponent<KPrefabID>();
                     component.prefabInitFn += config.OnPrefabInit;
                     component.prefabSpawnFn += config.OnSpawn;
                     Assets.AddPrefab(component);
