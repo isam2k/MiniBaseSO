@@ -9,11 +9,9 @@ namespace MiniBase.Model
     public class MoonletData
     {
         #region Properties
+
         /// <summary>Total size of the map in tiles.</summary>
         public Vector2I WorldSize { get; }
-
-        /// <summary>Size of the map where a borders and biomes will spawn.</summary>
-        public Vector2I BaseSize { get; }
 
         /// <summary>The type of mini moonlet of this instance.</summary>
         internal Moonlet Type { get; }
@@ -26,6 +24,7 @@ namespace MiniBase.Model
 
         /// <summary>Moonlet has a core biome or just the main biome.</summary>
         public bool HasCore { get; }
+
         #endregion
 
         public MoonletData(WorldGen worldGen)
@@ -76,44 +75,94 @@ namespace MiniBase.Model
                     Type = Moonlet.RadioactiveOcean;
                     break;
             }
+
             WorldSize = worldGen.WorldSize;
-            BaseSize = MiniBaseOptions.Instance.GetBaseSize(Type);
+            _baseSize = MiniBaseOptions.Instance.GetBaseSize(Type);
         }
-        
+
         #region Methods
-        
-        /// <summary>
-        /// Width of the vacuum area to the side of the base, outside of the borders. These areas are
-        /// accessible via the side tunnels if enabled.
-        /// </summary>
-        /// <returns></returns>
-        public int SideMargin() { return (WorldSize.x - BaseSize.x - 2 * MiniBaseOptions.BorderSize) / 2; }
+
         /// <summary>
         /// The leftmost tile position that is considered inside the liveable area or its borders.
         /// Tiles in the liveable area are part of the main biome.
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : MiniBaseOptions.BorderSize); }
+        public int Left(bool withBorders = false)
+        {
+            return SideMargin() + (withBorders ? 0 : MiniBaseOptions.BorderSize);
+        }
+
         /// <summary>
         /// The rightmost tile position that is considered inside the liveable area or its borders.
         /// </summary>
         /// <param name="withBorders"></param>
         /// <returns></returns>
-        public int Right(bool withBorders = false) { return Left(withBorders) + BaseSize.x + (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
-        public int Top(bool withBorders = false) { return WorldSize.y - MiniBaseOptions.TopMargin - _extraTopMargin - (withBorders ? 0 : MiniBaseOptions.BorderSize) + 1; }
-        public int Bottom(bool withBorders = false) { return Top(withBorders) - BaseSize.y - (withBorders ? MiniBaseOptions.BorderSize * 2 : 0); }
-        public int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
-        public int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
-        public Vector2I TopLeft(bool withBorders = false) { return new Vector2I(Left(withBorders), Top(withBorders)); }
-        public Vector2I TopRight(bool withBorders = false) { return new Vector2I(Right(withBorders), Top(withBorders)); }
-        public Vector2I BottomLeft(bool withBorders = false) { return new Vector2I(Left(withBorders), Bottom(withBorders)); }
-        public Vector2I BottomRight(bool withBorders = false) { return new Vector2I(Right(withBorders), Bottom(withBorders)); }
-        public bool InLiveableArea(Vector2I pos) { return pos.x >= Left() && pos.x < Right() && pos.y >= Bottom() && pos.y < Top(); }
+        public int Right(bool withBorders = false)
+        {
+            return Left(withBorders) + _baseSize.x + (withBorders ? MiniBaseOptions.BorderSize * 2 : 0);
+        }
+
+        public int Top(bool withBorders = false)
+        {
+            return WorldSize.y - MiniBaseOptions.TopMargin - _extraTopMargin -
+                (withBorders ? 0 : MiniBaseOptions.BorderSize) + 1;
+        }
+
+        public int Bottom(bool withBorders = false)
+        {
+            return Top(withBorders) - _baseSize.y - (withBorders ? MiniBaseOptions.BorderSize * 2 : 0);
+        }
+
+        public int Width(bool withBorders = false)
+        {
+            return Right(withBorders) - Left(withBorders);
+        }
+
+        public int Height(bool withBorders = false)
+        {
+            return Top(withBorders) - Bottom(withBorders);
+        }
+
+        public Vector2I TopLeft(bool withBorders = false)
+        {
+            return new Vector2I(Left(withBorders), Top(withBorders));
+        }
+
+        public Vector2I TopRight(bool withBorders = false)
+        {
+            return new Vector2I(Right(withBorders), Top(withBorders));
+        }
+
+        public Vector2I BottomLeft(bool withBorders = false)
+        {
+            return new Vector2I(Left(withBorders), Bottom(withBorders));
+        }
+
+        public Vector2I BottomRight(bool withBorders = false)
+        {
+            return new Vector2I(Right(withBorders), Bottom(withBorders));
+        }
+
+        public bool InLiveableArea(Vector2I pos)
+        {
+            return pos.x >= Left() && pos.x < Right() && pos.y >= Bottom() && pos.y < Top();
+        }
         
+        /// <summary>
+        /// Width of the vacuum area to the side of the base, outside of the borders. These areas are
+        /// accessible via the side tunnels if enabled.
+        /// </summary>
+        /// <returns></returns>
+        private int SideMargin()
+        {
+            return (WorldSize.x - _baseSize.x - 2 * MiniBaseOptions.BorderSize) / 2;
+        }
+
         #endregion
-        
+
         #region Static Functions
+
         /// <summary>
         /// Determines if a <see cref="WorldGen"/> instance represents a minibase map.
         /// </summary>
@@ -125,6 +174,7 @@ namespace MiniBase.Model
             instance.Settings.world.filePath == DlcSecondMap ||
             instance.Settings.world.filePath == DlcMarshyMap ||
             instance.Settings.world.filePath == DlcNiobiumMap;
+
         /// <summary>
         /// Determines if a <see cref="WorldGen"/> instance represents a natural minibase map.
         /// </summary>
@@ -136,6 +186,7 @@ namespace MiniBase.Model
             instance.Settings.world.filePath == DlcFlippedMap ||
             instance.Settings.world.filePath == DlcMetallicSwampyMap ||
             instance.Settings.world.filePath == DlcRadioactiveOceanMap;
+
         /// <summary>
         /// If the starting asteroid is worlds/MiniBase we consider the playthrough
         /// to be a minibase one (for Cluster Generaton Manager compatibility).
@@ -144,22 +195,28 @@ namespace MiniBase.Model
         public static bool IsMiniBaseCluster()
         {
             var clusterCache = SettingsCache.clusterLayouts.clusterCache;
-            var world = clusterCache[CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id]
+            var world = clusterCache[
+                    CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id]
                 .GetStartWorld();
             return world == DlcStartMap ||
                    world == DlcFrozenForestMap ||
                    world == VanillaStartMap;
         }
+
         #endregion
-        
+
         #region Fields
-        
+
         /// <summary>Additional margin at the top for landing rockets</summary>
         private readonly int _extraTopMargin;
 
+        /// <summary>Size of the map where a borders and biomes will spawn.</summary>
+        private readonly Vector2I _baseSize;
+
         #endregion
-        
+
         #region Constants
+
         internal const string MiniBaseCluster = "expansion1::clusters/MiniBase";
         internal const string VanillaStartMap = "worlds/MiniBase";
         internal const string DlcStartMap = "expansion1::worlds/MiniBase";
@@ -171,6 +228,7 @@ namespace MiniBase.Model
         internal const string DlcFlippedMap = "expansion1::worlds/BabyFlipped";
         internal const string DlcMetallicSwampyMap = "expansion1::worlds/BabyMetallicSwampy";
         internal const string DlcRadioactiveOceanMap = "expansion1::worlds/BabyRadioactiveOcean";
+
         #endregion
     }
 }

@@ -47,13 +47,13 @@ namespace MiniBase.Model.Enums
             [Option("Liquid Sulfur", "165.2C liquid sulfur geyser")]
             Sulfur,
             [Option("CO2 Geyser", "-55C carbon dioxide geyser")]
-            ColdCO2,
+            ColdCo2,
             [Option("CO2 Vent", "500C carbon dioxide vent")]
-            HotCO2,
+            HotCo2,
             [Option("Infectious PO2", "60C infectious polluted oxygen vent")]
-            InfectedPO2,
+            InfectedPo2,
             [Option("Hot PO2 Vent", "500C polluted oxygen vent")]
-            HotPO2,
+            HotPo2,
             [Option("Chlorine Vent", "60C chlorine vent")]
             Chlorine,
             [Option("Random (Any)", "It could be anything! (excluding niobium volcano)")]

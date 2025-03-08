@@ -8,7 +8,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Diamond,
             1998f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.18f, SimHashes.Diamond),
                 new BandInfo(0.22f, SimHashes.Tungsten),
@@ -35,7 +35,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Ice,
             233f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.10f, SimHashes.CarbonDioxide, density: 2f),
                 new BandInfo(0.18f, SimHashes.Oxygen, density: 2f),
@@ -80,7 +80,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Salt,
             -1f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.08f, SimHashes.Hydrogen, density: 2f),
                 new BandInfo(0.19f, SimHashes.SaltWater, density: 0.9f),
@@ -132,7 +132,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Diamond,
             553f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.18f, SimHashes.Diamond),
                 new BandInfo(0.20f, SimHashes.Fossil),
@@ -157,7 +157,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.IronOre,
             483f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.18f, SimHashes.IronOre),
                 new BandInfo(0.25f, SimHashes.Wolframite),
@@ -184,7 +184,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Dirt,
             -1f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.10f, SimHashes.Sand),
                 new BandInfo(0.27f, SimHashes.Water),
@@ -238,7 +238,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Granite,
             265f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.16f, SimHashes.IgneousRock),
                 new BandInfo(0.21f, SimHashes.Carbon),
@@ -268,7 +268,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Katairite,
             265f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.12f, SimHashes.Katairite),
                 new BandInfo(0.27f, SimHashes.Ethanol),
@@ -293,7 +293,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Diamond,
             1759f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.13f, SimHashes.Steam, density: 20f),
                 new BandInfo(0.18f, SimHashes.Diamond),
@@ -320,7 +320,7 @@ namespace MiniBase.Model.Profiles
             null,
             SimHashes.Ice,
             254f,
-            new BandInfo[]
+            new[]
             {
                 new BandInfo(0.15f, SimHashes.CarbonDioxide, density: 2f),
                 new BandInfo(0.22f, SimHashes.Ice, density: 2f),

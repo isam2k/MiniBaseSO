@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace MiniBase
 {
     internal class STRINGS

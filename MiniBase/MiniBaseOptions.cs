@@ -433,10 +433,10 @@ namespace MiniBase
             { FeatureType.Tungsten, "GeyserGeneric_" + GeyserGenericConfig.MoltenTungsten },
             { FeatureType.Niobium, "GeyserGeneric_" + GeyserGenericConfig.MoltenNiobium },
             { FeatureType.Sulfur, "GeyserGeneric_" + GeyserGenericConfig.LiquidSulfur },
-            { FeatureType.ColdCO2, "GeyserGeneric_" + GeyserGenericConfig.LiquidCO2 },
-            { FeatureType.HotCO2, "GeyserGeneric_" + GeyserGenericConfig.HotCO2 },
-            { FeatureType.InfectedPO2, "GeyserGeneric_" + GeyserGenericConfig.SlimyPO2 },
-            { FeatureType.HotPO2, "GeyserGeneric_" + GeyserGenericConfig.HotPO2 },
+            { FeatureType.ColdCo2, "GeyserGeneric_" + GeyserGenericConfig.LiquidCO2 },
+            { FeatureType.HotCo2, "GeyserGeneric_" + GeyserGenericConfig.HotCO2 },
+            { FeatureType.InfectedPo2, "GeyserGeneric_" + GeyserGenericConfig.SlimyPO2 },
+            { FeatureType.HotPo2, "GeyserGeneric_" + GeyserGenericConfig.HotPO2 },
             { FeatureType.Chlorine, "GeyserGeneric_" + GeyserGenericConfig.ChlorineGas },
         };
 

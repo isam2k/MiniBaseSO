@@ -408,8 +408,8 @@ namespace MiniBase
 
                 try
                 {
-                    MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
-                        ref placedStoryTraits, isStartingWorld);
+                    MiniBaseWorldGen.CreateWorld(__instance, writer, baseId,
+                        out cells, out dc);
                     __result = true;
                 }
                 catch (Exception e)
