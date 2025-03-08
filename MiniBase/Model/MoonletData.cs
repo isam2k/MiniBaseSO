@@ -81,6 +81,7 @@ namespace MiniBase.Model
         }
         
         #region Methods
+        
         /// <summary>
         /// Width of the vacuum area to the side of the base, outside of the borders. These areas are
         /// accessible via the side tunnels if enabled.

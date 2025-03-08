@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Klei.CustomSettings;
 using MiniBase.Model;
 using MiniBase.Model.Enums;
@@ -20,48 +19,48 @@ namespace MiniBase
         
         [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map", WorldGenCategory)]
         [JsonProperty]
-        public FeatureType FeatureWest { get; set; }
+        public FeatureType FeatureWest { get; set; } = FeatureType.PollutedWater;
 
         [Option("Eastern Feature", "The geyser, vent, or volcano on the right side of the map", WorldGenCategory)]
         [JsonProperty]
-        public FeatureType FeatureEast { get; set; }
+        public FeatureType FeatureEast { get; set; } = FeatureType.RandomUseful;
 
         [Option("Southern Feature", "The geyser, vent, or volcano at the bottom of the map\nInaccessible until the abyssalite boundary is breached", WorldGenCategory)]
         [JsonProperty]
-        public FeatureType FeatureSouth { get; set; }
+        public FeatureType FeatureSouth { get; set; } = FeatureType.OilReservoir;
 
         [Option("Main Biome", "The main biome of the map\nDetermines available resources, flora, and fauna", WorldGenCategory)]
         [JsonProperty]
-        public BiomeType Biome { get; set; }
+        public BiomeType Biome { get; set; } = BiomeType.Temperate;
 
         [Option("Southern Biome", "The small biome at the bottom of the map\nProtected by a layer of abyssalite", WorldGenCategory)]
         [JsonProperty]
-        public CoreType CoreBiome { get; set; }
-        
+        public CoreType CoreBiome { get; set; } = CoreType.Magma;
+
         [Option("Resource Density", "Modifies the density of available resources", WorldGenCategory)]
         [JsonProperty]
-        public ResourceModifier ResourceMod { get; set; }
+        public ResourceModifier ResourceMod { get; set; } = ResourceModifier.Normal;
 
         [Option("Space Access", "Allows renewable resources to be collected from meteorites\nDoes not significantly increase the liveable area", WorldGenCategory)]
         [JsonProperty]
-        public AccessType SpaceAccess { get; set; }
+        public AccessType SpaceAccess { get; set; } = AccessType.Classic;
 
         [Option("Map Size", "The size of the liveable area\nSelect 'Custom' to define a custom size", SizeCategory)]
         [JsonProperty]
-        public BaseSize Size { get; set; }
+        public BaseSize Size { get; set; } = BaseSize.Normal;
 
         [Option("Space radiation intensity", "How many rads from the cosmic radiation", WorldGenCategory)]
         [JsonProperty]
-        public Intensity SpaceRads { get; set; }
+        public Intensity SpaceRads { get; set; } = Intensity.Med;
 
         [Option("Meteor showers", "The type of meteor shower that will fall on the minibase", WorldGenCategory)]
         [JsonProperty]
-        public MeteorShowerType MeteorShower { get; set; }
+        public MeteorShowerType MeteorShower { get; set; } = MeteorShowerType.Mixed;
 
         [Option("Gilded asteroid distance", "Distance from the center of starmap the gilded asteroid is located (fullerene and gold)", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int GildedAsteroidDistance { get; set; }
+        public int GildedAsteroidDistance { get; set; } = 8;
 
         [Option("Oil mini-moonlet", "A neabry planetoid with oil wells and a volcano", WorldGenCategory)]
         [JsonProperty]
@@ -70,7 +69,7 @@ namespace MiniBase
         [Option("Oil mini-moonlet distance", "Distance from the center of starmap the oil mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int OilMoonletDistance { get; set; }
+        public int OilMoonletDistance { get; set; } = 3;
 
         [Option("Resin mini-moonlet", "A planetoid with the Experiment 52B (resin tree)", WorldGenCategory)]
         [JsonProperty]
@@ -79,7 +78,7 @@ namespace MiniBase
         [Option("Resin mini-moonlet distance", "Distance from the center of starmap the resin mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int ResinMoonletDistance { get; set; }
+        public int ResinMoonletDistance { get; set; } = 5;
 
         [Option("Niobium mini-moonlet", "A planetoid with niobium, and magma, lots of magma", WorldGenCategory)]
         [JsonProperty]
@@ -88,8 +87,8 @@ namespace MiniBase
         [Option("Niobium mini-moonlet distance", "Distance from the center of starmap the niobium mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int NiobiumMoonletDistance { get; set; }
-        
+        public int NiobiumMoonletDistance { get; set; } = 10;
+
         [Option("Frozen forest mini-moonlet", "A frigid location marked by inhospitably low temperatures throughout.", WorldGenCategory)]
         [JsonProperty]
         public bool FrozenForestMoonlet { get; set; }
@@ -101,76 +100,76 @@ namespace MiniBase
         [Option("Badlands mini-moonlet", "A rocky and barren mini-moonlet with an overabundance of minerals.", WorldGenCategory)]
         [JsonProperty]
         public bool BadlandsMoonlet { get; set; }
-        
+
         [Option("Badlands mini-moonlet distance", "Distance from the center of the starmap the badlands mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
-        public int BadlandsMoonletDistance { get; set; }
-        
+        public int BadlandsMoonletDistance { get; set; } = 5;
+
         [Option("Flipped mini-moonlet", "An asteroid in which the surface is molten hot lava and the core is livable.", WorldGenCategory)]
         [JsonProperty]
         public bool FlippedMoonlet { get; set; }
-        
+
         [Option("Flipped mini-moonlet distance", "Distance from the center of the starmap the flipped mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
-        public int FlippedMoonletDistance { get; set; }
-        
+        public int FlippedMoonletDistance { get; set; } = 5;
+
         [Option("Metallic swampy mini-moonlet", "A small swampy world with an abundance of renewable metal.", WorldGenCategory)]
         [JsonProperty]
         public bool MetallicSwampyMoonlet { get; set; }
-        
+
         [Option("Metallic swampy mini-moonlet distance", "Distance from the center of the starmap the metallic swampy mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
-        public int MetallicSwampyMoonletDistance { get; set; }
-        
+        public int MetallicSwampyMoonletDistance { get; set; } = 5;
+
         [Option("Radioactive ocean mini-moonlet", "An irradiated world with renewable water sources.", WorldGenCategory)]
         [JsonProperty]
         public bool RadioactiveOceanMoonlet { get; set; }
-        
+
         [Option("Radioactive ocean mini-moonlet distance", "Distance from the center of the starmap the radioactive ocean mini-moonlet is located", WorldGenCategory)]
         [Limit(3, 11)]
-        public int RadioactiveOceanMoonletDistance { get; set; }
+        public int RadioactiveOceanMoonletDistance { get; set; } = 5;
 
         [Option("Resin POI", "A new type of space POI where resin can be harvested", WorldGenCategory)]
         [JsonProperty]
-        public bool ResinPOI { get; set; }
+        public bool ResinPoi { get; set; } = true;
 
         [Option("Resin POI distance", "Distance from the center of starmap the resin poi is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int ResinPOIDistance { get; set; }
+        public int ResinPoiDistance { get; set; } = 5;
 
         [Option("Niobium POI", "A new type of space POI where niobium can be harvested", WorldGenCategory)]
         [JsonProperty]
-        public bool NiobiumPOI { get; set; }
+        public bool NiobiumPoi { get; set; } = true;
 
         [Option("Niobium POI distance", "Distance from the center of starmap the niobium poi is located", WorldGenCategory)]
         [Limit(3, 11)]
         [JsonProperty]
-        public int NiobiumPOIDistance { get; set; }
+        public int NiobiumPoiDistance { get; set; } = 10;
 
         [Option("Custom Width", "The width of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
-        public int CustomWidth { get; set; }
+        public int CustomWidth { get; set; } = 76;
 
         [Option("Custom Height", "The height of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
-        public int CustomHeight { get; set; }
+        public int CustomHeight { get; set; } = 49;
 
         [Option("Care Package Timer (Cycles)", "Period of care package drops, in cycles\nLower values give more frequent drops", AnytimeCategory)]
         [Limit(1, 10)]
         [JsonProperty]
-        public int CarePackageFrequency { get; set; }
+        public int CarePackageFrequency { get; set; } = 2;
 
         [Option("Tunnel Access", "Adds tunnels for access to left and right sides", WorldGenCategory)]
         [JsonProperty]
-        public TunnelAccessType TunnelAccess { get; set; }
+        public TunnelAccessType TunnelAccess { get; set; } = TunnelAccessType.None;
 
         [Option("Teleporter placement", "Controls where teleporters are placed if enabled.", WorldGenCategory)]
         [JsonProperty]
-        public WarpPlacementType TeleporterPlacement { get; set; }
-        
+        public WarpPlacementType TeleporterPlacement { get; set; } = WarpPlacementType.Corners;
+
         [JsonIgnore]
         public bool TeleportersEnabled =>
             OilMoonlet &&
@@ -206,63 +205,6 @@ namespace MiniBase
         public bool SkipLiveableArea;
         #endregion
         
-        #region Constructor
-        
-        public MiniBaseOptions()
-        {
-            MeteorShower = MeteorShowerType.Mixed;
-            SpaceRads = Intensity.Med;
-
-            OilMoonlet = false;
-            OilMoonletDistance = 3;
-
-            ResinMoonlet = false;
-            ResinMoonletDistance = 5;
-
-            NiobiumMoonlet = false;
-            NiobiumMoonletDistance = 10;
-
-            BadlandsMoonlet = false;
-            BadlandsMoonletDistance = 5;
-            
-            FlippedMoonlet = false;
-            FlippedMoonletDistance = 5;
-            
-            MetallicSwampyMoonlet = false;
-            MetallicSwampyMoonletDistance = 5;
-            
-            RadioactiveOceanMoonlet = false;
-            RadioactiveOceanMoonletDistance = 5;
-
-            ResinPOI = true;
-            ResinPOIDistance = 5;
-
-            NiobiumPOI = true;
-            NiobiumPOIDistance = 10;
-
-            GildedAsteroidDistance = 8;
-
-            FeatureWest = FeatureType.PollutedWater;
-            FeatureEast = FeatureType.RandomUseful;
-            FeatureSouth = FeatureType.OilReservoir;
-            Biome = BiomeType.Temperate;
-            CoreBiome = CoreType.Magma;
-            ResourceMod = ResourceModifier.Normal;
-            SpaceAccess = AccessType.Classic;
-            Size = BaseSize.Normal;
-            CustomWidth = 76;
-            CustomHeight = 49;
-            CarePackageFrequency = 2;
-            TunnelAccess = TunnelAccessType.None;
-            TeleporterPlacement = WarpPlacementType.Corners;
-
-            DebugMode = false;
-            FastImmigration = false;
-            SkipLiveableArea = false;
-        }
-        
-        #endregion
-        
         #region Methods
 
         public Vector2I GetWorldSize(Moonlet type)
@@ -283,7 +225,7 @@ namespace MiniBase
         {
             if (type == Moonlet.Start)
             {
-                return BaseSizeDictionary.TryGetValue(Size, out var size) ?
+                return _baseSizeDictionary.TryGetValue(Size, out var size) ?
                     size : new Vector2I(CustomWidth, CustomHeight);                
             }
             
@@ -295,7 +237,7 @@ namespace MiniBase
 
         public MiniBaseBiomeProfile GetBiome()
         {
-            return BiomeTypeMap.TryGetValue(Biome, out var profile) ? profile : TemperateProfile;
+            return _biomeTypeMap.TryGetValue(Biome, out var profile) ? profile : TemperateProfile;
         }
 
         public bool HasCore()
@@ -305,7 +247,7 @@ namespace MiniBase
 
         public MiniBaseBiomeProfile GetCoreBiome()
         {
-            return HasCore() ? CoreTypeMap[CoreBiome] : MagmaCoreProfile;
+            return HasCore() ? _coreTypeMap[CoreBiome] : MagmaCoreProfile;
         }
 
         public float GetResourceModifier()
@@ -428,7 +370,7 @@ namespace MiniBase
         
         #region Dictionaries
         
-        private static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
+        private static Dictionary<BaseSize, Vector2I> _baseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
         {
             { BaseSize.Tiny, new Vector2I(30, 20) },
             { BaseSize.Small, new Vector2I(50, 30) },
@@ -442,7 +384,7 @@ namespace MiniBase
             { BaseSize.Skinny, new Vector2I(26, 100) },
         };
 
-        private static Dictionary<BiomeType, MiniBaseBiomeProfile> BiomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
+        private static Dictionary<BiomeType, MiniBaseBiomeProfile> _biomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
         {
             { BiomeType.Temperate, TemperateProfile },
             { BiomeType.Forest, ForestProfile },
@@ -454,7 +396,7 @@ namespace MiniBase
             { BiomeType.DeepEssence, DeepEssenceProfile },
         };
 
-        private static Dictionary<CoreType, MiniBaseBiomeProfile> CoreTypeMap = new Dictionary<CoreType, MiniBaseBiomeProfile>()
+        private static Dictionary<CoreType, MiniBaseBiomeProfile> _coreTypeMap = new Dictionary<CoreType, MiniBaseBiomeProfile>()
         {
             { CoreType.Magma, MagmaCoreProfile },
             { CoreType.Ocean, OceanCoreProfile },
