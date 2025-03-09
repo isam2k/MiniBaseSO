@@ -82,7 +82,7 @@ namespace MiniBase
         #endregion
     }
 
-    public struct BandInfo
+    public readonly struct BandInfo
     {
         public readonly float CumulativeWeight;
         public readonly SimHashes ElementId;
