@@ -34,3 +34,5 @@ packages/
 scripts/
 #Unity and Klei libraries
 lib/
+#Editor files
+.idea/

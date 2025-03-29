@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using MiniBase.Model.Enums;
 
-namespace MiniBase.Profiles
+namespace MiniBase.Model.Profiles
 {
-    class MiniBaseBiomeProfiles
+    public static class MiniBaseBiomeProfiles
     {
-        public static MiniBaseBiomeProfile TemperateProfile = new MiniBaseBiomeProfile(
+        public static readonly MiniBaseBiomeProfile TemperateProfile = new MiniBaseBiomeProfile(
             "subworlds/sandstone/SandstoneStart",
             SimHashes.SandStone,
             -1f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.23f, SimHashes.Water),
                 new BandInfo(0.30f, SimHashes.Oxygen, density: 2f),
@@ -71,7 +72,7 @@ namespace MiniBase.Profiles
             "subworlds/forest/ForestStart",
             SimHashes.Dirt,
             -1f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.23f, SimHashes.Water),
                 new BandInfo(0.26f, SimHashes.CarbonDioxide),
@@ -137,11 +138,11 @@ namespace MiniBase.Profiles
             "subworlds/marsh/HotMarsh",
             SimHashes.Algae,
             303f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.22f, SimHashes.Water, 310f),
                 new BandInfo(0.27f, SimHashes.Oxygen, density: 2f),
-                new BandInfo(0.30f, SimHashes.SlimeMold, disease: MiniBaseConfig.DiseaseID.Slimelung),
+                new BandInfo(0.30f, SimHashes.SlimeMold, disease: DiseaseID.Slimelung),
                 new BandInfo(0.32f, SimHashes.Clay),
                 new BandInfo(0.34f, SimHashes.Sand, density: 2f),
                 new BandInfo(0.36f, SimHashes.FoolsGold),
@@ -154,7 +155,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.63f, SimHashes.IgneousRock),
                 new BandInfo(0.64f, SimHashes.BleachStone, density: 4f),
                 new BandInfo(0.66f, SimHashes.SedimentaryRock),
-                new BandInfo(0.73f, SimHashes.SlimeMold, disease: MiniBaseConfig.DiseaseID.Slimelung),
+                new BandInfo(0.73f, SimHashes.SlimeMold, disease: DiseaseID.Slimelung),
                 new BandInfo(0.77f, SimHashes.GoldAmalgam),
                 new BandInfo(0.85f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(1.00f, SimHashes.DirtyWater, 310f),
@@ -207,7 +208,7 @@ namespace MiniBase.Profiles
             "subworlds/frozen/Frozen",
             SimHashes.IgneousRock,
             275f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.10f, SimHashes.CarbonDioxide, 245f, density: 2f),
                 new BandInfo(0.24f, SimHashes.Oxygen, 245f, 2f),
@@ -267,7 +268,7 @@ namespace MiniBase.Profiles
             "subworlds/oil/OilPatch",
             SimHashes.SandStone,
             313f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.13f, SimHashes.CrudeOil, 373f, density: 4.3f),
                 new BandInfo(0.15f, SimHashes.Water, 373f),
@@ -338,7 +339,7 @@ namespace MiniBase.Profiles
             "subworlds/barren/BarrenGranite",
             SimHashes.IgneousRock,
             283f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.20f, SimHashes.Water),
                 new BandInfo(0.21f, SimHashes.CarbonDioxide, density: 2f),
@@ -372,11 +373,9 @@ namespace MiniBase.Profiles
                 new KeyValuePair<string, float>("BasicSingleHarvestPlantSeed", 1f),
             },
             spawnablesOnFloor:
-            new Dictionary<string, float>()
-            {
-            },
+            new Dictionary<string, float>(),
             spawnablesInGround:
-            new Dictionary<string, float>()
+            new Dictionary<string, float>
             {
                 { "Hatch", 0.004f },
                 { "HatchHard", 0.010f },
@@ -387,7 +386,7 @@ namespace MiniBase.Profiles
             "subworlds/barren/BarrenGranite",
             SimHashes.Dirt,
             -1f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.08f, SimHashes.Water),
                 new BandInfo(0.10f, SimHashes.Aluminum),
@@ -426,14 +425,14 @@ namespace MiniBase.Profiles
                 new BandInfo(0.76f, SimHashes.Granite),
                 new BandInfo(0.78f, SimHashes.Glass),
                 new BandInfo(0.80f, SimHashes.Dirt, density: 2f),
-                new BandInfo(0.82f, SimHashes.SlimeMold, disease: MiniBaseConfig.DiseaseID.Slimelung),
+                new BandInfo(0.82f, SimHashes.SlimeMold, disease: DiseaseID.Slimelung),
                 new BandInfo(0.84f, SimHashes.OxyRock),
                 new BandInfo(0.86f, SimHashes.Sand),
                 new BandInfo(0.88f, SimHashes.Clay),
                 new BandInfo(0.90f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(0.93f, SimHashes.DirtyIce),
                 new BandInfo(0.95f, SimHashes.OxyRock),
-                new BandInfo(1.00f, SimHashes.DirtyWater, disease: MiniBaseConfig.DiseaseID.FoodPoisoning),
+                new BandInfo(1.00f, SimHashes.DirtyWater, disease: DiseaseID.FoodPoisoning),
             },
             startingItems:
             new List<KeyValuePair<string, float>>()
@@ -507,7 +506,7 @@ namespace MiniBase.Profiles
             "subworlds/ocean/OceanDeep",
             SimHashes.Glass,
             287f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.25f, SimHashes.Water),
                 new BandInfo(0.30f, SimHashes.Oxygen, density: 3f),
@@ -555,7 +554,7 @@ namespace MiniBase.Profiles
             "subworlds/oil/OilPatch",
             SimHashes.Fossil,
             333f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.25f, SimHashes.CrudeOil, density: 4.3f),
                 new BandInfo(0.30f, SimHashes.Carbon, density: 2f),
@@ -574,11 +573,9 @@ namespace MiniBase.Profiles
                 new BandInfo(1.00f, SimHashes.Lead),
             },
             startingItems:
-            new List<KeyValuePair<string, float>>()
-            {
-            },
+            new List<KeyValuePair<string, float>>(),
             spawnablesOnFloor:
-            new Dictionary<string, float>()
+            new Dictionary<string, float>
             {
                 { "Oilfloater", 0.05f },
                 { "DivergentBeetle", 0.1f },
@@ -611,7 +608,7 @@ namespace MiniBase.Profiles
             "subworlds/oil/OilPatch",
             SimHashes.Obsidian,
             1873f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.12f, SimHashes.Niobium),
                 new BandInfo(0.30f, SimHashes.Obsidian),
@@ -623,34 +620,24 @@ namespace MiniBase.Profiles
                 new BandInfo(1.0f, SimHashes.Magma),
             },
             startingItems:
-            new List<KeyValuePair<string, float>>()
-            {
-            },
+            new List<KeyValuePair<string, float>>(),
             spawnablesOnFloor:
-            new Dictionary<string, float>()
-            {
-            },
+            new Dictionary<string, float>(),
             spawnablesInGround:
-            new Dictionary<string, float>()
-            {
-            },
+            new Dictionary<string, float>(),
             spawnablesInAir:
-            new Dictionary<string, float>()
-            {
-            },
+            new Dictionary<string, float>(),
             spawnablesInLiquid:
-            new Dictionary<string, float>()
-            {
-            });
+            new Dictionary<string, float>());
         public static MiniBaseBiomeProfile TreeMoonletProfile = new MiniBaseBiomeProfile(
             "subworlds/marsh/HotMarsh",
             SimHashes.Algae,
             303f,
-            new BandInfo[]
+            new []
             {
                 new BandInfo(0.22f, SimHashes.DirtyWater, 310f),
                 new BandInfo(0.27f, SimHashes.ContaminatedOxygen, density: 2f),
-                new BandInfo(0.30f, SimHashes.SlimeMold, disease: MiniBaseConfig.DiseaseID.Slimelung),
+                new BandInfo(0.30f, SimHashes.SlimeMold, disease: DiseaseID.Slimelung),
                 new BandInfo(0.32f, SimHashes.Clay),
                 new BandInfo(0.34f, SimHashes.Sand, density: 2f),
                 new BandInfo(0.36f, SimHashes.FoolsGold),
@@ -663,7 +650,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.63f, SimHashes.IgneousRock),
                 new BandInfo(0.64f, SimHashes.BleachStone, density: 4f),
                 new BandInfo(0.66f, SimHashes.SedimentaryRock),
-                new BandInfo(0.73f, SimHashes.SlimeMold, disease: MiniBaseConfig.DiseaseID.Slimelung),
+                new BandInfo(0.73f, SimHashes.SlimeMold, disease: DiseaseID.Slimelung),
                 new BandInfo(0.77f, SimHashes.GoldAmalgam),
                 new BandInfo(0.85f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(1.00f, SimHashes.DirtyWater, 310f),

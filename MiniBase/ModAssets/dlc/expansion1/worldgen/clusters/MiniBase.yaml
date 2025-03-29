@@ -1,7 +1,7 @@
-name: STRINGS.WORLDS.MINIBASE.NAME
-description: STRINGS.WORLDS.MINIBASE.DESCRIPTION
+name: STRINGS.CLUSTER_NAMES.MINIBASE.NAME
+description: STRINGS.CLUSTER_NAMES.MINIBASE.DESCRIPTION
 requiredDlcId: EXPANSION1_ID
-menuOrder: -1
+menuOrder: -2
 coordinatePrefix: MINI-B
 clusterCategory: 2
 disableStoryTraits: true
@@ -26,6 +26,22 @@ worldPlacements:
   allowedRings:
     min: 7
     max: 7
+- world: expansion1::worlds/BabyBadlands # Natural badlands moonlet
+  allowedRings:
+    min: 5
+    max: 5
+- world: expansion1::worlds/BabyFlipped # Natural flipped moonlet
+  allowedRings:
+    min: 5
+    max: 5
+- world: expansion1::worlds/BabyMetallicSwampy # Natural metallic swampy moonlet
+  allowedRings:
+    min: 5
+    max: 5
+- world: expansion1::worlds/BabyRadioactiveOcean # Natural radioactive ocean moonlet
+  allowedRings:
+    min: 5
+    max: 5
 
 poiPlacements:
   - pois:

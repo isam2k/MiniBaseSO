@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using MiniBase.Model.Enums;
 
 namespace MiniBase
 {
@@ -45,9 +46,9 @@ namespace MiniBase
         /// <returns></returns>
         public BandInfo GetBand(float f)
         {
-            for (int i = 0; i < BandProfile.Length; i++)
+            for (var i = 0; i < BandProfile.Length; i++)
             {
-                if (f < BandProfile[i].cumulativeWeight)
+                if (f < BandProfile[i].CumulativeWeight)
                 {
                     return BandProfile[i];
                 }
@@ -63,8 +64,8 @@ namespace MiniBase
         /// <returns></returns>
         public Sim.PhysicsData GetPhysicsData(BandInfo band, float modifier = 1f)
         {
-            float temperature = (band.temperature < 0 && DefaultTemperature > 0) ? DefaultTemperature : band.temperature;
-            return MiniBaseWorldGen.GetPhysicsData(band.GetElement(), modifier * band.density, temperature);
+            var temperature = (band.Temperature < 0 && DefaultTemperature > 0) ? DefaultTemperature : band.Temperature;
+            return MiniBaseWorldGen.GetPhysicsData(band.GetElement(), modifier * band.Density, temperature);
         }
         
         #region Fields
@@ -81,23 +82,23 @@ namespace MiniBase
         #endregion
     }
 
-    public struct BandInfo
+    public readonly struct BandInfo
     {
-        public float cumulativeWeight;
-        public SimHashes elementId;
-        public float temperature;
-        public float density;
-        public MiniBaseConfig.DiseaseID disease;
+        public readonly float CumulativeWeight;
+        public readonly SimHashes ElementId;
+        public readonly float Temperature;
+        public readonly float Density;
+        public readonly DiseaseID Disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, MiniBaseConfig.DiseaseID disease = MiniBaseConfig.DiseaseID.None)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, DiseaseID disease = DiseaseID.None)
         {
-            this.cumulativeWeight = cumulativeWeight;
-            this.elementId = elementId;
-            this.temperature = temperature;
-            this.density = density;
-            this.disease = disease;
+            CumulativeWeight = cumulativeWeight;
+            ElementId = elementId;
+            Temperature = temperature;
+            Density = density;
+            Disease = disease;
         }
 
-        public Element GetElement() { return ElementLoader.FindElementByHash(elementId); }
+        public Element GetElement() { return ElementLoader.FindElementByHash(ElementId); }
     }
 }

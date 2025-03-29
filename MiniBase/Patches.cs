@@ -4,22 +4,24 @@ using System.IO;
 using System.Linq;
 using Database;
 using HarmonyLib;
-using Klei;
 using Klei.AI;
 using KMod;
+using MiniBase.Model;
+using MiniBase.Model.Enums;
 using ProcGen;
 using ProcGenGame;
-using static MiniBase.MiniBaseConfig;
-using static MiniBase.MiniBaseUtils;
+
+// ReSharper disable InconsistentNaming
 
 namespace MiniBase
 {
     internal class Patches
     {
-        public static List<WorldPlacement> DefaultWorldPlacements = null;
-        public static List<SpaceMapPOIPlacement> DefaultPOIPlacements = null;
-        
-        // Reload mod options at asteroid select screen, before world gen happens
+        #region Misc
+
+        /// <summary>
+        /// Reload mod options at asteroid select screen, before world gen happens
+        /// </summary>
         [HarmonyPatch(typeof(ColonyDestinationSelectScreen), "LaunchClicked")]
         public static class ColonyDestinationSelectScreen_LaunchClicked_Patch
         {
@@ -35,7 +37,7 @@ namespace MiniBase
             public static void Postfix(ref GameplaySeasons __instance)
             {
                 // Custom meteor showers
-                var mixedMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent(
+                var mixedMinibaseShower = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
                         "ClusterMinibaseShower",
                         150f,
                         4.5f,
@@ -48,7 +50,7 @@ namespace MiniBase
                     .AddMeteor(UraniumCometConfig.ID, 1f)
                     .AddMeteor(RockCometConfig.ID, 1f));
 
-                var fullereneMinibaseShower = Db.Get().GameplayEvents.Add((GameplayEvent)new MeteorShowerEvent(
+                var fullereneMinibaseShower = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
                         "FullereneMinibaseShower",
                         150f,
                         4.5f,
@@ -69,7 +71,7 @@ namespace MiniBase
                     .AddMeteor(GoldCometConfig.ID, 2f)
                     .AddMeteor(RockCometConfig.ID, 0.5f)
                     .AddMeteor(DustCometConfig.ID, 5f));
-                
+
                 var vanillaMeteorShowerCopperEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
                         "MiniBaseVanillaMeteorShowerCopperEvent",
                         4200f,
@@ -79,7 +81,7 @@ namespace MiniBase
                         secondsBombardmentOff: new MathUtil.MinMax(300f, 1200f))
                     .AddMeteor(CopperCometConfig.ID, 1f)
                     .AddMeteor(RockCometConfig.ID, 1f));
-                
+
                 var vanillaMeteorShowerIronEvent = Db.Get().GameplayEvents.Add(new MeteorShowerEvent(
                         "MiniBaseVanillaMeteorShowerIronEvent",
                         6000f,
@@ -100,7 +102,7 @@ namespace MiniBase
                         startActive: true,
                         clusterTravelDuration: 6000f)
                     .AddEvent(fullereneMinibaseShower));
-                
+
                 __instance.Add(new MeteorShowerSeason(
                         "MixedMinibaseShower",
                         GameplaySeason.Type.World,
@@ -110,7 +112,7 @@ namespace MiniBase
                         startActive: true,
                         clusterTravelDuration: 6000f)
                     .AddEvent(mixedMinibaseShower));
-                
+
                 __instance.Add(new MeteorShowerSeason(
                         "VanillaMinibaseShower",
                         GameplaySeason.Type.World,
@@ -131,10 +133,10 @@ namespace MiniBase
             public static void Prefix()
             {
                 MiniBaseOptions.Reload();
-                
+
                 WorldGen_RenderOffline_Patch.FoundTemporalTearOpener = false;
                 WorldGen_RenderOffline_Patch.AfterWorldGen = false;
-                
+
                 if (DlcManager.IsExpansion1Active())
                 {
                     Expansion1OnSpawn();
@@ -147,153 +149,97 @@ namespace MiniBase
 
             private static void VanillaOnSpawn()
             {
-                var minibaseWorld = SettingsCache.worlds.worldCache["worlds/MiniBase"];
-                var baseSize = MiniBaseOptions.Instance.GetBaseSize();
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * BorderSize, baseSize.y + 2 * BorderSize + TopMargin));
+                var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.VanillaStartMap];
+                Traverse
+                    .Create(minibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Start));
             }
 
             private static void Expansion1OnSpawn()
             {
-                const string miniBasePath = "expansion1::worlds/MiniBase";
-                const string babyOilPath = "expansion1::worlds/BabyOilyMoonlet";
-                const string babyMarshyPath = "expansion1::worlds/BabyMarshyMoonlet";
-                const string babyNiobiumPath = "expansion1::worlds/BabyNiobiumMoonlet";
-                
-                var minibaseWorld = SettingsCache.worlds.worldCache[miniBasePath];
-                var oilyMinibaseWorld = SettingsCache.worlds.worldCache[babyOilPath];
-                var marshyMinibaseWorld = SettingsCache.worlds.worldCache[babyMarshyPath];
-                var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[babyNiobiumPath];
+                var minibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcStartMap];
+                var oilyMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcSecondMap];
+                var marshyMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcMarshyMap];
+                var niobiumMinibaseWorld = SettingsCache.worlds.worldCache[MoonletData.DlcNiobiumMap];
 
-                var baseSize = MiniBaseOptions.Instance.GetBaseSize();
-                var colonizableBaseSize = new Vector2I(50, 60);
+                Traverse
+                    .Create(minibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Start));
+                Traverse
+                    .Create(oilyMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Second));
+                Traverse
+                    .Create(marshyMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Tree));
+                Traverse
+                    .Create(niobiumMinibaseWorld)
+                    .Property("worldsize")
+                    .SetValue(MiniBaseOptions.Instance.GetWorldSize(Moonlet.Niobium));
 
-                Traverse.Create(minibaseWorld).Property("worldsize").SetValue(new Vector2I(baseSize.x + 2 * BorderSize, baseSize.y + 2 * BorderSize + TopMargin));
-                Traverse.Create(oilyMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
-                Traverse.Create(marshyMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
-                Traverse.Create(niobiumMinibaseWorld).Property("worldsize").SetValue(new Vector2I(colonizableBaseSize.x + 2 * BorderSize, colonizableBaseSize.y + 2 * BorderSize + TopMargin + ColonizableExtraMargin));
+                MiniBaseOptions.Instance.Configure(minibaseWorld);
 
-                minibaseWorld.seasons.Clear();
-                
-                switch (MiniBaseOptions.Instance.SpaceRads)
+                var cluster = SettingsCache.clusterLayouts.clusterCache[MoonletData.MiniBaseCluster];
+
+                cluster.startWorldIndex = 0;
+
+                // get the list of worlds to spawn, which will also contain
+                // some worlds the user can disallow in the options. process
+                // the list according to the options and save the updated list
+                var defaultPlacements = cluster.worldPlacements;
+                cluster.worldPlacements = new List<WorldPlacement>();
+                foreach (var world in defaultPlacements)
                 {
-                    case MiniBaseOptions.Intensity.VERY_VERY_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.MED_LOW:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW);
-                        break;
-                    case MiniBaseOptions.Intensity.MED:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED);
-                        break;
-                    case MiniBaseOptions.Intensity.MED_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.VERY_VERY_HIGH:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH);
-                        break;
-                    case MiniBaseOptions.Intensity.NONE:
-                        minibaseWorld.fixedTraits.Add(TUNING.FIXEDTRAITS.COSMICRADIATION.NAME.NONE);
-                        break;
-                }
-
-                switch (MiniBaseOptions.Instance.MeteorShower)
-                {
-                    case MiniBaseOptions.MeteorShowerType.Classic:
-                        minibaseWorld.seasons.Add("VanillaMinibaseShower");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.SpacedOut:
-                        minibaseWorld.seasons.Add("ClassicStyleStartMeteorShowers");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.Radioactive:
-                        minibaseWorld.seasons.Add("MiniRadioactiveOceanMeteorShowers");
-                        break;
-                    case MiniBaseOptions.MeteorShowerType.Fullerene:
-                        minibaseWorld.seasons.Add("FullereneMinibaseShower");
-                        break;
-                    default:
-                        minibaseWorld.seasons.Add("MixedMinibaseShower");
-                        break;
-                }
-
-                Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
-                var minibase_layout = clusterCache["expansion1::clusters/MiniBase"];
-
-                if (DefaultWorldPlacements == null)
-                {
-                    DefaultWorldPlacements = minibase_layout.worldPlacements;
-                }
-
-                if (DefaultPOIPlacements == null)
-                {
-                    DefaultPOIPlacements = minibase_layout.poiPlacements;
-                }
-
-                minibase_layout.worldPlacements = new List<WorldPlacement>();
-                minibase_layout.poiPlacements = new List<SpaceMapPOIPlacement>(DefaultPOIPlacements);
-                minibase_layout.startWorldIndex = 0;
-
-                foreach (var world in DefaultWorldPlacements)
-                {
-                    switch (world.world)
+                    if (!MiniBaseOptions.Instance.GetWorldParameters(world, out var distance))
                     {
-                        case babyOilPath:
-                            if (MiniBaseOptions.Instance.OilMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.OilMoonletDisance, MiniBaseOptions.Instance.OilMoonletDisance);
-                            }
-                            break;
-                        case babyMarshyPath:
-                            if (MiniBaseOptions.Instance.ResinMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.ResinMoonletDisance, MiniBaseOptions.Instance.ResinMoonletDisance);
-                            }
-                            break;
-                        case babyNiobiumPath:
-                            if (MiniBaseOptions.Instance.NiobiumMoonlet)
-                            {
-                                world.allowedRings = new MinMaxI(MiniBaseOptions.Instance.NiobiumMoonletDisance, MiniBaseOptions.Instance.NiobiumMoonletDisance);
-                            }
-                            break;
+                        continue;
                     }
-                    minibase_layout.worldPlacements.Add(world);
-                }
-                void AddPOI(string name, int distance)
-                {
-                    FileHandle f = new FileHandle();
-                    var poi = YamlIO.Parse<SpaceMapPOIPlacement>($"pois:\n  - {name}\nnumToSpawn: 1\navoidClumping: true\nallowedRings:\n  min: {distance}\n  max: {distance}", f);
-                    minibase_layout.poiPlacements.Insert(0, poi);
-                };
 
-                if (MiniBaseOptions.Instance.ResinPOI)
-                {
-                    AddPOI("HarvestableSpacePOI_ResinAsteroidField", MiniBaseOptions.Instance.ResinPOIDistance);
-                }
-                if (MiniBaseOptions.Instance.NiobiumPOI)
-                {
-                    AddPOI("HarvestableSpacePOI_NiobiumAsteroidField", MiniBaseOptions.Instance.NiobiumPOIDistance);
+                    world.allowedRings = distance;
+                    cluster.worldPlacements.Add(world);
                 }
 
-                foreach (var poiPlacement in minibase_layout.poiPlacements.Where(poiPlacement => poiPlacement.pois.Count == 1 && poiPlacement.pois[0] == "HarvestableSpacePOI_GildedAsteroidField"))
+                var addPoi = new Action<string, int>((name, distance) =>
                 {
-                    poiPlacement.allowedRings = new MinMaxI(MiniBaseOptions.Instance.GildedAsteroidDistance, MiniBaseOptions.Instance.GildedAsteroidDistance);
-                    break;
+                    var poi = new SpaceMapPOIPlacement()
+                    {
+                        numToSpawn = 1,
+                        avoidClumping = true,
+                        allowedRings = new MinMaxI(distance, distance)
+                    };
+                    Traverse.Create(poi).Property("pois").SetValue(new List<string> { name });
+                    cluster.poiPlacements.Insert(0, poi);
+                });
+
+                // spawn the poi for renewable resin
+                if (MiniBaseOptions.Instance.ResinPoi)
+                {
+                    addPoi("HarvestableSpacePOI_ResinAsteroidField", MiniBaseOptions.Instance.ResinPoiDistance);
+                }
+
+                // spawn the poi for renewable niobium
+                if (MiniBaseOptions.Instance.NiobiumPoi)
+                {
+                    addPoi("HarvestableSpacePOI_NiobiumAsteroidField", MiniBaseOptions.Instance.NiobiumPoiDistance);
+                }
+
+                // modify the distance to the fullerene poi
+                var placement = cluster.poiPlacements
+                    .FirstOrDefault(p => p.pois.Contains("HarvestableSpacePOI_GildedAsteroidField"));
+                if (placement != null)
+                {
+                    placement.allowedRings = new MinMaxI(MiniBaseOptions.Instance.GildedAsteroidDistance,
+                        MiniBaseOptions.Instance.GildedAsteroidDistance);
                 }
             }
         }
 
-        // Reload mod options when game is reloaded from save
+        /// <summary>
+        /// Reload mod options when game is reloaded from save.
+        /// </summary>
         [HarmonyPatch(typeof(Game), "OnPrefabInit")]
         public static class Game_OnPrefabInit_Patch
         {
@@ -303,41 +249,49 @@ namespace MiniBase
             }
         }
 
-        // Reveal map on startup
+        /// <summary>
+        /// Reveal the map on startup.
+        /// </summary>
         [HarmonyPatch(typeof(MinionSelectScreen), "OnProceed")]
         public static class MinionSelectScreen_OnProceed_Patch
         {
             public static void Postfix()
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
-                int radius = (int)(Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f);
+
+                var radius = (int)(Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f);
                 GridVisibility.Reveal(0, 0, radius, radius - 1);
             }
         }
-        
+
+        /// <summary>
+        /// Open the temporal tear if no opener has been found in the cluster.
+        /// </summary>
         [HarmonyPatch(typeof(ClusterPOIManager), "RegisterTemporalTear")]
         public static class ClusterPOIManager_RegisterTemporalTear_Patch
         {
             public static void Postfix(TemporalTear temporalTear, ClusterPOIManager __instance)
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
+
                 if (!temporalTear.IsOpen() &&
                     !WorldGen_RenderOffline_Patch.FoundTemporalTearOpener &&
                     WorldGen_RenderOffline_Patch.AfterWorldGen)
                 {
                     temporalTear.Open();
                 }
+
                 WorldGen_RenderOffline_Patch.AfterWorldGen = false;
                 WorldGen_RenderOffline_Patch.FoundTemporalTearOpener = false;
             }
         }
-        
+
         /// <summary>
         /// Load translatable mod strings.
         /// </summary>
@@ -350,28 +304,29 @@ namespace MiniBase
             {
                 // basic intended way to register strings, keeps namespace
                 Localization.RegisterForTranslation(root);
-                
+
                 // load user created translation files
                 LoadStrings();
-                
+
                 // register strings without namespace
                 // because we already loaded user translations
                 // custom languages will overwrite these
                 LocString.CreateLocStringKeys(root, null);
-                
+
                 // creates template for users to edit
-                Localization.GenerateStringsTemplate(root, System.IO.Path.Combine(Manager.GetDirectory(), "strings_templates"));
+                Localization.GenerateStringsTemplate(root,
+                    System.IO.Path.Combine(Manager.GetDirectory(), "strings_templates"));
             }
 
             private static void LoadStrings()
             {
-                string code = Localization.GetLocale()?.Code;
+                var code = Localization.GetLocale()?.Code;
                 if (code.IsNullOrWhiteSpace())
                 {
                     return;
                 }
-                
-                string path = System.IO.Path.Combine(ModUtils.Constants.ModPath, "translations",
+
+                var path = System.IO.Path.Combine(ModUtils.Constants.ModPath, "translations",
                     code + ".po");
                 if (File.Exists(path))
                 {
@@ -379,158 +334,113 @@ namespace MiniBase
                 }
             }
         }
-        
+
+        #endregion
+
         #region CarePackages
 
-        // Immigration Speed
+        /// <summary>
+        /// Patching the frequency at which care packages become available.
+        /// </summary>
         [HarmonyPatch(typeof(Game), "OnSpawn")]
         public static class Game_OnSpawn_Patch
         {
             public static void Postfix()
             {
-                if (!IsMiniBaseCluster())
+                if (!MoonletData.IsMiniBaseCluster())
                 {
                     return;
                 }
+
                 var immigration = Immigration.Instance;
                 const float SecondsPerDay = 600f;
-                float frequency = MiniBaseOptions.Instance.FastImmigration ? 10f : (MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay);
-                immigration.spawnInterval = new float[] { frequency, frequency };
+                var frequency = MiniBaseOptions.Instance.FastImmigration
+                    ? 10f
+                    : (MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay);
+                immigration.spawnInterval = new[] { frequency, frequency };
                 immigration.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
             }
         }
 
-        // Add care package drops
-        [HarmonyPatch(typeof(Immigration), "ConfigureCarePackages")]
-        public static class Immigration_ConfigureCarePackages_Patch
-        {
-            public static void Postfix(ref CarePackageInfo[] ___carePackages)
-            {
-                if (!IsMiniBaseCluster())
-                {
-                    return;
-                }
-                
-                // Add new care packages
-                var packageList = ___carePackages.ToList();
-                void AddElement(SimHashes element, float amount, int cycle = -1)
-                {
-                    AddItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle);
-                }
-                void AddItem(string name, float amount, int cycle = -1)
-                {
-                    packageList.Add(new CarePackageInfo(name, amount, cycle < 0 ? IsMiniBaseCluster : (Func<bool>)(() => CycleCondition(cycle) && IsMiniBaseCluster())));
-                }
-
-                // Minerals
-                AddElement(SimHashes.Granite, 2000f);
-                AddElement(SimHashes.IgneousRock, 2000f);
-                AddElement(SimHashes.Obsidian, 2000f, 24);
-                AddElement(SimHashes.Salt, 2000f);
-                AddElement(SimHashes.BleachStone, 2000f, 12);
-                AddElement(SimHashes.Fossil, 1000f, 24);
-                // Metals
-                AddElement(SimHashes.IronOre, 1000f);
-                AddElement(SimHashes.FoolsGold, 1000f, 12);
-                AddElement(SimHashes.Wolframite, 500f, 24);
-                AddElement(SimHashes.Lead, 1000f, 36);
-                AddElement(SimHashes.AluminumOre, 500f, 24);
-                AddElement(SimHashes.UraniumOre, 400f, 36);
-                // Liquids
-                AddElement(SimHashes.DirtyWater, 2000f, 12);
-                AddElement(SimHashes.CrudeOil, 1000f, 24);
-                AddElement(SimHashes.Petroleum, 1000f, 48);
-                // Gases
-                AddElement(SimHashes.ChlorineGas, 50f);
-                AddElement(SimHashes.Methane, 50f, 24);
-                // Plants
-                AddItem("BasicSingleHarvestPlantSeed", 4f);             // Mealwood
-                AddItem("SeaLettuceSeed", 3f);                          // Waterweed
-                AddItem("SaltPlantSeed", 3f);                           // Dasha Saltvine
-                AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
-                AddItem("ColdWheatSeed", 8f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
-                AddItem("BeanPlantSeed", 5f);                           // Nosh Bean
-                AddItem("EvilFlowerSeed", 1f, 36);                 // Sporechid
-                AddItem("WormPlantSeed", 3f);                           // Grubfruit Plant
-                AddItem("SwampHarvestPlantSeed", 3f);                   // Bog Bucket Plant
-                AddItem("CritterTrapPlantSeed", 1f, 36);           // Satturn Critter Trap
-                // Critters
-                AddItem("PacuEgg", 3f);                                 // Pacu
-                AddItem("BeeBaby", 1f, 36);                        // Beetiny
-                ___carePackages = packageList.ToArray();
-            }
-
-            private static bool CycleCondition(int cycle) => GameClock.Instance.GetCycle() >= cycle;
-        }
-
-        // Remove the need to discover items for them to be available in the printing pod
+        /// <summary>
+        /// Remove the need to discover items for them to be available in the printing pod.
+        /// </summary>
         [HarmonyPatch(typeof(Immigration), "DiscoveredCondition")]
         public static class Immigration_DiscoveredCondition_Patch
         {
             public static void Postfix(ref bool __result)
             {
-                if (IsMiniBaseCluster())
+                if (MoonletData.IsMiniBaseCluster())
                 {
                     __result = true;
                 }
             }
         }
-        
+
         #endregion
 
         #region WorldGen
 
-        // Bypass and rewrite world generation
+        /// <summary>
+        /// Bypass and rewrite world generation. Spawn temporal tear and open it since
+        /// the minibase cluster does not spawn a moonlet with a temporal tear opener.
+        /// </summary>
         [HarmonyPatch(typeof(WorldGen), "RenderOffline")]
         public static class WorldGen_RenderOffline_Patch
         {
-            public static bool AfterWorldGen = false;
-            public static bool FoundTemporalTearOpener = false;
+            public static bool AfterWorldGen;
+            public static bool FoundTemporalTearOpener;
 
             public static bool Prefix(WorldGen __instance)
             {
                 // Skip the original method if on minibase world
-                return !IsMiniBaseWorld(__instance);
+                return !MoonletData.IsMiniBaseWorld(__instance);
             }
-            
-            public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits, bool isStartingWorld)
-            {
-                if (IsMiniBaseWorld(__instance))
-                {
-                    __result = MiniBaseWorldGen.CreateWorld(__instance, writer, ref cells, ref dc, baseId,
-                        ref placedStoryTraits, isStartingWorld);
-                }
 
-                if (!DlcManager.IsExpansion1Active() || !IsMiniBaseCluster())
+            public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer,
+                ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits,
+                bool isStartingWorld)
+            {
+                if (!MoonletData.IsMiniBaseWorld(__instance))
                 {
                     return;
                 }
-                
+
+                try
+                {
+                    MiniBaseWorldGen.CreateWorld(__instance, writer, baseId,
+                        out cells, out dc);
+                    __result = true;
+                }
+                catch (Exception e)
+                {
+                    __instance.ReportWorldGenError(e);
+                    __result = false;
+                    return;
+                }
+
+                if (!DlcManager.IsExpansion1Active())
+                {
+                    return;
+                }
+
                 AfterWorldGen = true;
-                
+
                 if (FoundTemporalTearOpener || __instance.POISpawners == null)
                 {
                     return;
                 }
-                
-                foreach (var spawner in __instance.POISpawners.Where(s => s.container.buildings != null))
-                {
-                    if (spawner.container.buildings.Exists(b => b.id == "TemporalTearOpener"))
-                    {
-                        FoundTemporalTearOpener = true;
-                        break;
-                    }
-                }
+
+                var spawner = __instance.POISpawners
+                    .Where(s => s.container.buildings != null)
+                    .FirstOrDefault(s => s.container.buildings.Exists(b => b.id == "TemporalTearOpener"));
+                FoundTemporalTearOpener = spawner != null;
             }
-            
-            private static bool IsMiniBaseWorld(WorldGen instance) =>
-                instance.Settings.world.filePath == "worlds/MiniBase" ||
-                instance.Settings.world.filePath == "expansion1::worlds/MiniBase" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyOilyMoonlet" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyMarshyMoonlet" ||
-                instance.Settings.world.filePath == "expansion1::worlds/BabyNiobiumMoonlet";
         }
 
+        /// <summary>
+        /// Add additional harvestable space POI for spaced out to make niobium and resin renewable.
+        /// </summary>
         [HarmonyPatch(typeof(EntityConfigManager), "RegisterEntities")]
         public static class EntityConfigManager_RegisterEntities_Patch
         {
@@ -541,47 +451,57 @@ namespace MiniBase
                     return;
                 }
 
-                void AddPrefab(HarvestablePOIConfig.HarvestablePOIParams poi_config)
+                var addPrefab = new Action<HarvestablePOIConfig.HarvestablePOIParams>((poiConfig) =>
                 {
-                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poi_config.id, poi_config.anim, (string)Strings.Get(poi_config.nameStringKey), poi_config.descStringKey, poi_config.poiType.idHash, poi_config.poiType.canProvideArtifacts);
-                    KPrefabID component = prefab.GetComponent<KPrefabID>();
-                    component.prefabInitFn += new KPrefabID.PrefabFn(config.OnPrefabInit);
-                    component.prefabSpawnFn += new KPrefabID.PrefabFn(config.OnSpawn);
+                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poiConfig.id, poiConfig.anim,
+                        Strings.Get(poiConfig.nameStringKey), poiConfig.descStringKey,
+                        poiConfig.poiType.idHash, poiConfig.poiType.canProvideArtifacts);
+                    var component = prefab.GetComponent<KPrefabID>();
+                    component.prefabInitFn += config.OnPrefabInit;
+                    component.prefabSpawnFn += config.OnSpawn;
                     Assets.AddPrefab(component);
-                }
-                AddPrefab(new HarvestablePOIConfig.HarvestablePOIParams("metallic_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("NiobiumAsteroidField", new Dictionary<SimHashes, float>()
-                {
-                    {
-                        SimHashes.Obsidian,
-                        5.0f
-                    },
-                    {
-                        SimHashes.MoltenTungsten,
-                        3.0f
-                    },
-                    {
-                        SimHashes.Niobium,
-                        0.03f
-                    }
-                })));
-                AddPrefab(new HarvestablePOIConfig.HarvestablePOIParams("gilded_asteroid_field", new HarvestablePOIConfigurator.HarvestablePOIType("ResinAsteroidField", new Dictionary<SimHashes, float>()
-                {
-                    {
-                        SimHashes.Fossil,
-                        0.2f
-                    },
-                    {
-                        SimHashes.CrudeOil,
-                        0.4f
-                    },
-                    {
-                        SimHashes.Resin,
-                        0.4f
-                    }
-                }, 56250, 56250, 30000, 30000)));
+                });
+                addPrefab(new HarvestablePOIConfig.HarvestablePOIParams("metallic_asteroid_field",
+                    new HarvestablePOIConfigurator.HarvestablePOIType("NiobiumAsteroidField",
+                        new Dictionary<SimHashes, float>()
+                        {
+                            {
+                                SimHashes.Obsidian,
+                                5.0f
+                            },
+                            {
+                                SimHashes.MoltenTungsten,
+                                3.0f
+                            },
+                            {
+                                SimHashes.Niobium,
+                                0.03f
+                            }
+                        },
+                        requiredDlcIds: null,
+                        forbiddenDlcIds: null)));
+                addPrefab(new HarvestablePOIConfig.HarvestablePOIParams("gilded_asteroid_field",
+                    new HarvestablePOIConfigurator.HarvestablePOIType("ResinAsteroidField",
+                        new Dictionary<SimHashes, float>()
+                        {
+                            {
+                                SimHashes.Fossil,
+                                0.2f
+                            },
+                            {
+                                SimHashes.CrudeOil,
+                                0.4f
+                            },
+                            {
+                                SimHashes.Resin,
+                                0.4f
+                            }
+                        }, 56250, 56250, 30000, 30000,
+                        requiredDlcIds: null,
+                        forbiddenDlcIds: null)));
             }
         }
-        
+
         #endregion
     }
 }
