@@ -820,7 +820,7 @@ namespace MiniBase
                         }
                     };
                     break;
-                default:
+                case AccessType.Classic:
                     generateAccess = (y, mat) =>
                     {
                         // Left cutout
@@ -844,28 +844,37 @@ namespace MiniBase
                         }
                     };
                     break;
+                default:
+                    generateAccess = (y, mat) => { };
+                    break;
             }
-
+            
             Action<int, Element> generateSideBiomeCutouts = (y, mat) =>
             {
                 // Far left cutout
-                for (var x = MiniBaseOptions.BorderSize;
-                     x < Math.Min(
-                         MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
-                         moonletData.WorldSize.x - MiniBaseOptions.BorderSize);
-                     x++)
+                if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
                 {
-                    addBorderCell(x, y, mat);
+                    for (var x = MiniBaseOptions.BorderSize;
+                         x < Math.Min(
+                             MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
+                             moonletData.WorldSize.x - MiniBaseOptions.BorderSize);
+                         x++)
+                    {
+                        addBorderCell(x, y, mat);
+                    }
                 }
 
                 // Far right cutout
-                for (var x = Math.Max(
-                         moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
-                         MiniBaseOptions.BorderSize);
-                     x < moonletData.WorldSize.x - MiniBaseOptions.BorderSize;
-                     x++)
+                if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
                 {
-                    addBorderCell(x, y, mat);
+                    for (var x = Math.Max(
+                             moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
+                             MiniBaseOptions.BorderSize);
+                         x < moonletData.WorldSize.x - MiniBaseOptions.BorderSize;
+                         x++)
+                    {
+                        addBorderCell(x, y, mat);
+                    }
                 }
             };
 
