@@ -21,21 +21,26 @@ namespace MiniBase
 {
     public static class MiniBaseWorldGen
     {
-        public static void CreateWorld(WorldGen gen, BinaryWriter writer, int baseId, out Sim.Cell[] cells,
+        public static void CreateWorld(
+            WorldGen gen,
+            BinaryWriter writer,
+            uint simSeed,
+            int baseId,
+            out Sim.Cell[] cells,
             out Sim.DiseaseCell[] dc)
         {
             var moonletData = new MoonletData(gen);
             if (DlcManager.IsExpansion1Active())
             {
-                CreateSoWorld(gen, writer, baseId, moonletData, out cells, out dc);
+                CreateSoWorld(gen, writer, simSeed, baseId, moonletData, out cells, out dc);
             }
             else
             {
-                CreateVanillaWorld(gen, writer, baseId, moonletData, out cells, out dc);
+                CreateVanillaWorld(gen, writer, simSeed, baseId, moonletData, out cells, out dc);
             }
         }
 
-        private static void CreateVanillaWorld(WorldGen gen, BinaryWriter writer, int baseId, MoonletData moonletData,
+        private static void CreateVanillaWorld(WorldGen gen, BinaryWriter writer, uint simSeed, int baseId, MoonletData moonletData,
             out Sim.Cell[] cells,
             out Sim.DiseaseCell[] dc)
         {
@@ -149,8 +154,18 @@ namespace MiniBase
 
             // Settle simulation
             // This writes the cells to the world, then performs a couple of game frames of simulation, then saves the game
-            running.SetValue(WorldGenSimUtil.DoSettleSim(gen.Settings, writer, ref cells, ref bgTemp, ref dc,
-                updateProgressFn, data, templateSpawnTargets, errorCallback, baseId));
+            running.SetValue(WorldGenSimUtil.DoSettleSim(
+                gen.Settings,
+                writer,
+                simSeed,
+                ref cells,
+                ref bgTemp,
+                ref dc,
+                updateProgressFn,
+                data,
+                templateSpawnTargets,
+                errorCallback,
+                baseId));
 
             // Place templates, pretty much just the printing pod
             var claimedCells = new Dictionary<int, int>();
@@ -174,7 +189,7 @@ namespace MiniBase
             running.SetValue(false);
         }
 
-        private static void CreateSoWorld(WorldGen gen, BinaryWriter writer, int baseId, MoonletData moonletData,
+        private static void CreateSoWorld(WorldGen gen, BinaryWriter writer, uint simSeed, int baseId, MoonletData moonletData,
             out Sim.Cell[] cells,
             out Sim.DiseaseCell[] dc)
         {
@@ -388,8 +403,18 @@ namespace MiniBase
 
             // Settle simulation
             // This writes the cells to the world, then performs a couple of game frames of simulation, then saves the game
-            running.SetValue(WorldGenSimUtil.DoSettleSim(gen.Settings, writer, ref cells, ref bgTemp, ref dc,
-                updateProgressFn, gen.data, templateSpawnTargets, errorCallback, baseId));
+            running.SetValue(WorldGenSimUtil.DoSettleSim(
+                gen.Settings,
+                writer,
+                simSeed,
+                ref cells,
+                ref bgTemp,
+                ref dc,
+                updateProgressFn,
+                gen.data,
+                templateSpawnTargets,
+                errorCallback,
+                baseId));
 
             // Place templates, pretty much just the printing pod
             var claimedCells = new Dictionary<int, int>();
