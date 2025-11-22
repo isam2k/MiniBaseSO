@@ -96,31 +96,31 @@ namespace MiniBase
                 __instance.Add(new MeteorShowerSeason(
                         "FullereneMinibaseShower",
                         GameplaySeason.Type.World,
-                        "EXPANSION1_ID",
                         20f,
                         false,
                         startActive: true,
-                        clusterTravelDuration: 6000f)
+                        clusterTravelDuration: 6000f,
+                        requiredDlcIds: new[] { "EXPANSION1_ID" })
                     .AddEvent(fullereneMinibaseShower));
 
                 __instance.Add(new MeteorShowerSeason(
                         "MixedMinibaseShower",
                         GameplaySeason.Type.World,
-                        "EXPANSION1_ID",
                         20f,
                         false,
                         startActive: true,
-                        clusterTravelDuration: 6000f)
+                        clusterTravelDuration: 6000f,
+                        requiredDlcIds: new[] { "EXPANSION1_ID" })
                     .AddEvent(mixedMinibaseShower));
 
                 __instance.Add(new MeteorShowerSeason(
                         "VanillaMinibaseShower",
                         GameplaySeason.Type.World,
-                        "EXPANSION1_ID",
                         20f,
                         false,
                         startActive: true,
-                        clusterTravelDuration: 6000f)
+                        clusterTravelDuration: 6000f,
+                        requiredDlcIds: new[] { "EXPANSION1_ID" })
                     .AddEvent(vanillaMeteorShowerIronEvent)
                     .AddEvent(vanillaMeteorShowerGoldEvent)
                     .AddEvent(vanillaMeteorShowerCopperEvent));
@@ -397,8 +397,16 @@ namespace MiniBase
                 return !MoonletData.IsMiniBaseWorld(__instance);
             }
 
-            public static void Postfix(WorldGen __instance, ref bool __result, bool doSettle, BinaryWriter writer,
-                ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId, ref List<WorldTrait> placedStoryTraits,
+            public static void Postfix(
+                WorldGen __instance,
+                ref bool __result,
+                bool doSettle,
+                uint simSeed,
+                BinaryWriter writer,
+                ref Sim.Cell[] cells,
+                ref Sim.DiseaseCell[] dc,
+                int baseId,
+                ref List<WorldTrait> placedStoryTraits,
                 bool isStartingWorld)
             {
                 if (!MoonletData.IsMiniBaseWorld(__instance))
@@ -408,8 +416,13 @@ namespace MiniBase
 
                 try
                 {
-                    MiniBaseWorldGen.CreateWorld(__instance, writer, baseId,
-                        out cells, out dc);
+                    MiniBaseWorldGen.CreateWorld(
+                        __instance,
+                        writer,
+                        simSeed,
+                        baseId,
+                        out cells,
+                        out dc);
                     __result = true;
                 }
                 catch (Exception e)
@@ -451,11 +464,10 @@ namespace MiniBase
                     return;
                 }
 
-                var addPrefab = new Action<HarvestablePOIConfig.HarvestablePOIParams>((poiConfig) =>
+                var addPrefab = new Action<HarvestablePOIConfig.HarvestablePOIParams>(poiConfig =>
                 {
-                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poiConfig.id, poiConfig.anim,
-                        Strings.Get(poiConfig.nameStringKey), poiConfig.descStringKey,
-                        poiConfig.poiType.idHash, poiConfig.poiType.canProvideArtifacts);
+                    var prefab = HarvestablePOIConfig.CreateHarvestablePOI(poiConfig);
+
                     var component = prefab.GetComponent<KPrefabID>();
                     component.prefabInitFn += config.OnPrefabInit;
                     component.prefabSpawnFn += config.OnSpawn;
