@@ -103,7 +103,6 @@
     <Compile Include="Mod.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />
     <Compile Include="Model\Enums\AccessType.cs" />
-    <Compile Include="Model\Enums\BaseSize.cs" />
     <Compile Include="Model\Enums\BiomeType.cs" />
     <Compile Include="Model\Enums\CoreType.cs" />
     <Compile Include="Model\Enums\CornerType.cs" />

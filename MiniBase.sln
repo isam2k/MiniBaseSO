@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniBase", "MiniBase\MiniBa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModUtils", "ModUtils\ModUtils.csproj", "{339718FB-7413-4EFC-BC53-70E1B5E0D027}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{D8027F0B-08F8-4946-9561-35E1D7DF1578}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\publish_dev.sh = scripts\publish_dev.sh
+		scripts\prepare_lib.sh = scripts\prepare_lib.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
