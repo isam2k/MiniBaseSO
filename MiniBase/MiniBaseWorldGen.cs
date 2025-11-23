@@ -40,7 +40,12 @@ namespace MiniBase
             }
         }
 
-        private static void CreateVanillaWorld(WorldGen gen, BinaryWriter writer, uint simSeed, int baseId, MoonletData moonletData,
+        private static void CreateVanillaWorld(
+            WorldGen gen,
+            BinaryWriter writer,
+            uint simSeed,
+            int baseId,
+            MoonletData moonletData,
             out Sim.Cell[] cells,
             out Sim.DiseaseCell[] dc)
         {
@@ -189,7 +194,12 @@ namespace MiniBase
             running.SetValue(false);
         }
 
-        private static void CreateSoWorld(WorldGen gen, BinaryWriter writer, uint simSeed, int baseId, MoonletData moonletData,
+        private static void CreateSoWorld(
+            WorldGen gen,
+            BinaryWriter writer,
+            uint simSeed,
+            int baseId,
+            MoonletData moonletData,
             out Sim.Cell[] cells,
             out Sim.DiseaseCell[] dc)
         {
@@ -583,8 +593,13 @@ namespace MiniBase
         /// <param name="noiseMap"></param>
         /// <param name="coreCells"></param>
         /// <returns></returns>
-        private static ISet<Vector2I> DrawCustomTerrain(MoonletData moonletData, Data data, Sim.Cell[] cells,
-            Sim.DiseaseCell[] dc, float[,] noiseMap, out ISet<Vector2I> coreCells)
+        private static ISet<Vector2I> DrawCustomTerrain(
+            MoonletData moonletData,
+            Data data,
+            Sim.Cell[] cells,
+            Sim.DiseaseCell[] dc,
+            float[,] noiseMap,
+            out ISet<Vector2I> coreCells)
         {
             var biomeCells = new HashSet<Vector2I>();
             var sideCells = new HashSet<Vector2I>();
@@ -898,8 +913,14 @@ namespace MiniBase
         /// <param name="coverMaterial"></param>
         /// <param name="neutronium"></param>
         /// <param name="cover"></param>
-        private static void PlaceGeyser(Data data, Sim.Cell[] cells, FeatureType type, Vector2I pos,
-            Element coverMaterial, bool neutronium = true, bool cover = true)
+        private static void PlaceGeyser(
+            Data data,
+            Sim.Cell[] cells,
+            FeatureType type,
+            Vector2I pos,
+            Element coverMaterial,
+            bool neutronium = true,
+            bool cover = true)
         {
             string featureName;
             switch (type)

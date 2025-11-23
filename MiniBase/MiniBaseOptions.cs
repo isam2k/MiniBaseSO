@@ -78,29 +78,29 @@ namespace MiniBase
         
         #region Spaced out only options
 
-        [Option("Space radiation intensity", "How many rads from the cosmic radiation", WorldGenCategory)]
+        [Option("Space radiation intensity", "How many rads from the cosmic radiation", SpacedOutOnlyCategory)]
         [JsonProperty]
         public Intensity SpaceRads { get; set; } = Intensity.Med;
         
-        [Option("Gilded asteroid distance", "Distance from the center of starmap the gilded asteroid is located (fullerene and gold)", WorldGenCategory)]
+        [Option("Gilded asteroid distance", "Distance from the center of starmap the gilded asteroid is located (fullerene and gold)", SpacedOutOnlyCategory)]
         [Limit(3, 11)]
         [JsonProperty]
         public int GildedAsteroidDistance { get; set; } = 8;
 
-        [Option("Resin POI", "A new type of space POI where resin can be harvested", WorldGenCategory)]
+        [Option("Resin POI", "A new type of space POI where resin can be harvested", SpacedOutOnlyCategory)]
         [JsonProperty]
         public bool ResinPoi { get; set; } = true;
 
-        [Option("Resin POI distance", "Distance from the center of starmap the resin poi is located", WorldGenCategory)]
+        [Option("Resin POI distance", "Distance from the center of starmap the resin poi is located", SpacedOutOnlyCategory)]
         [Limit(3, 11)]
         [JsonProperty]
         public int ResinPoiDistance { get; set; } = 5;
 
-        [Option("Niobium POI", "A new type of space POI where niobium can be harvested", WorldGenCategory)]
+        [Option("Niobium POI", "A new type of space POI where niobium can be harvested", SpacedOutOnlyCategory)]
         [JsonProperty]
         public bool NiobiumPoi { get; set; } = true;
 
-        [Option("Niobium POI distance", "Distance from the center of starmap the niobium poi is located", WorldGenCategory)]
+        [Option("Niobium POI distance", "Distance from the center of starmap the niobium poi is located", SpacedOutOnlyCategory)]
         [Limit(3, 11)]
         [JsonProperty]
         public int NiobiumPoiDistance { get; set; } = 10;
@@ -226,32 +226,29 @@ namespace MiniBase
 
         public Vector2I GetWorldSize(Moonlet type)
         {
-            switch (type)
+            if (type == Moonlet.Start)
             {
-                case Moonlet.Second:
-                case Moonlet.Tree:
-                case Moonlet.Niobium:
-                    return new Vector2I(
-                        50 + (2 * BorderSize),
-                        60 + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
-                default: return new Vector2I(
-                    BaseWidth + (2 * BorderSize) + 22,
+                return new Vector2I(
+                    BaseWidth + (2 * BorderSize) + 36,
                     BaseHeight + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
             }
+            
+            return new Vector2I(
+                50 + (2 * BorderSize),
+                60 + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
         }
 
         public Vector2I GetBaseSize(Moonlet type)
         {
-            switch (type)
+            if (type == Moonlet.Start)
             {
-                case Moonlet.Start:
-                    return new Vector2I(BaseWidth, BaseHeight);
-                default:
-                    var worldSize = GetWorldSize(type);
-                    return new Vector2I(
-                        worldSize.x - 2 * BorderSize,
-                        worldSize.y - 2 * BorderSize - TopMargin - ColonizableExtraMargin);
+                return new Vector2I(BaseWidth, BaseHeight);
             }
+            
+            var worldSize = GetWorldSize(type);
+            return new Vector2I(
+                worldSize.x - 2 * BorderSize,
+                worldSize.y - 2 * BorderSize - TopMargin - ColonizableExtraMargin);
         }
 
         public MiniBaseBiomeProfile GetBiome()
@@ -515,10 +512,10 @@ namespace MiniBase
         #endregion
         
         #region Fields
-        private const string WorldGenCategory = "These options are only applied when the map is generated";
-        private const string SizeCategory = "These options change the size of the liveable area\nTo define a custom size, set Map Size to 'Custom'";
-        private const string SpacedOutOnlyCategory = "These options are only applicable for Spaced Out edition.";
-        private const string AnytimeCategory = "These options may be changed at any time";
+        private const string SizeCategory = "1. Change the size of the liveable area.";
+        private const string WorldGenCategory = "2. Map generation";
+        private const string AnytimeCategory = "3. These options may be changed at any time";
+        private const string SpacedOutOnlyCategory = "4. For Spaced Out! only.";
         #endregion
     }
 }
