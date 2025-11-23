@@ -38,7 +38,7 @@ namespace MiniBase.Model
                     Biome = options.GetBiome();
                     CoreBiome = options.GetCoreBiome();
                     HasCore = options.HasCore();
-                    _extraTopMargin = 0;
+                    _extraTopMargin = options.BuildableSpaceTop;
                     break;
                 case DlcSecondMap:
                     Type = Moonlet.Second;

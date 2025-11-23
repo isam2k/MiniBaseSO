@@ -848,35 +848,6 @@ namespace MiniBase
                     generateAccess = (y, mat) => { };
                     break;
             }
-            
-            Action<int, Element> generateSideBiomeCutouts = (y, mat) =>
-            {
-                // Far left cutout
-                if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
-                {
-                    for (var x = MiniBaseOptions.BorderSize;
-                         x < Math.Min(
-                             MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
-                             moonletData.WorldSize.x - MiniBaseOptions.BorderSize);
-                         x++)
-                    {
-                        addBorderCell(x, y, mat);
-                    }
-                }
-
-                // Far right cutout
-                if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
-                {
-                    for (var x = Math.Max(
-                             moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
-                             MiniBaseOptions.BorderSize);
-                         x < moonletData.WorldSize.x - MiniBaseOptions.BorderSize;
-                         x++)
-                    {
-                        addBorderCell(x, y, mat);
-                    }
-                }
-            };
 
             borderMat = WorldGen.katairiteElement;
             if (moonletData.Type == Moonlet.Start)
@@ -884,32 +855,31 @@ namespace MiniBase
                 for (var y = moonletData.Top(); y < moonletData.Top(true); y++)
                 {
                     generateAccess(y, borderMat);
-                    generateSideBiomeCutouts(y, borderMat);
-                }
-
-                if (options.TunnelAccess > 0)
-                {
-                    // Access tunnels to side biomes
-                    for (var y = moonletData.Bottom() + MiniBaseOptions.CornerSize;
-                         y < moonletData.Bottom() + MiniBaseOptions.SideAccessSize + MiniBaseOptions.CornerSize;
-                         y++)
+                    
+                    // generate access to side tunnels if desired
+                    // Far left cutout
+                    if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
                     {
-                        // Far left tunnel
-                        if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
+                        for (var x = MiniBaseOptions.BorderSize;
+                             x < Math.Min(
+                                 MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
+                                 moonletData.WorldSize.x - MiniBaseOptions.BorderSize);
+                             x++)
                         {
-                            for (var x = moonletData.Left(true); x < moonletData.Left(); x++)
-                            {
-                                addBorderCell(x, y, borderMat);
-                            }
+                            addBorderCell(x, y, borderMat);
                         }
+                    }
 
-                        // Far Right tunnel
-                        if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
+                    // Far right cutout
+                    if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
+                    {
+                        for (var x = Math.Max(
+                                 moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
+                                 MiniBaseOptions.BorderSize);
+                             x < moonletData.WorldSize.x - MiniBaseOptions.BorderSize;
+                             x++)
                         {
-                            for (var x = moonletData.Right(); x < moonletData.Right(true); x++)
-                            {
-                                addBorderCell(x, y, borderMat);
-                            }
+                            addBorderCell(x, y, borderMat);
                         }
                     }
                 }
