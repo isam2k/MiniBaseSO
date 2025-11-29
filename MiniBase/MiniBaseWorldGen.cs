@@ -753,6 +753,17 @@ namespace MiniBase
                 }
             });
 
+            var addBorderCells = new Action<int, int, int, int, Element>((xMin, xMax, yMin, yMax, e) =>
+            {
+                for (var x = xMin; x < xMax; x++)
+                {
+                    for (var y = yMin; y < yMax; y++)
+                    {
+                        addBorderCell(x, y, e);
+                    }
+                }
+            });
+
             // Top and bottom borders
             for (var x = 0; x < moonletData.WorldSize.x; x++)
             {
@@ -821,82 +832,90 @@ namespace MiniBase
             }
 
             // Space access
-            Action<int, Element> generateAccess;
-            switch (options.SpaceAccess)
-            {
-                case AccessType.Full:
-                    generateAccess = (y, mat) =>
-                    {
-                        for (var x = moonletData.Left() + MiniBaseOptions.CornerSize;
-                             x < moonletData.Right() - MiniBaseOptions.CornerSize;
-                             x++)
-                        {
-                            addBorderCell(x, y, mat);
-                        }
-                    };
-                    break;
-                case AccessType.Classic:
-                    generateAccess = (y, mat) =>
-                    {
-                        // Left cutout
-                        for (var x = moonletData.Left() + MiniBaseOptions.CornerSize;
-                             x < Math.Min(
-                                 moonletData.Left() + MiniBaseOptions.CornerSize + MiniBaseOptions.SpaceAccessSize,
-                                 moonletData.Right() - MiniBaseOptions.CornerSize);
-                             x++)
-                        {
-                            addBorderCell(x, y, mat);
-                        }
-
-                        // Right cutout
-                        for (var x = Math.Max(
-                                 moonletData.Right() - MiniBaseOptions.CornerSize - MiniBaseOptions.SpaceAccessSize,
-                                 moonletData.Left() + MiniBaseOptions.CornerSize);
-                             x < moonletData.Right() - MiniBaseOptions.CornerSize;
-                             x++)
-                        {
-                            addBorderCell(x, y, mat);
-                        }
-                    };
-                    break;
-                default:
-                    generateAccess = (y, mat) => { };
-                    break;
-            }
-
             borderMat = WorldGen.katairiteElement;
             if (moonletData.Type == Moonlet.Start)
             {
-                for (var y = moonletData.Top(); y < moonletData.Top(true); y++)
+                switch (options.SpaceAccess)
                 {
-                    generateAccess(y, borderMat);
-                    
-                    // generate access to side tunnels if desired
-                    // Far left cutout
-                    if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
-                    {
-                        for (var x = MiniBaseOptions.BorderSize;
-                             x < Math.Min(
-                                 MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
-                                 moonletData.WorldSize.x - MiniBaseOptions.BorderSize);
-                             x++)
-                        {
-                            addBorderCell(x, y, borderMat);
-                        }
-                    }
+                    case AccessType.Full:
+                        addBorderCells(
+                            moonletData.Left() + MiniBaseOptions.CornerSize,
+                            moonletData.Right() - MiniBaseOptions.CornerSize,
+                            moonletData.Top(),
+                            moonletData.Top(true),
+                            borderMat
+                        );
+                        break;
+                    case AccessType.Classic:
+                        // Left cutout
+                        addBorderCells(
+                            moonletData.Left() + MiniBaseOptions.CornerSize,
+                            Math.Min(
+                                moonletData.Left() + MiniBaseOptions.CornerSize + MiniBaseOptions.SpaceAccessSize,
+                                moonletData.Right() - MiniBaseOptions.CornerSize),
+                            moonletData.Top(),
+                            moonletData.Top(true),
+                            borderMat
+                        );
 
-                    // Far right cutout
-                    if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
-                    {
-                        for (var x = Math.Max(
-                                 moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
-                                 MiniBaseOptions.BorderSize);
-                             x < moonletData.WorldSize.x - MiniBaseOptions.BorderSize;
-                             x++)
-                        {
-                            addBorderCell(x, y, borderMat);
-                        }
-                    }
+                        // Right cutout
+                        addBorderCells(
+                            Math.Max(
+                                moonletData.Right() - MiniBaseOptions.CornerSize - MiniBaseOptions.SpaceAccessSize,
+                                moonletData.Left() + MiniBaseOptions.CornerSize),
+                            moonletData.Right() - MiniBaseOptions.CornerSize,
+                            moonletData.Top(),
+                            moonletData.Top(true),
+                            borderMat
+                        );
+                        break;
+                }
+
+                // generate access to side tunnels if desired
+                if ((options.TunnelAccess & TunnelAccessType.Left) > 0)
+                {
+                    // Ceiling cutout
+                    addBorderCells(
+                        MiniBaseOptions.BorderSize,
+                        Math.Min(
+                            MiniBaseOptions.BorderSize + MiniBaseOptions.SpaceAccessSize,
+                            moonletData.WorldSize.x - MiniBaseOptions.BorderSize),
+                        moonletData.Top(),
+                        moonletData.Top(true),
+                        borderMat
+                    );
+
+                    // Wall cutout
+                    addBorderCells(
+                        moonletData.Left(true),
+                        moonletData.Left(),
+                        moonletData.Bottom() + MiniBaseOptions.CornerSize,
+                        moonletData.Bottom() + MiniBaseOptions.CornerSize + MiniBaseOptions.SideAccessSize,
+                        borderMat
+                    );
+                }
+
+                if ((options.TunnelAccess & TunnelAccessType.Right) > 0)
+                {
+                    // Ceiling cutout
+                    addBorderCells(
+                        Math.Max(
+                            moonletData.WorldSize.x - MiniBaseOptions.BorderSize - MiniBaseOptions.SpaceAccessSize,
+                            MiniBaseOptions.BorderSize),
+                        moonletData.WorldSize.x - MiniBaseOptions.BorderSize,
+                        moonletData.Top(),
+                        moonletData.Top(true),
+                        borderMat
+                    );
+
+                    // Wall cutout
+                    addBorderCells(
+                        moonletData.Right(),
+                        moonletData.Right(true),
+                        moonletData.Bottom() + MiniBaseOptions.CornerSize,
+                        moonletData.Bottom() + MiniBaseOptions.CornerSize + MiniBaseOptions.SideAccessSize,
+                        borderMat
+                    );
                 }
             }
 
