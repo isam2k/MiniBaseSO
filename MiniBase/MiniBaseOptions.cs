@@ -59,15 +59,19 @@ namespace MiniBase
         
         #region Size options
         
-        [Option("Base Width", "The width of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
+        [Option("Map Size", "The size of the liveable area\nSelect 'Custom' to define a custom size", SizeCategory)]
+        [JsonProperty]
+        public BaseSize Size { get; set; } = BaseSize.Normal;
+        
+        [Option("Custom Width", "The width of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
-        public int BaseWidth { get; set; } = 76;
+        public int CustomWidth { get; set; } = 76;
 
-        [Option("Base Height", "The height of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
+        [Option("Custom Height", "The height of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
-        public int BaseHeight { get; set; } = 49;
+        public int CustomHeight { get; set; } = 49;
         
         [Option("Buildable space top", "The number of buildable tiles above the neutronium layer of the starting asteroid.", SizeCategory)]
         [Limit(0, 5)]
@@ -189,6 +193,7 @@ namespace MiniBase
         
         [JsonIgnore]
         public bool TeleportersEnabled =>
+            DlcManager.IsExpansion1Active() &&
             OilMoonlet &&
             CustomGameSettings.Instance
                 .GetCurrentQualitySetting(CustomGameSettingConfigs.Teleporters).id == "Enabled";
@@ -226,23 +231,23 @@ namespace MiniBase
 
         public Vector2I GetWorldSize(Moonlet type)
         {
-            if (type == Moonlet.Start)
-            {
-                return new Vector2I(
-                    BaseWidth + (2 * BorderSize) + 36,
-                    BaseHeight + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
-            }
-            
-            return new Vector2I(
-                50 + (2 * BorderSize),
-                60 + (2 * BorderSize) + TopMargin + ColonizableExtraMargin);
+            var size = type == Moonlet.Start
+                ? _baseSizeDictionary.TryGetValue(Size, out var s)
+                    ? s
+                    : new Vector2I(CustomWidth, CustomHeight)
+                : new Vector2I(50, 60);
+            size.X += (2 * BorderSize) + 36;
+            size.Y += (2 * BorderSize) + TopMargin + ColonizableExtraMargin;
+            return size;
         }
 
         public Vector2I GetBaseSize(Moonlet type)
         {
             if (type == Moonlet.Start)
             {
-                return new Vector2I(BaseWidth, BaseHeight);
+                return _baseSizeDictionary.TryGetValue(Size, out var size)
+                    ? size
+                    : new Vector2I(CustomWidth, CustomHeight);
             }
             
             var worldSize = GetWorldSize(type);
@@ -397,6 +402,20 @@ namespace MiniBase
             { BiomeType.Strange, StrangeProfile },
             { BiomeType.DeepEssence, DeepEssenceProfile },
         };
+        
+        private static Dictionary<BaseSize, Vector2I> _baseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
+        {
+            { BaseSize.Tiny, new Vector2I(30, 20) },
+            { BaseSize.Small, new Vector2I(50, 30) },
+            { BaseSize.Normal, new Vector2I(70, 40) },
+            { BaseSize.Large, new Vector2I(90, 50) },
+            { BaseSize.Square, new Vector2I(50, 50) },
+            { BaseSize.MediumSquare, new Vector2I(70, 70) },
+            { BaseSize.LargeSquare, new Vector2I(90, 90) },
+            { BaseSize.Inverted, new Vector2I(40, 70) },
+            { BaseSize.Tall, new Vector2I(40, 100) },
+            { BaseSize.Skinny, new Vector2I(26, 100) },
+        };
 
         private static Dictionary<CoreType, MiniBaseBiomeProfile> _coreTypeMap = new Dictionary<CoreType, MiniBaseBiomeProfile>()
         {
@@ -511,7 +530,7 @@ namespace MiniBase
         private static MiniBaseOptions _instance;
         #endregion
         
-        #region Fields
+        #region Constants
         private const string SizeCategory = "1. Change the size of the liveable area.";
         private const string WorldGenCategory = "2. Map generation";
         private const string AnytimeCategory = "3. These options may be changed at any time";

@@ -102,7 +102,9 @@
     <Compile Include="MiniBaseOptions.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />
+    <Compile Include="Model\BandInfo.cs" />
     <Compile Include="Model\Enums\AccessType.cs" />
+    <Compile Include="Model\Enums\BaseSize.cs" />
     <Compile Include="Model\Enums\BiomeType.cs" />
     <Compile Include="Model\Enums\CoreType.cs" />
     <Compile Include="Model\Enums\CornerType.cs" />
@@ -116,8 +118,10 @@
     <Compile Include="Model\Enums\TunnelAccessType.cs" />
     <Compile Include="Model\Enums\WarpPlacementType.cs" />
     <Compile Include="Model\MoonletData.cs" />
+    <Compile Include="Model\Octave.cs" />
     <Compile Include="Model\Profiles\MiniBaseBiomeProfiles.cs" />
     <Compile Include="Model\Profiles\MiniBaseCoreBiomeProfiles.cs" />
+    <Compile Include="Model\SpawnPoints.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="STRINGS.cs" />
